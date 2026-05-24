@@ -1,4 +1,4 @@
-import 'package:real_calc/core/seedWorks/entity.dart';
+import 'package:real_calc/core/seed_works/entity.dart';
 
 class Financing extends Entity{
   final double initialValue;
