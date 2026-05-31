@@ -1,62 +1,49 @@
 import 'dart:math';
 
+import 'package:real_calc/core/utils/result.dart';
+import 'package:real_calc/core/utils/validation.dart';
 import '../entities/financing.dart';
+import '../validation/financing_validator.dart';
 
 class CalculateCompoundInterestUseCase {
-  double calculateFinalValue(Financing params) {
-    _validate(params, checkInitial: true, checkRate: true, checkMonths: true);
-    final realRate = params.rate / 100;
+  final FinancingValidator validator;
 
-    return params.initialValue * pow(1 + realRate, params.months.toDouble());
+  CalculateCompoundInterestUseCase(this.validator);
+
+  Result<ValidationFailure, double> calculateFinalValue(Financing params) {
+    return validator.validateForFinalValue(params).map((financing) {
+      final realRate = financing.rate / 100;
+      return financing.initialValue *
+          pow(1 + realRate, financing.months.toDouble());
+    });
   }
 
-  double calculateRate(Financing params) {
-    _validate(params, checkInitial: true, checkFinal: true, checkMonths: true);
-
-    return (pow(params.finalValue / params.initialValue, 1.0 / params.months.toDouble()) - 1) * 100;
+  Result<ValidationFailure, double> calculateRate(Financing params) {
+    return validator.validateForRate(params).map((financing) {
+      return (pow(
+                financing.finalValue / financing.initialValue,
+                1.0 / financing.months.toDouble(),
+              ) -
+              1) *
+          100;
+    });
   }
 
-  int calculateMonths(Financing params) {
-    _validate(params, checkInitial: true, checkFinal: true, checkRate: true);
-
-    final realRate = params.rate / 100;
-    return (log(params.finalValue / params.initialValue) / log(1 + realRate))
-        .ceil()
-        .toInt();
+  Result<ValidationFailure, int> calculateMonths(Financing params) {
+    return validator.validateForMonths(params).map((financing) {
+      final realRate = financing.rate / 100;
+      return (log(financing.finalValue / financing.initialValue) /
+              log(1 + realRate))
+          .ceil()
+          .toInt();
+    });
   }
 
-  double calculateInitialValue(Financing params) {
-    _validate(params, checkFinal: true, checkRate: true, checkMonths: true);
-
-    final realRate = params.rate / 100;
-
-    return params.finalValue / pow(1 + realRate, params.months.toDouble());
-  }
-
-  void _validate(
-    Financing params, {
-    bool checkInitial = false,
-    bool checkFinal = false,
-    bool checkRate = false,
-    bool checkMonths = false,
-  }) {
-    final errors = <String>[];
-
-    if (checkInitial && params.initialValue <= 0) {
-      errors.add('O valor inicial deve ser maior que zero');
-    }
-    if (checkFinal && params.finalValue <= 0) {
-      errors.add('O valor final deve ser maior que zero');
-    }
-    if (checkRate && params.rate <= 0) {
-      errors.add('O valor da taxa deve ser maior que zero');
-    }
-    if (checkMonths && params.months <= 0) {
-      errors.add('A quantidade de meses deve ser maior que zero');
-    }
-
-    if (errors.isNotEmpty) {
-      throw ArgumentError(errors.join('; '));
-    }
+  Result<ValidationFailure, double> calculateInitialValue(Financing params) {
+    return validator.validateForInitialValue(params).map((financing) {
+      final realRate = financing.rate / 100;
+      return financing.finalValue /
+          pow(1 + realRate, financing.months.toDouble());
+    });
   }
 }
