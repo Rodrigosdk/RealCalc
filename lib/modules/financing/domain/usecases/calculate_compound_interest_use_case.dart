@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:real_calc/core/utils/result.dart';
 import 'package:real_calc/core/utils/validation.dart';
 import '../entities/financing.dart';
+import '../enum/calculate_financing_type.dart';
 import '../validation/financing_validator.dart';
 
 class CalculateCompoundInterestUseCase {
@@ -45,5 +46,19 @@ class CalculateCompoundInterestUseCase {
       return financing.finalValue /
           pow(1 + realRate, financing.months.toDouble());
     });
+  }
+
+  Result<ValidationFailure, double> calculate(Financing params){
+    return validator.validateTypeCalculation(params).fold(
+      (error) => ValidationError<ValidationFailure, double>(error),
+      (calculationType) {
+        return switch(calculationType) {
+          CalculateFinancingType.finalValue => calculateFinalValue(params),
+          CalculateFinancingType.rate => calculateRate(params),
+          CalculateFinancingType.months => calculateMonths(params).map((value) => value.toDouble()),
+          CalculateFinancingType.initialValue => calculateInitialValue(params),
+        };
+      },
+    );
   }
 }

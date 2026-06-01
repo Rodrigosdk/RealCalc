@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:real_calc/modules/financing/domain/entities/financing.dart';
+import 'package:real_calc/modules/financing/domain/enum/calculate_financing_type.dart';
 import 'package:real_calc/modules/financing/domain/validation/financing_validator.dart';
 
 void main() {
@@ -9,38 +10,42 @@ void main() {
     validator = FinancingValidator();
   });
 
-  Financing buildFinancingValido() {
+  Financing buildFinancingValido({double? initialValue, double? finalValue, double? rate, int? months}) {
     return Financing(
-      initialValue: 1000,
-      finalValue: 1200,
-      rate: 5,
-      months: 12,
+      initialValue: initialValue ?? 1000,
+      finalValue: finalValue ?? 1200,
+      rate: rate ?? 5,
+      months: months ?? 12
     );
   }
 
   group('FinancingValidator', () {
     group('validateForFinalValue', () {
-      test('Deve retornar sucesso quando initialValue, rate e months forem válidos', () {
-        final financing = buildFinancingValido();
-        final result = validator.validateForFinalValue(financing);
+      test(
+        'Deve retornar sucesso quando initialValue, rate e months forem válidos',
+        () {
+          final financing = buildFinancingValido(finalValue: 0);
+          final result = validator.validateForFinalValue(financing);
 
-        expect(result.isSuccess, isTrue);
-        expect(result.fold((_) => null, (value) => value.initialValue), 1000);
-      });
+          expect(result.isSuccess, isTrue);
+          expect(result.fold((_) => null, (value) => value.initialValue), 1000);
+        },
+      );
 
-      test('Deve retornar erro quando campos obrigatórios estiverem inválidos', () {
-        final financing = Financing(
-          initialValue: 0,
-          finalValue: 1000,
-          rate: 0,
-          months: 0,
-        );
+      test(
+        'Deve retornar erro quando campos obrigatórios estiverem inválidos',
+        () {
+          final financing = Financing(
+            initialValue: 0,
+            finalValue: 1000,
+            rate: 0,
+            months: 0,
+          );
 
-        final result = validator.validateForFinalValue(financing);
+          final result = validator.validateForFinalValue(financing);
 
-        expect(result.isError, isTrue);
-        result.fold(
-          (failure) {
+          expect(result.isError, isTrue);
+          result.fold((failure) {
             expect(
               failure.errors,
               containsAll([
@@ -49,20 +54,22 @@ void main() {
                 'A quantidade de meses deve ser maior que zero',
               ]),
             );
-          },
-          (_) => fail('Esperava validação falhar.'),
-        );
-      });
+          }, (_) => fail('Esperava validação falhar.'));
+        },
+      );
     });
 
     group('validateForRate', () {
-      test('Deve retornar sucesso quando initialValue, finalValue e months forem válidos', () {
-        final financing = buildFinancingValido();
-        final result = validator.validateForRate(financing);
+      test(
+        'Deve retornar sucesso quando initialValue, finalValue e months forem válidos',
+        () {
+          final financing = buildFinancingValido(rate: 0);
+          final result = validator.validateForRate(financing);
 
-        expect(result.isSuccess, isTrue);
-        expect(result.fold((_) => null, (value) => value.finalValue), 1200);
-      });
+          expect(result.isSuccess, isTrue);
+          expect(result.fold((_) => null, (value) => value.finalValue), 1200);
+        },
+      );
 
       test('Deve retornar erro quando finalValue for inválido', () {
         final financing = Financing(
@@ -75,23 +82,26 @@ void main() {
         final result = validator.validateForRate(financing);
 
         expect(result.isError, isTrue);
-        result.fold(
-          (failure) {
-            expect(failure.errors, contains('O valor final deve ser maior que zero'));
-          },
-          (_) => fail('Esperava validação falhar.'),
-        );
+        result.fold((failure) {
+          expect(
+            failure.errors,
+            contains('O valor final deve ser maior que zero'),
+          );
+        }, (_) => fail('Esperava validação falhar.'));
       });
     });
 
     group('validateForMonths', () {
-      test('Deve retornar sucesso quando initialValue, finalValue e rate forem válidos', () {
-        final financing = buildFinancingValido();
-        final result = validator.validateForMonths(financing);
+      test(
+        'Deve retornar sucesso quando initialValue, finalValue e rate forem válidos',
+        () {
+          final financing = buildFinancingValido(months: 0);
+          final result = validator.validateForMonths(financing);
 
-        expect(result.isSuccess, isTrue);
-        expect(result.fold((_) => null, (value) => value.rate), 5);
-      });
+          expect(result.isSuccess, isTrue);
+          expect(result.fold((_) => null, (value) => value.rate), 5);
+        },
+      );
 
       test('Deve retornar erro quando rate for inválido', () {
         final financing = Financing(
@@ -104,23 +114,26 @@ void main() {
         final result = validator.validateForMonths(financing);
 
         expect(result.isError, isTrue);
-        result.fold(
-          (failure) {
-            expect(failure.errors, contains('O valor da taxa deve ser maior que zero'));
-          },
-          (_) => fail('Esperava validação falhar.'),
-        );
+        result.fold((failure) {
+          expect(
+            failure.errors,
+            contains('O valor da taxa deve ser maior que zero'),
+          );
+        }, (_) => fail('Esperava validação falhar.'));
       });
     });
 
     group('validateForInitialValue', () {
-      test('Deve retornar sucesso quando finalValue, rate e months forem válidos', () {
-        final financing = buildFinancingValido();
-        final result = validator.validateForInitialValue(financing);
+      test(
+        'Deve retornar sucesso quando finalValue, rate e months forem válidos',
+        () {
+          final financing = buildFinancingValido(initialValue: 0);
+          final result = validator.validateForInitialValue(financing);
 
-        expect(result.isSuccess, isTrue);
-        expect(result.fold((_) => null, (value) => value.months), 12);
-      });
+          expect(result.isSuccess, isTrue);
+          expect(result.fold((_) => null, (value) => value.months), 12);
+        },
+      );
 
       test('Deve retornar erro quando finalValue for inválido', () {
         final financing = Financing(
@@ -133,12 +146,42 @@ void main() {
         final result = validator.validateForInitialValue(financing);
 
         expect(result.isError, isTrue);
-        result.fold(
-          (failure) {
-            expect(failure.errors, contains('O valor final deve ser maior que zero'));
-          },
-          (_) => fail('Esperava validação falhar.'),
-        );
+        result.fold((failure) {
+          expect(
+            failure.errors,
+            contains('O valor final deve ser maior que zero'),
+          );
+        }, (_) => fail('Esperava validação falhar.'));
+      });
+    });
+
+    group('validateTypeCalculation', () {
+      test(
+        'Deve retornar o tipo de cálculo correto quando os parâmetros forem válidos',
+        () {
+          final financing = buildFinancingValido(finalValue: 0);
+          final result = validator.validateTypeCalculation(financing);
+
+          expect(result.isSuccess, isTrue);
+          expect(
+            result.fold((_) => null, (value) => value),
+            CalculateFinancingType.finalValue,
+          );
+        },
+      );
+      test('Deve retornar erro quando os parâmetros forem inválidos', () {
+        final financing = Financing();
+        final result = validator.validateTypeCalculation(financing);
+
+        expect(result.isError, isTrue);
+        result.fold((failure) {
+          expect(
+            failure.errors,
+            containsAll([
+              "Não foi possível determinar o tipo de cálculo. Verifique os parâmetros informados."
+            ]),
+          );
+        }, (_) => fail('Esperava validação falhar.'));
       });
     });
   });

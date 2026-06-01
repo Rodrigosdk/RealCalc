@@ -56,7 +56,7 @@ void main() {
 
       expect(result.isSuccess, isTrue);
       expect(
-        result.fold((_) => null, (value) => value),
+        result.fold((_) => null, (value) => value), 
         closeTo(rate, 0.01),
       );
     });
@@ -138,5 +138,89 @@ void main() {
         (_) => fail('Esperava validação falhar.'),
       );
     });
+  });
+
+  group("CalculateCompoundInterestUseCase - determineType", () {
+    test(
+      'Deve retornar erro quando não for possível determinar o tipo de cálculo',
+      () {
+        final result = useCase.calculate(Financing());
+
+        expect(result.isError, isTrue);
+        result.fold(
+          (failure) => expect(
+            failure.errors,
+            contains(
+              'Não foi possível determinar o tipo de cálculo. Verifique os parâmetros informados.',
+            ),
+          ),
+          (_) => fail('Esperava validação falhar.'),
+        );
+      },
+    );
+
+    test(
+      'Deve determinar o tipo de cálculo correto para calcular o valor final',
+      () {
+        final result = useCase.calculate(
+          Financing(initialValue: initialValue, rate: rate, months: months),
+        );
+
+        expect(result.isSuccess, isTrue);
+        expect(
+          result.fold((_) => null, (value) => value),
+          closeTo(finalValue, 0.01),
+        );
+      },
+    );
+    test(
+      'Deve determinar o tipo de cálculo correto para calcular o valor inicial',
+      () {
+        final result = useCase.calculate(
+          Financing(rate: rate, months: months, finalValue: finalValue),
+        );
+
+        expect(result.isSuccess, isTrue);
+        expect(
+          result.fold((_) => null, (value) => value),
+          closeTo(initialValue, 0.01),
+        );
+      },
+    );
+
+    test(
+      'Deve determinar o tipo de cálculo correto para calcular a taxa de juros',
+      () {
+        final result = useCase.calculate(
+          Financing(
+            initialValue: initialValue,
+            months: months,
+            finalValue: finalValue,
+          ),
+        );
+
+        expect(result.isSuccess, isTrue);
+        expect(result.fold((_) => null, (value) => value), closeTo(rate, 0.01));
+      },
+    );
+
+    test(
+      'Deve determinar o tipo de cálculo correto para calcular o número de meses',
+      () {
+        final result = useCase.calculate(
+          Financing(
+            initialValue: initialValue,
+            rate: rate,
+            finalValue: finalValue,
+          ),
+        );
+
+        expect(result.isSuccess, isTrue);
+        expect(
+          result.fold((_) => null, (value) => value),
+          closeTo(months.toDouble(), 0.01),
+        );
+      },
+    );
   });
 }
