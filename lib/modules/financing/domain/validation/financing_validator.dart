@@ -1,143 +1,84 @@
-import 'package:real_calc/core/utils/result.dart';
-import 'package:real_calc/core/utils/specification.dart';
-import 'package:real_calc/core/utils/validation.dart';
+import 'package:real_calc/core/errors/failures.dart';
+import 'package:real_calc/core/errors/messages.dart';
+import 'package:real_calc/core/seed_works/result.dart';
+import 'package:real_calc/core/seed_works/specification.dart';
 import 'package:real_calc/modules/financing/domain/entities/financing.dart';
 
 import '../enum/calculate_financing_type.dart';
-
-class PositiveInitialValueSpecification implements Specification<Financing> {
-  @override
-  List<String> validate(Financing financing) {
-    return financing.initialValue > 0
-        ? []
-        : ['O valor inicial deve ser maior que zero'];
-  }
-}
-
-class PositiveFinalValueSpecification implements Specification<Financing> {
-  @override
-  List<String> validate(Financing financing) {
-    return financing.finalValue > 0
-        ? []
-        : ['O valor final deve ser maior que zero'];
-  }
-}
-
-class PositiveRateSpecification implements Specification<Financing> {
-  @override
-  List<String> validate(Financing financing) {
-    return financing.rate > 0
-        ? []
-        : ['O valor da taxa deve ser maior que zero'];
-  }
-}
-
-class PositiveMonthsSpecification implements Specification<Financing> {
-  @override
-  List<String> validate(Financing financing) {
-    return financing.months > 0
-        ? []
-        : ['A quantidade de meses deve ser maior que zero'];
-  }
-}
+import 'spec/financing_spec.dart';
 
 class FinancingValidator {
-  final Specification<Financing> _validateForFinalValue =
+  // Instanciação limpa usando o CompositeSpecification do SeedWork
+  final Specification<Financing, FinancingValidationMessage> _validateForFinalValue =
       CompositeSpecification([
         PositiveInitialValueSpecification(),
         PositiveRateSpecification(),
         PositiveMonthsSpecification(),
       ]);
 
-  final Specification<Financing> _validateForRate = CompositeSpecification([
-    PositiveInitialValueSpecification(),
-    PositiveFinalValueSpecification(),
-    PositiveMonthsSpecification(),
-  ]);
+  final Specification<Financing, FinancingValidationMessage> _validateForRate = 
+      CompositeSpecification([
+        PositiveInitialValueSpecification(),
+        PositiveFinalValueSpecification(),
+        PositiveMonthsSpecification(),
+      ]);
 
-  final Specification<Financing> _validateForMonths = CompositeSpecification([
-    PositiveInitialValueSpecification(),
-    PositiveFinalValueSpecification(),
-    PositiveRateSpecification(),
-  ]);
+  final Specification<Financing, FinancingValidationMessage> _validateForMonths = 
+      CompositeSpecification([
+        PositiveInitialValueSpecification(),
+        PositiveFinalValueSpecification(),
+        PositiveRateSpecification(),
+      ]);
 
-  final Specification<Financing> _validateForInitialValue =
+  final Specification<Financing, FinancingValidationMessage> _validateForInitialValue =
       CompositeSpecification([
         PositiveFinalValueSpecification(),
         PositiveRateSpecification(),
         PositiveMonthsSpecification(),
       ]);
 
-  Result<ValidationFailure, Financing> validateForFinalValue(Financing params) {
-    final errors = _validateForFinalValue.validate(params);
+  // Função utilitária privada para remover código duplicado de conversão para Result
+  Result<Failure, T> _buildResult<T>(List<FinancingValidationMessage> errors, T successValue) {
     return errors.isEmpty
-        ? ValidationSuccess<ValidationFailure, Financing>(params)
-        : ValidationError<ValidationFailure, Financing>(
-            ValidationFailure(errors),
+        ? SuccessResult<Failure, T>(successValue) // Ajustado o tipo genérico para Failure para bater com a assinatura do método
+        : FailureResult<Failure, T>(
+            ValidationFailure(message: errors),
           );
   }
 
-  Result<ValidationFailure, Financing> validateForRate(Financing params) {
-    final errors = _validateForRate.validate(params);
-    return errors.isEmpty
-        ? ValidationSuccess<ValidationFailure, Financing>(params)
-        : ValidationError<ValidationFailure, Financing>(
-            ValidationFailure(errors),
-          );
+  Result<Failure, Financing> validateForFinalValue(Financing params) {
+    return _buildResult(_validateForFinalValue.validate(params), params);
   }
 
-  Result<ValidationFailure, Financing> validateForMonths(Financing params) {
-    final errors = _validateForMonths.validate(params);
-    return errors.isEmpty
-        ? ValidationSuccess<ValidationFailure, Financing>(params)
-        : ValidationError<ValidationFailure, Financing>(
-            ValidationFailure(errors),
-          );
+  Result<Failure, Financing> validateForRate(Financing params) {
+    return _buildResult(_validateForRate.validate(params), params);
   }
 
-  Result<ValidationFailure, Financing> validateForInitialValue(
-    Financing params,
-  ) {
-    final errors = _validateForInitialValue.validate(params);
-    return errors.isEmpty
-        ? ValidationSuccess<ValidationFailure, Financing>(params)
-        : ValidationError<ValidationFailure, Financing>(
-            ValidationFailure(errors),
-          );
+  Result<Failure, Financing> validateForMonths(Financing params) {
+    return _buildResult(_validateForMonths.validate(params), params);
   }
 
-  Result<ValidationFailure, CalculateFinancingType> validateTypeCalculation(
-    Financing params,
-  ) {
-    final errorsInitialValue = _validateForInitialValue.validate(params);
-    final errorsRate = _validateForRate.validate(params);
-    final errorsMonths = _validateForMonths.validate(params);
-    final errorsFinalValue = _validateForFinalValue.validate(params);
+  Result<Failure, Financing> validateForInitialValue(Financing params) {
+    return _buildResult(_validateForInitialValue.validate(params), params);
+  }
 
-    if (errorsInitialValue.isEmpty) {
-      return ValidationSuccess<ValidationFailure, CalculateFinancingType>(
-        CalculateFinancingType.initialValue,
-      );
+  Result<Failure, CalculateFinancingType> validateTypeCalculation(Financing params) {
+    if (_validateForInitialValue.validate(params).isEmpty) {
+      return SuccessResult<Failure, CalculateFinancingType>(CalculateFinancingType.initialValue);
     }
-    if (errorsRate.isEmpty) {
-      return ValidationSuccess<ValidationFailure, CalculateFinancingType>(
-        CalculateFinancingType.rate,
-      );
+    if (_validateForRate.validate(params).isEmpty) {
+      return SuccessResult<Failure, CalculateFinancingType>(CalculateFinancingType.rate);
     }
-    if (errorsMonths.isEmpty) {
-      return ValidationSuccess<ValidationFailure, CalculateFinancingType>(
-        CalculateFinancingType.months,
-      );
+    if (_validateForMonths.validate(params).isEmpty) {
+      return SuccessResult<Failure, CalculateFinancingType>(CalculateFinancingType.months);
     }
-    if (errorsFinalValue.isEmpty) {
-      return ValidationSuccess<ValidationFailure, CalculateFinancingType>(
-        CalculateFinancingType.finalValue,
-      );
+    if (_validateForFinalValue.validate(params).isEmpty) {
+      return SuccessResult<Failure, CalculateFinancingType>(CalculateFinancingType.finalValue);
     }
 
-    return ValidationError<ValidationFailure, CalculateFinancingType>(
-      ValidationFailure([
-        "Não foi possível determinar o tipo de cálculo. Verifique os parâmetros informados."
+    return FailureResult<Failure, CalculateFinancingType>(
+      ValidationFailure(message: [
+        FinancingValidationMessage.unableToDetermineCalculationType
       ]),
     );
   }

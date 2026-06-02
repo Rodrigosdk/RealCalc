@@ -11,7 +11,9 @@ sealed class Failure extends Equatable {
   List<Object?> get props => [message];
 }
 
-
+class ValidationFailure  extends Failure {
+  const ValidationFailure({required super.message});
+}
 
 class ServerFailure extends Failure {
   const ServerFailure({required super.message});
