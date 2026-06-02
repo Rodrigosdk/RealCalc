@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:real_calc/core/errors/messages.dart';
 import 'package:real_calc/modules/financing/domain/entities/financing.dart';
 import 'package:real_calc/modules/financing/domain/usecases/calculate_compound_interest_use_case.dart';
 import 'package:real_calc/modules/financing/domain/validation/financing_validator.dart';
@@ -10,6 +11,21 @@ void main() {
   late double finalValue;
 
   late CalculateCompoundInterestUseCase useCase;
+
+  Financing buildFinancing({
+    double? initialValueParam,
+    double? rateParam,
+    int? monthsParam,
+    double? finalValueParam,
+  }) {
+
+    return Financing(
+      initialValue: initialValueParam ?? initialValue,
+      rate: rateParam ?? rate,
+      months: monthsParam ?? months,
+      finalValue: finalValueParam ?? finalValue,
+    );
+  }
 
   setUp(() {
     initialValue = 50000.0;
@@ -23,58 +39,34 @@ void main() {
   group('CalculateCompoundInterestUseCase', () {
     test('Deve calcular o montante final de um regime de Juros Compostos', () {
       final result = useCase.calculateFinalValue(
-        Financing(initialValue: initialValue, rate: rate, months: months),
+        buildFinancing(finalValueParam: 0),
       );
 
       expect(result.isSuccess, isTrue);
-      expect(
-        result.fold((_) => null, (value) => value),
-        closeTo(finalValue, 0.01),
-      );
+      expect(result.getOrNull(), closeTo(finalValue, 0.01));
     });
 
     test('Deve calcular o valor inicial de um regime de Juros Compostos', () {
       final result = useCase.calculateInitialValue(
-        Financing(rate: rate, months: months, finalValue: finalValue),
+        buildFinancing(initialValueParam: 0),
       );
 
       expect(result.isSuccess, isTrue);
-      expect(
-        result.fold((_) => null, (value) => value),
-        closeTo(initialValue, 0.01),
-      );
+      expect(result.getOrNull(), closeTo(initialValue, 0.01));
     });
 
     test('Deve calcular a taxa de juros de um regime de Juros Compostos', () {
-      final result = useCase.calculateRate(
-        Financing(
-          initialValue: initialValue,
-          months: months,
-          finalValue: finalValue,
-        ),
-      );
+      final result = useCase.calculateRate(buildFinancing(rateParam: 0));
 
       expect(result.isSuccess, isTrue);
-      expect(
-        result.fold((_) => null, (value) => value), 
-        closeTo(rate, 0.01),
-      );
+      expect(result.getOrNull(), closeTo(rate, 0.01));
     });
 
     test('Deve calcular o número de meses de um regime de Juros Compostos', () {
-      final result = useCase.calculateMonths(
-        Financing(
-          initialValue: initialValue,
-          rate: rate,
-          finalValue: finalValue,
-        ),
-      );
+      final result = useCase.calculateMonths(buildFinancing(monthsParam: 0));
 
       expect(result.isSuccess, isTrue);
-      expect(
-        result.fold((_) => null, (value) => value.toDouble()),
-        closeTo(months.toDouble(), 0.01),
-      );
+      expect(result.getOrNull(), closeTo(months.toDouble(), 0.01));
     });
   });
 
@@ -83,12 +75,13 @@ void main() {
       final result = useCase.calculateFinalValue(Financing());
 
       expect(result.isError, isTrue);
-      result.fold(
-        (failure) => expect(
-          failure.errors,
-          contains('O valor inicial deve ser maior que zero'),
-        ),
-        (_) => fail('Esperava validação falhar.'),
+      expect(
+        result.getErrorOrNull()?.message,
+        containsAll([
+          FinancingValidationMessage.positiveInitialValue,
+          FinancingValidationMessage.positiveRate,
+          FinancingValidationMessage.positiveMonths,
+        ]),
       );
     });
 
@@ -96,12 +89,9 @@ void main() {
       final result = useCase.calculateInitialValue(Financing());
 
       expect(result.isError, isTrue);
-      result.fold(
-        (failure) => expect(
-          failure.errors,
-          contains('O valor final deve ser maior que zero'),
-        ),
-        (_) => fail('Esperava validação falhar.'),
+      expect(
+        result.getErrorOrNull()?.message,
+        contains(FinancingValidationMessage.positiveFinalValue),
       );
     });
 
@@ -109,33 +99,27 @@ void main() {
       final result = useCase.calculateRate(Financing(rate: -1.5));
 
       expect(result.isError, isTrue);
-      result.fold(
-        (failure) => expect(
-          failure.errors,
-          containsAll([
-            'O valor inicial deve ser maior que zero',
-            'O valor final deve ser maior que zero',
-            'A quantidade de meses deve ser maior que zero'
-          ]),
-        ),
-        (_) => fail('Esperava validação falhar.'),
+      expect(
+        result.getErrorOrNull()?.message,
+        containsAll(([
+          FinancingValidationMessage.positiveInitialValue,
+          FinancingValidationMessage.positiveFinalValue,
+          FinancingValidationMessage.positiveMonths,
+        ])),
       );
     });
 
     test('Deve retornar erro quando o número de meses for inválido', () {
       final result = useCase.calculateMonths(Financing());
 
-      //expect(result.isError, isTrue);
-      result.fold(
-        (failure) => expect(
-          failure.errors,
-          containsAll([
-            'O valor inicial deve ser maior que zero',
-            'O valor final deve ser maior que zero',
-            'O valor da taxa deve ser maior que zero'
-          ]),
-        ),
-        (_) => fail('Esperava validação falhar.'),
+      expect(result.isError, isTrue);
+      expect(
+        result.getErrorOrNull()?.message,
+        containsAll([
+          FinancingValidationMessage.positiveInitialValue,
+          FinancingValidationMessage.positiveFinalValue,
+          FinancingValidationMessage.positiveRate,
+        ]),
       );
     });
   });
@@ -147,14 +131,9 @@ void main() {
         final result = useCase.calculate(Financing());
 
         expect(result.isError, isTrue);
-        result.fold(
-          (failure) => expect(
-            failure.errors,
-            contains(
-              'Não foi possível determinar o tipo de cálculo. Verifique os parâmetros informados.',
-            ),
-          ),
-          (_) => fail('Esperava validação falhar.'),
+        expect(
+          result.getErrorOrNull()?.message,
+          contains(FinancingValidationMessage.unableToDetermineCalculationType),
         );
       },
     );
@@ -162,64 +141,39 @@ void main() {
     test(
       'Deve determinar o tipo de cálculo correto para calcular o valor final',
       () {
-        final result = useCase.calculate(
-          Financing(initialValue: initialValue, rate: rate, months: months),
-        );
+        final result = useCase.calculate(buildFinancing(finalValueParam: 0));
 
         expect(result.isSuccess, isTrue);
-        expect(
-          result.fold((_) => null, (value) => value),
-          closeTo(finalValue, 0.01),
-        );
+        expect(result.getOrNull(), closeTo(finalValue, 0.01));
       },
     );
     test(
       'Deve determinar o tipo de cálculo correto para calcular o valor inicial',
       () {
-        final result = useCase.calculate(
-          Financing(rate: rate, months: months, finalValue: finalValue),
-        );
+        final result = useCase.calculate(buildFinancing(initialValueParam: 0));
 
         expect(result.isSuccess, isTrue);
-        expect(
-          result.fold((_) => null, (value) => value),
-          closeTo(initialValue, 0.01),
-        );
+        expect(result.getOrNull(), closeTo(initialValue, 0.01));
       },
     );
 
     test(
       'Deve determinar o tipo de cálculo correto para calcular a taxa de juros',
       () {
-        final result = useCase.calculate(
-          Financing(
-            initialValue: initialValue,
-            months: months,
-            finalValue: finalValue,
-          ),
-        );
-
+        final result = useCase.calculate(buildFinancing(rateParam: 0));
+        
         expect(result.isSuccess, isTrue);
-        expect(result.fold((_) => null, (value) => value), closeTo(rate, 0.01));
+        expect(result.getOrNull(), closeTo(rate, 0.01));
       },
     );
 
     test(
       'Deve determinar o tipo de cálculo correto para calcular o número de meses',
       () {
-        final result = useCase.calculate(
-          Financing(
-            initialValue: initialValue,
-            rate: rate,
-            finalValue: finalValue,
-          ),
-        );
+        final result = useCase.calculate(buildFinancing(monthsParam: 0));
 
         expect(result.isSuccess, isTrue);
-        expect(
-          result.fold((_) => null, (value) => value),
-          closeTo(months.toDouble(), 0.01),
-        );
+        expect(result.getOrNull(), closeTo(months.toDouble(), 0.01));
       },
     );
   });

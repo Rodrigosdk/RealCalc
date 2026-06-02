@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:real_calc/core/errors/messages.dart';
 import 'package:real_calc/modules/financing/domain/entities/financing.dart';
 import 'package:real_calc/modules/financing/domain/enum/calculate_financing_type.dart';
 import 'package:real_calc/modules/financing/domain/validation/financing_validator.dart';
@@ -10,12 +11,17 @@ void main() {
     validator = FinancingValidator();
   });
 
-  Financing buildFinancingValido({double? initialValue, double? finalValue, double? rate, int? months}) {
+  Financing buildFinancingValido({
+    double? initialValue,
+    double? finalValue,
+    double? rate,
+    int? months,
+  }) {
     return Financing(
       initialValue: initialValue ?? 1000,
       finalValue: finalValue ?? 1200,
       rate: rate ?? 5,
-      months: months ?? 12
+      months: months ?? 12,
     );
   }
 
@@ -28,7 +34,7 @@ void main() {
           final result = validator.validateForFinalValue(financing);
 
           expect(result.isSuccess, isTrue);
-          expect(result.fold((_) => null, (value) => value.initialValue), 1000);
+          expect(result.getOrNull()?.initialValue, 1000);
         },
       );
 
@@ -45,16 +51,14 @@ void main() {
           final result = validator.validateForFinalValue(financing);
 
           expect(result.isError, isTrue);
-          result.fold((failure) {
-            expect(
-              failure.errors,
-              containsAll([
-                'O valor inicial deve ser maior que zero',
-                'O valor da taxa deve ser maior que zero',
-                'A quantidade de meses deve ser maior que zero',
-              ]),
-            );
-          }, (_) => fail('Esperava validação falhar.'));
+          expect(
+            result.getErrorOrNull()?.message,
+            containsAll([
+              FinancingValidationMessage.positiveInitialValue,
+              FinancingValidationMessage.positiveRate,
+              FinancingValidationMessage.positiveMonths,
+            ]),
+          );
         },
       );
     });
@@ -67,7 +71,7 @@ void main() {
           final result = validator.validateForRate(financing);
 
           expect(result.isSuccess, isTrue);
-          expect(result.fold((_) => null, (value) => value.finalValue), 1200);
+          expect(result.getOrNull()?.finalValue, 1200);
         },
       );
 
@@ -82,12 +86,10 @@ void main() {
         final result = validator.validateForRate(financing);
 
         expect(result.isError, isTrue);
-        result.fold((failure) {
-          expect(
-            failure.errors,
-            contains('O valor final deve ser maior que zero'),
-          );
-        }, (_) => fail('Esperava validação falhar.'));
+        expect(
+          result.getErrorOrNull()?.message,
+          contains(FinancingValidationMessage.positiveFinalValue),
+        );
       });
     });
 
@@ -99,7 +101,7 @@ void main() {
           final result = validator.validateForMonths(financing);
 
           expect(result.isSuccess, isTrue);
-          expect(result.fold((_) => null, (value) => value.rate), 5);
+          expect(result.getOrNull()?.rate, 5);
         },
       );
 
@@ -114,12 +116,10 @@ void main() {
         final result = validator.validateForMonths(financing);
 
         expect(result.isError, isTrue);
-        result.fold((failure) {
-          expect(
-            failure.errors,
-            contains('O valor da taxa deve ser maior que zero'),
-          );
-        }, (_) => fail('Esperava validação falhar.'));
+        expect(
+          result.getErrorOrNull()?.message,
+          contains(FinancingValidationMessage.positiveRate),
+        );
       });
     });
 
@@ -131,7 +131,7 @@ void main() {
           final result = validator.validateForInitialValue(financing);
 
           expect(result.isSuccess, isTrue);
-          expect(result.fold((_) => null, (value) => value.months), 12);
+          expect(result.getOrNull()?.months, 12);
         },
       );
 
@@ -146,12 +146,10 @@ void main() {
         final result = validator.validateForInitialValue(financing);
 
         expect(result.isError, isTrue);
-        result.fold((failure) {
-          expect(
-            failure.errors,
-            contains('O valor final deve ser maior que zero'),
-          );
-        }, (_) => fail('Esperava validação falhar.'));
+        expect(
+          result.getErrorOrNull()?.message,
+          contains(FinancingValidationMessage.positiveFinalValue),
+        );
       });
     });
 
@@ -163,10 +161,7 @@ void main() {
           final result = validator.validateTypeCalculation(financing);
 
           expect(result.isSuccess, isTrue);
-          expect(
-            result.fold((_) => null, (value) => value),
-            CalculateFinancingType.finalValue,
-          );
+          expect(result.getOrNull(), CalculateFinancingType.finalValue);
         },
       );
       test('Deve retornar erro quando os parâmetros forem inválidos', () {
@@ -174,14 +169,10 @@ void main() {
         final result = validator.validateTypeCalculation(financing);
 
         expect(result.isError, isTrue);
-        result.fold((failure) {
-          expect(
-            failure.errors,
-            containsAll([
-              "Não foi possível determinar o tipo de cálculo. Verifique os parâmetros informados."
-            ]),
-          );
-        }, (_) => fail('Esperava validação falhar.'));
+        expect(
+          result.getErrorOrNull()?.message,
+          contains(FinancingValidationMessage.unableToDetermineCalculationType),
+        );
       });
     });
   });

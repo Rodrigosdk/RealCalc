@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:real_calc/core/utils/result.dart';
-import 'package:real_calc/core/utils/validation.dart';
+import 'package:real_calc/core/errors/failures.dart';
+import 'package:real_calc/core/seed_works/result.dart';
 import '../entities/financing.dart';
 import '../enum/calculate_financing_type.dart';
 import '../validation/financing_validator.dart';
@@ -11,7 +11,7 @@ class CalculateCompoundInterestUseCase {
 
   CalculateCompoundInterestUseCase(this.validator);
 
-  Result<ValidationFailure, double> calculateFinalValue(Financing params) {
+  Result<Failure, double> calculateFinalValue(Financing params) {
     return validator.validateForFinalValue(params).map((financing) {
       final realRate = financing.rate / 100;
       return financing.initialValue *
@@ -19,7 +19,7 @@ class CalculateCompoundInterestUseCase {
     });
   }
 
-  Result<ValidationFailure, double> calculateRate(Financing params) {
+  Result<Failure, double> calculateRate(Financing params) {
     return validator.validateForRate(params).map((financing) {
       return (pow(
                 financing.finalValue / financing.initialValue,
@@ -30,7 +30,7 @@ class CalculateCompoundInterestUseCase {
     });
   }
 
-  Result<ValidationFailure, int> calculateMonths(Financing params) {
+  Result<Failure, int> calculateMonths(Financing params) {
     return validator.validateForMonths(params).map((financing) {
       final realRate = financing.rate / 100;
       return (log(financing.finalValue / financing.initialValue) /
@@ -40,7 +40,7 @@ class CalculateCompoundInterestUseCase {
     });
   }
 
-  Result<ValidationFailure, double> calculateInitialValue(Financing params) {
+  Result<Failure, double> calculateInitialValue(Financing params) {
     return validator.validateForInitialValue(params).map((financing) {
       final realRate = financing.rate / 100;
       return financing.finalValue /
@@ -48,9 +48,9 @@ class CalculateCompoundInterestUseCase {
     });
   }
 
-  Result<ValidationFailure, double> calculate(Financing params){
+  Result<Failure, double> calculate(Financing params){
     return validator.validateTypeCalculation(params).fold(
-      (error) => ValidationError<ValidationFailure, double>(error),
+      (error) => FailureResult<Failure, double>(error),
       (calculationType) {
         return switch(calculationType) {
           CalculateFinancingType.finalValue => calculateFinalValue(params),
