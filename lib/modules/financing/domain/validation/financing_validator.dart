@@ -62,7 +62,7 @@ class FinancingValidator {
     return _buildResult(_validateForInitialValue.validate(params), params);
   }
 
-  Result<Failure, CalculateFinancingType> validateTypeCalculation(Financing params) {
+  Result<Failure, CalculateFinancingType> detectTypeCalculation(Financing params) {
     if (_validateForInitialValue.validate(params).isEmpty) {
       return SuccessResult<Failure, CalculateFinancingType>(CalculateFinancingType.initialValue);
     }

@@ -49,7 +49,7 @@ class CalculateCompoundInterestUseCase {
   }
 
   Result<Failure, double> calculate(Financing params){
-    return validator.validateTypeCalculation(params).fold(
+    return validator.detectTypeCalculation(params).fold(
       (error) => FailureResult<Failure, double>(error),
       (calculationType) {
         return switch(calculationType) {
