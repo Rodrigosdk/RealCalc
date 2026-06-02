@@ -153,12 +153,12 @@ void main() {
       });
     });
 
-    group('validateTypeCalculation', () {
+    group('detectTypeCalculation', () {
       test(
         'Deve retornar o tipo de cálculo correto quando os parâmetros forem válidos',
         () {
           final financing = buildFinancingValido(finalValue: 0);
-          final result = validator.validateTypeCalculation(financing);
+          final result = validator.detectTypeCalculation(financing);
 
           expect(result.isSuccess, isTrue);
           expect(result.getOrNull(), CalculateFinancingType.finalValue);
@@ -166,7 +166,7 @@ void main() {
       );
       test('Deve retornar erro quando os parâmetros forem inválidos', () {
         final financing = Financing();
-        final result = validator.validateTypeCalculation(financing);
+        final result = validator.detectTypeCalculation(financing);
 
         expect(result.isError, isTrue);
         expect(
