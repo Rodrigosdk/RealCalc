@@ -23,17 +23,20 @@ void main() {
 
   setUp(() {
     mockCubit = MockFinancingCubit();
-    // Define o estado inicial padrão do formulário
     when(() => mockCubit.state).thenReturn(FinancingInitial());
   });
 
-  // Helper para criar a árvore com o Cubit injetado
-  Widget createSut() {
+  Widget createSut(WidgetTester tester, {FinancingCubit? cubit}) {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1.0;
+
     return MaterialApp(
       home: Scaffold(
         body: BlocProvider<FinancingCubit>.value(
-          value: mockCubit,
-          child: const SingleChildScrollView(child: FinancingForms()),
+          value: cubit ?? mockCubit,
+          child: const SingleChildScrollView(
+            child: FinancingForms(),
+          ),
         ),
       ),
     );
@@ -45,9 +48,8 @@ void main() {
       (tester) async {
         when(() => mockCubit.state).thenReturn(FinancingLoading());
 
-        await tester.pumpWidget(createSut());
+        await tester.pumpWidget(createSut(tester));
 
-        // Verifica se o indicador visual de carregamento aparece na tela
         expect(find.byType(LinearProgressIndicator), findsOneWidget);
       },
     );
@@ -55,34 +57,18 @@ void main() {
     testWidgets(
       'Deve exibir o banner com a mensagem de erro quando o estado for FinancingError',
       (tester) async {
-        // 1. Cria um mock específico para este fluxo de escuta
         final whenListenCubit = MockFinancingCubit();
         when(() => whenListenCubit.state).thenReturn(FinancingInitial());
 
-        // 2. Simula o Cubit emitindo o estado de erro logo após iniciar
-        const errorMessage =
-            'Os seguintes campos não podem ficar vazios: Prazo.';
+        const errorMessage = 'Os seguintes campos não podem ficar vazios: Prazo.';
         whenListen<FinancingState>(
           whenListenCubit,
           Stream.fromIterable([FinancingError(errorMessage)]),
         );
 
-        // 3. Renderiza a tela injetando o Cubit reativo
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: BlocProvider<FinancingCubit>.value(
-                value: whenListenCubit,
-                child: const FinancingForms(),
-              ),
-            ),
-          ),
-        );
-
-        // 4. Aguarda o listener do BlocConsumer interceptar o erro e redesenhar a tela
+        await tester.pumpWidget(createSut(tester, cubit: whenListenCubit));
         await tester.pump();
 
-        // 5. Valida a presença do texto do erro
         final errorBannerFinder = find.textContaining(
           'Os seguintes campos não podem ficar vazios',
         );
@@ -110,17 +96,7 @@ void main() {
           ]),
         );
 
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: BlocProvider<FinancingCubit>.value(
-                value: whenListenCubit,
-                child: const FinancingForms(),
-              ),
-            ),
-          ),
-        );
-
+        await tester.pumpWidget(createSut(tester, cubit: whenListenCubit));
         await tester.pump();
 
         final inputs = find.byType(TextField);
@@ -142,7 +118,7 @@ void main() {
       (tester) async {
         when(() => mockCubit.calculate(any())).thenAnswer((_) async {});
 
-        await tester.pumpWidget(createSut());
+        await tester.pumpWidget(createSut(tester));
 
         final inputs = find.byType(TextField);
         await tester.enterText(inputs.at(0), '15000');
@@ -167,7 +143,7 @@ void main() {
     testWidgets(
       'Deve limpar todos os campos de texto ao clicar no botão Limpar',
       (tester) async {
-        await tester.pumpWidget(createSut());
+        await tester.pumpWidget(createSut(tester));
 
         final inputs = find.byType(TextField);
 
@@ -187,7 +163,6 @@ void main() {
         expect(tester.widget<TextField>(inputs.at(0)).controller?.text, '');
         expect(tester.widget<TextField>(inputs.at(1)).controller?.text, '');
       },
-
     );
   });
 }

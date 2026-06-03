@@ -75,78 +75,76 @@ class _FinancingFormsState extends State<FinancingForms> {
       builder: (context, state) {
         return Form(
           key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              spacing: 18,
-              children: [
-                if (_errorMessage != null)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.redAccent.withValues(alpha: 0.5)),
-                    ),
-                    child: Text(
-                      _errorMessage!,
-                      style: const TextStyle(color: Colors.redAccent, fontSize: 13, fontWeight: FontWeight.w500),
-                    ),
+          child: Column(
+            spacing: 18,
+            children: [
+              if (_errorMessage != null)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.redAccent.withValues(alpha: 0.5)),
                   ),
-            
-                if (state is FinancingLoading)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8),
-                    child: LinearProgressIndicator(color: Color(0xFF1E94F6)),
+                  child: Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.redAccent, fontSize: 13, fontWeight: FontWeight.w500),
                   ),
-            
-                InputFormsResultCard(
-                  label: 'Valor financiado (R\$)',
-                  hint: '0,00',
-                  controller: _initialValueController,
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.only(left: 14, right: 10),
-                    child: Icon(Icons.attach_money, color: Color(0xFF1E94F6)),
-                  ),
-                  onTap: () => financingCubit.calculate(_getFinancingFromInputs()),
                 ),
-                InputFormsResultCard(
-                  label: 'Prazo (meses)',
-                  hint: '0',
-                  controller: _monthsController,
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.only(left: 14, right: 10),
-                    child: Icon(Icons.calendar_today, color: Color(0xFF1E94F6)),
-                  ),
-                  onTap: () => financingCubit.calculate(_getFinancingFromInputs()),
+          
+              if (state is FinancingLoading)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: LinearProgressIndicator(color: Color(0xFF1E94F6)),
                 ),
-                InputFormsResultCard(
-                  label: 'Taxa de juros (% ao mês)',
-                  hint: '0,00',
-                  controller: _rateController,
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.only(left: 14, right: 10),
-                    child: Icon(Icons.percent, color: Color(0xFF1E94F6)),
-                  ),
-                  onTap: () => financingCubit.calculate(_getFinancingFromInputs()),
+          
+              InputFormsResultCard(
+                label: 'Valor financiado (R\$)',
+                hint: '0,00',
+                controller: _initialValueController,
+                prefixIcon: const Padding(
+                  padding: EdgeInsets.only(left: 14, right: 10),
+                  child: Icon(Icons.attach_money, color: Color(0xFF1E94F6)),
                 ),
-                InputFormsResultCard(
-                  label: 'Valor da prestação',
-                  hint: '0,00',
-                  controller: _finalValueController,
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.only(left: 14, right: 10),
-                    child: Icon(Icons.payments, color: Color(0xFF1E94F6)),
-                  ),
-                  onTap: () => financingCubit.calculate(_getFinancingFromInputs()),
+                onTap: () => financingCubit.calculate(_getFinancingFromInputs()),
+              ),
+              InputFormsResultCard(
+                label: 'Prazo (meses)',
+                hint: '0',
+                controller: _monthsController,
+                prefixIcon: const Padding(
+                  padding: EdgeInsets.only(left: 14, right: 10),
+                  child: Icon(Icons.calendar_today, color: Color(0xFF1E94F6)),
                 ),
-                
-                OptionsBottomForms(
-                  onCalculate: () => financingCubit.calculate(_getFinancingFromInputs()),
-                  onClear: _clearForm,
-                )
-              ],
-            ),
+                onTap: () => financingCubit.calculate(_getFinancingFromInputs()),
+              ),
+              InputFormsResultCard(
+                label: 'Taxa de juros (% ao mês)',
+                hint: '0,00',
+                controller: _rateController,
+                prefixIcon: const Padding(
+                  padding: EdgeInsets.only(left: 14, right: 10),
+                  child: Icon(Icons.percent, color: Color(0xFF1E94F6)),
+                ),
+                onTap: () => financingCubit.calculate(_getFinancingFromInputs()),
+              ),
+              InputFormsResultCard(
+                label: 'Valor da prestação',
+                hint: '0,00',
+                controller: _finalValueController,
+                prefixIcon: const Padding(
+                  padding: EdgeInsets.only(left: 14, right: 10),
+                  child: Icon(Icons.payments, color: Color(0xFF1E94F6)),
+                ),
+                onTap: () => financingCubit.calculate(_getFinancingFromInputs()),
+              ),
+              
+              OptionsBottomForms(
+                onCalculate: () => financingCubit.calculate(_getFinancingFromInputs()),
+                onClear: _clearForm,
+              )
+            ],
           ),
         );
       },
