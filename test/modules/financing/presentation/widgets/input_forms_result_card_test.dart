@@ -37,7 +37,7 @@ void main() {
             hint: hint,
             prefixIcon: prefixIcon,
             onTap: onTap,
-            validator: validator, // Agora repassa o validator se necessário
+            validator: validator,
           ),
         ),
       ),
@@ -74,14 +74,15 @@ void main() {
       expect(textField.textInputAction, TextInputAction.done);
     });
 
-    testWidgets('Deve repassar a ação do callback onTap ao clicar no campo', (tester) async {
+    testWidgets('Deve repassar a ação do callback onTap ao clicar na seta lateral', (tester) async {
       bool wasTapped = false;
 
       await tester.pumpWidget(createSut(
         onTap: () => wasTapped = true,
       ));
 
-      await tester.tap(find.byType(TextFormField));
+      // CORREÇÃO: O teste agora clica explicitamente no ícone da seta e não no input de texto
+      await tester.tap(find.byIcon(Icons.chevron_right));
       await tester.pump();
 
       expect(wasTapped, true);

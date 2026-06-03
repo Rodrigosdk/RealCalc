@@ -30,16 +30,18 @@ class InputFormsResultCard extends StatelessWidget {
         InputForms(
           label: label,
           hint: hint,
-          validator: validator,
           controller: controller,
-          onTap: onTap,
+          prefixIcon: prefixIcon,
+          validator: validator,
           textInputAction: TextInputAction.done,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          prefixIcon: prefixIcon,
-          suffixIcon: const Padding(
-                    padding: EdgeInsets.only(right: 14),
-                    child: Icon(Icons.chevron_right, color: Color(0xFF5B6874)),
-                  ),
+          suffixIcon: GestureDetector(
+            onTap: onTap,
+            child: const Padding(
+              padding: EdgeInsets.only(right: 14),
+              child: Icon(Icons.chevron_right, color: Color(0xFF5B6874)),
+            ),
+          ),
         ),
         const SizedBox(height: 8),
         const Text(
