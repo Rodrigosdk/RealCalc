@@ -8,7 +8,8 @@ class InputFormsResultCard extends StatelessWidget {
   final Widget prefixIcon;
 
   final VoidCallback? onTap;
-
+  final String? Function(String?)? validator; 
+  
   final TextEditingController controller;
 
   const InputFormsResultCard({
@@ -17,7 +18,8 @@ class InputFormsResultCard extends StatelessWidget {
     this.onTap,
     required this.label,
     required this.hint,
-    required this.prefixIcon,
+    required this.prefixIcon, 
+    this.validator,
   });
 
   @override
@@ -28,6 +30,7 @@ class InputFormsResultCard extends StatelessWidget {
         InputForms(
           label: label,
           hint: hint,
+          validator: validator,
           controller: controller,
           onTap: onTap,
           textInputAction: TextInputAction.done,

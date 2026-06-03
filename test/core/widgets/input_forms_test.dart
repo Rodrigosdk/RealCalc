@@ -9,6 +9,7 @@ void main() {
   late String hint;
   late Widget prefixIcon;
   late Widget suffixIcon;
+  final formKey = GlobalKey<FormState>(); // Chave global para testar a validação do Form
 
   setUpAll(() {
     // Evita chamadas HTTP do GoogleFonts durante os testes
@@ -27,33 +28,36 @@ void main() {
     controller.dispose();
   });
 
-  // Helper para facilitar o pump do widget nos testes
+  // Helper atualizado envolvendo o componente em um Form para possibilitar o teste do validator
   Widget createSut({
     TextInputType keyboardType = TextInputType.number,
     TextInputAction? textInputAction,
     GestureTapCallback? onTap,
     bool includeSuffix = true,
+    String? Function(String?)? validator,
   }) {
     return MaterialApp(
       home: Scaffold(
-        body: InputForms(
-          label: label,
-          hint: hint,
-          controller: controller,
-          prefixIcon: prefixIcon,
-          suffixIcon: includeSuffix ? suffixIcon : null,
-          keyboardType: keyboardType,
-          textInputAction: textInputAction,
-          onTap: onTap,
+        body: Form(
+          key: formKey,
+          child: InputForms(
+            label: label,
+            hint: hint,
+            controller: controller,
+            prefixIcon: prefixIcon,
+            suffixIcon: includeSuffix ? suffixIcon : null,
+            keyboardType: keyboardType,
+            textInputAction: textInputAction,
+            onTap: onTap,
+            validator: validator, // Injeção do validator
+          ),
         ),
       ),
     );
   }
 
   group('InputForms', () {
-    testWidgets('Deve exibir o label e o hint text corretamente', (
-      tester,
-    ) async {
+    testWidgets('Deve exibir o label e o hint text corretamente', (tester) async {
       await tester.pumpWidget(createSut());
 
       final labelFinder = find.text(label);
@@ -65,12 +69,13 @@ void main() {
 
       final textFieldFinder = find.byType(TextField);
       final TextField textField = tester.widget(textFieldFinder);
+      
       expect(textField.decoration?.hintText, hint);
     });
 
-    testWidgets('Deve conter o prefixIcon e o suffixIcon configurados', (
-      tester,
-    ) async {
+
+
+    testWidgets('Deve conter o prefixIcon e o suffixIcon configurados', (tester) async {
       await tester.pumpWidget(createSut());
 
       expect(find.byIcon(Icons.attach_money), findsOneWidget);
@@ -84,9 +89,7 @@ void main() {
       expect(find.byIcon(Icons.check), findsNothing);
     });
 
-    testWidgets('Deve aplicar as configurações de teclado e ação corretas', (
-      tester,
-    ) async {
+     testWidgets('Deve aplicar as configurações de teclado e ação corretas', (tester) async {
       await tester.pumpWidget(
         createSut(
           keyboardType: TextInputType.emailAddress,
@@ -100,61 +103,74 @@ void main() {
       expect(textField.textInputAction, TextInputAction.done);
     });
 
-    testWidgets('Deve disparar a função onTap ao clicar no campo', (
-      tester,
-    ) async {
+    testWidgets('Deve disparar a função onTap ao clicar no campo', (tester) async {
       int tapCount = 0;
 
       await tester.pumpWidget(createSut(onTap: () => tapCount++));
 
-      // Simula o clique do usuário no TextField
-      await tester.tap(find.byType(TextField));
-      await tester.pump(); // Atualiza o frame
+      await tester.tap(find.byType(TextFormField));
+      await tester.pump(); 
 
       expect(tapCount, 1);
     });
 
-    testWidgets('Deve aceitar entrada de texto e atualizar o controller', (
-      tester,
-    ) async {
+    testWidgets('Deve aceitar entrada de texto e atualizar o controller', (tester) async {
       await tester.pumpWidget(createSut());
 
-      await tester.enterText(find.byType(TextField), '123.45');
+      await tester.enterText(find.byType(TextFormField), '123.45');
       await tester.pump();
 
       expect(controller.text, '123.45');
     });
 
-    testWidgets(
-      'Deve aplicar os estilos corretos para enabledBorder e focusedBorder',
-      (tester) async {
-        await tester.pumpWidget(createSut());
+    testWidgets('Deve aplicar os estilos corretos para enabledBorder e focusedBorder', (tester) async {
+      await tester.pumpWidget(createSut());
 
-        // 1. Captura o TextField no estado inicial (Enabled)
-        final textFieldFinder = find.byType(TextField);
-        TextField textField = tester.widget(textFieldFinder);
+      final textFieldFinder = find.byType(TextField);
+      TextField textField = tester.widget(textFieldFinder);
 
-        // Valida o enabledBorder
-        final enabledBorder = textField.decoration?.enabledBorder as OutlineInputBorder?;
-        expect(enabledBorder, isNotNull);
-        expect(enabledBorder!.borderSide.color, const Color(0xFF1E293B));
-        expect(enabledBorder.borderSide.width, 1.0);
-        expect(enabledBorder.borderRadius, BorderRadius.circular(16));
+      final decoration = textField.decoration;
+      expect(decoration, isNotNull);
 
-        // 2. Simula o clique no input para ganhar foco (Focused)
-        await tester.tap(textFieldFinder);
-        await tester.pump(); // Atualiza a árvore de widgets para refletir o foco
+      final enabledBorder = decoration!.enabledBorder as OutlineInputBorder?;
+      expect(enabledBorder, isNotNull);
+      expect(enabledBorder!.borderSide.color, const Color(0xFF1E293B));
+      expect(enabledBorder.borderSide.width, 1.0);
+      expect(enabledBorder.borderRadius, BorderRadius.circular(16));
 
-        // Recaptura o TextField agora que ele está focado
-        textField = tester.widget(textFieldFinder);
+      await tester.tap(find.byType(TextFormField));
+      await tester.pump(); 
 
-        // Valida o focusedBorder
-        final focusedBorder = textField.decoration?.focusedBorder as OutlineInputBorder?;
-        expect(focusedBorder, isNotNull);
-        expect(focusedBorder!.borderSide.color, Color(0xFF1E94F6));
-        expect(focusedBorder.borderSide.width, 1.5);
-        expect(focusedBorder.borderRadius, BorderRadius.circular(16));
-      },
-    );
+      textField = tester.widget(textFieldFinder);
+      final focusedBorder = textField.decoration?.focusedBorder as OutlineInputBorder?;
+      
+      expect(focusedBorder, isNotNull);
+      expect(focusedBorder!.borderSide.color, const Color(0xFF1E94F6));
+      expect(focusedBorder.borderSide.width, 1.5);
+      expect(focusedBorder.borderRadius, BorderRadius.circular(16));
+    });
+
+
+    testWidgets('Deve exibir a mensagem de erro na tela quando o validator falhar', (tester) async {
+      const errorText = 'Este campo possui um valor inválido';
+
+      await tester.pumpWidget(
+        createSut(
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return errorText;
+            }
+            return null;
+          },
+        ),
+      );
+
+      expect(find.text(errorText), findsNothing);
+
+      formKey.currentState?.validate();
+      await tester.pump();
+
+      expect(find.text(errorText), findsOneWidget);
+    });
   });
 }

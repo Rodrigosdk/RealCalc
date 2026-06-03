@@ -9,6 +9,7 @@ void main() {
   late String label;
   late String hint;
   late Widget prefixIcon;
+  final formKey = GlobalKey<FormState>();
 
   setUpAll(() {
     GoogleFonts.config.allowRuntimeFetching = false;
@@ -25,15 +26,19 @@ void main() {
     controller.dispose();
   });
 
-  Widget createSut({VoidCallback? onTap}) {
+  Widget createSut({VoidCallback? onTap, String? Function(String?)? validator}) {
     return MaterialApp(
       home: Scaffold(
-        body: InputFormsResultCard(
-          controller: controller,
-          label: label,
-          hint: hint,
-          prefixIcon: prefixIcon,
-          onTap: onTap,
+        body: Form(
+          key: formKey,
+          child: InputFormsResultCard(
+            controller: controller,
+            label: label,
+            hint: hint,
+            prefixIcon: prefixIcon,
+            onTap: onTap,
+            validator: validator, // Agora repassa o validator se necessário
+          ),
         ),
       ),
     );
@@ -43,10 +48,8 @@ void main() {
     testWidgets('Deve exibir o InputForms interno e a legenda de ajuda abaixo', (tester) async {
       await tester.pumpWidget(createSut());
 
-      // 1. Valida se o InputForms foi renderizado
       expect(find.byType(InputForms), findsOneWidget);
 
-      // 2. Valida se a mensagem informativa está na tela com o estilo correto
       final helperTextFinder = find.text('Toque para calcular automaticamente');
       expect(helperTextFinder, findsOneWidget);
 
@@ -58,10 +61,7 @@ void main() {
     testWidgets('Deve repassar o prefixIcon e fixar o chevron_right como suffixIcon', (tester) async {
       await tester.pumpWidget(createSut());
 
-      // Verifica o ícone customizado de entrada
       expect(find.byIcon(Icons.monetization_on), findsOneWidget);
-
-      // Verifica se o ícone de seta embutido no componente aparece
       expect(find.byIcon(Icons.chevron_right), findsOneWidget);
     });
 
@@ -70,7 +70,6 @@ void main() {
 
       final textField = tester.widget<TextField>(find.byType(TextField));
 
-      // Garante que o input use a configuração de decimais solicitada no design
       expect(textField.keyboardType, const TextInputType.numberWithOptions(decimal: true));
       expect(textField.textInputAction, TextInputAction.done);
     });
@@ -82,11 +81,21 @@ void main() {
         onTap: () => wasTapped = true,
       ));
 
-      // Clica diretamente no TextField interno para verificar se o callback borbulha corretamente
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TextFormField));
       await tester.pump();
 
       expect(wasTapped, true);
+    });
+
+    testWidgets('Deve repassar e exibir o erro do validator se configurado', (tester) async {
+      await tester.pumpWidget(createSut(
+        validator: (value) => 'Erro do card',
+      ));
+
+      formKey.currentState?.validate();
+      await tester.pump();
+
+      expect(find.text('Erro do card'), findsOneWidget);
     });
   });
 }

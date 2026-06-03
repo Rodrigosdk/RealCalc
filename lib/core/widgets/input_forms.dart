@@ -10,6 +10,7 @@ class InputForms extends StatelessWidget {
   final TextInputType keyboardType;
   final TextInputAction? textInputAction;
   final GestureTapCallback? onTap;
+  final String? Function(String?)? validator;
 
   const InputForms({
     super.key,
@@ -20,7 +21,8 @@ class InputForms extends StatelessWidget {
     this.suffixIcon,
     this.onTap,
     this.textInputAction,
-    this.keyboardType = TextInputType.number,
+    this.keyboardType = TextInputType.number, 
+    this.validator,
   });
 
   @override
@@ -37,7 +39,8 @@ class InputForms extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        TextField(
+        TextFormField(
+          validator: validator,
           controller: controller,
           keyboardType: keyboardType,
           textInputAction: textInputAction,
