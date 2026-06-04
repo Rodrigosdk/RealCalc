@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class InputForms extends StatelessWidget {
@@ -11,6 +12,7 @@ class InputForms extends StatelessWidget {
   final TextInputAction? textInputAction;
   final GestureTapCallback? onTap;
   final String? Function(String?)? validator;
+  final List<TextInputFormatter>? inputFormatters;
 
   const InputForms({
     super.key,
@@ -22,7 +24,8 @@ class InputForms extends StatelessWidget {
     this.onTap,
     this.textInputAction,
     this.keyboardType = TextInputType.number, 
-    this.validator,
+    this.validator, 
+    this.inputFormatters,
   });
 
   @override
@@ -42,6 +45,7 @@ class InputForms extends StatelessWidget {
         TextFormField(
           validator: validator,
           controller: controller,
+          inputFormatters: inputFormatters,
           keyboardType: keyboardType,
           textInputAction: textInputAction,
           onTap: onTap,

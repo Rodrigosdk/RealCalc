@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:real_calc/core/widgets/input_forms.dart';
 
 class InputFormsResultCard extends StatelessWidget {
@@ -11,6 +12,7 @@ class InputFormsResultCard extends StatelessWidget {
   final String? Function(String?)? validator; 
   
   final TextEditingController controller;
+  final List<TextInputFormatter>? inputFormatters;
 
   const InputFormsResultCard({
     super.key,
@@ -20,6 +22,7 @@ class InputFormsResultCard extends StatelessWidget {
     required this.hint,
     required this.prefixIcon, 
     this.validator,
+    this.inputFormatters
   });
 
   @override
@@ -31,6 +34,7 @@ class InputFormsResultCard extends StatelessWidget {
           label: label,
           hint: hint,
           controller: controller,
+          inputFormatters: inputFormatters,
           prefixIcon: prefixIcon,
           validator: validator,
           textInputAction: TextInputAction.done,

@@ -8,8 +8,7 @@ import 'package:real_calc/modules/financing/domain/entities/financing.dart';
 import 'package:real_calc/modules/financing/presentation/cubit/financing_cubit.dart';
 import 'package:real_calc/modules/financing/presentation/widgets/financing_forms.dart';
 
-class MockFinancingCubit extends MockCubit<FinancingState>
-    implements FinancingCubit {}
+class MockFinancingCubit extends MockCubit<FinancingState> implements FinancingCubit {}
 
 class FakeFinancing extends Fake implements Financing {}
 
@@ -106,10 +105,10 @@ void main() {
         final TextField inputTaxa = tester.widget(inputs.at(2));
         final TextField inputPresta = tester.widget(inputs.at(3));
 
-        expect(inputValor.controller?.text, '5000.00');
+        expect(inputValor.controller?.text, '5.000,00');
         expect(inputPrazo.controller?.text, '24');
-        expect(inputTaxa.controller?.text, '1.99');
-        expect(inputPresta.controller?.text, '350.00');
+        expect(inputTaxa.controller?.text, '1,99');
+        expect(inputPresta.controller?.text, '350,00');
       },
     );
 
@@ -132,7 +131,7 @@ void main() {
           () => mockCubit.calculate(
             any(
               that: isA<Financing>()
-                  .having((f) => f.initialValue, 'initialValue', 15000.0)
+                  .having((f) => f.initialValue, 'initialValue', 150.00)
                   .having((f) => f.months, 'months', 12),
             ),
           ),
@@ -150,7 +149,7 @@ void main() {
         await tester.enterText(inputs.at(0), '2500');
         await tester.pump();
 
-        expect(tester.widget<TextField>(inputs.at(0)).controller?.text, '2500');
+        expect(tester.widget<TextField>(inputs.at(0)).controller?.text, '25,00');
 
         final clearButtonFinder = find.text('Limpar');
 
@@ -162,6 +161,30 @@ void main() {
 
         expect(tester.widget<TextField>(inputs.at(0)).controller?.text, '');
         expect(tester.widget<TextField>(inputs.at(1)).controller?.text, '');
+      },
+    );
+
+    testWidgets(
+      'Deve aplicar os inputFormatters e formatar o texto em tempo real durante a digitação',
+      (tester) async {
+        await tester.pumpWidget(createSut(tester));
+
+        final inputs = find.byType(TextField);
+
+        // Digita no input de Valor Financiado (Índice 0 - DecimalInputFormatter)
+        await tester.enterText(inputs.at(0), '123456');
+        await tester.pump();
+
+        // Digita no input de Prazo (Índice 1 - FilteringTextInputFormatter.digitsOnly)
+        await tester.enterText(inputs.at(1), '12abc3');
+        await tester.pump();
+
+        final TextField inputValor = tester.widget(inputs.at(0));
+        final TextField inputPrazo = tester.widget(inputs.at(1));
+
+        // Valida as formatações ativas em tempo de digitação
+        expect(inputValor.controller?.text, '1.234,56');
+        expect(inputPrazo.controller?.text, '123');
       },
     );
   });

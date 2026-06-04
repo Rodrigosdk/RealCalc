@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:real_calc/core/utils/decimal_input_formatter.dart';
 import 'package:real_calc/core/widgets/options_bottom_forms.dart';
 import '../../domain/entities/financing.dart';
 import '../cubit/financing_cubit.dart';
@@ -11,6 +13,7 @@ class FinancingForms extends StatefulWidget {
   @override
   State<FinancingForms> createState() => _FinancingFormsState();
 }
+
 class _FinancingFormsState extends State<FinancingForms> {
   final _formKey = GlobalKey<FormState>();
 
@@ -19,7 +22,7 @@ class _FinancingFormsState extends State<FinancingForms> {
   final _rateController = TextEditingController();
   final _finalValueController = TextEditingController();
 
-  String? _errorMessage; // Apenas armazena o que vier do Cubit
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -41,18 +44,34 @@ class _FinancingFormsState extends State<FinancingForms> {
   }
 
   void _updateInputsFromState(Financing financing) {
-    _initialValueController.text = financing.initialValue > 0 ? financing.initialValue.toStringAsFixed(2) : '';
+    final formatter = DecimalInputFormatter();
+    
+    _initialValueController.value = financing.initialValue > 0 
+        ? formatter.formatEditUpdate(TextEditingValue.empty, TextEditingValue(text: financing.initialValue.toStringAsFixed(2).replaceAll('.', ''))) 
+        : TextEditingValue.empty;
+        
     _monthsController.text = financing.months > 0 ? financing.months.toString() : '';
-    _rateController.text = financing.rate > 0 ? financing.rate.toStringAsFixed(2) : '';
-    _finalValueController.text = financing.finalValue > 0 ? financing.finalValue.toStringAsFixed(2) : '';
+    
+    _rateController.value = financing.rate > 0 
+        ? formatter.formatEditUpdate(TextEditingValue.empty, TextEditingValue(text: financing.rate.toStringAsFixed(2).replaceAll('.', ''))) 
+        : TextEditingValue.empty;
+        
+    _finalValueController.value = financing.finalValue > 0 
+        ? formatter.formatEditUpdate(TextEditingValue.empty, TextEditingValue(text: financing.finalValue.toStringAsFixed(2).replaceAll('.', ''))) 
+        : TextEditingValue.empty;
+  }
+
+  double _parseFormattedDouble(String text) {
+    final cleaned = text.replaceAll('.', '').replaceAll(',', '.');
+    return double.tryParse(cleaned) ?? 0;
   }
 
   Financing _getFinancingFromInputs() {
     return Financing(
-      initialValue: double.tryParse(_initialValueController.text) ?? 0,
-      months: int.tryParse(_monthsController.text) ?? 0,
-      rate: double.tryParse(_rateController.text) ?? 0,
-      finalValue: double.tryParse(_finalValueController.text) ?? 0,
+      initialValue: _parseFormattedDouble(_initialValueController.text),
+      months: int.tryParse(_monthsController.text) ?? 0, // Prazo continua int simples
+      rate: _parseFormattedDouble(_rateController.text),
+      finalValue: _parseFormattedDouble(_finalValueController.text),
     );
   }
 
@@ -103,6 +122,7 @@ class _FinancingFormsState extends State<FinancingForms> {
                 label: 'Valor financiado (R\$)',
                 hint: '0,00',
                 controller: _initialValueController,
+                inputFormatters: [DecimalInputFormatter()], // Injeta a máscara aqui
                 prefixIcon: const Padding(
                   padding: EdgeInsets.only(left: 14, right: 10),
                   child: Icon(Icons.attach_money, color: Color(0xFF1E94F6)),
@@ -113,6 +133,7 @@ class _FinancingFormsState extends State<FinancingForms> {
                 label: 'Prazo (meses)',
                 hint: '0',
                 controller: _monthsController,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly], 
                 prefixIcon: const Padding(
                   padding: EdgeInsets.only(left: 14, right: 10),
                   child: Icon(Icons.calendar_today, color: Color(0xFF1E94F6)),
@@ -123,6 +144,7 @@ class _FinancingFormsState extends State<FinancingForms> {
                 label: 'Taxa de juros (% ao mês)',
                 hint: '0,00',
                 controller: _rateController,
+                inputFormatters: [DecimalInputFormatter()], // Injeta a máscara aqui
                 prefixIcon: const Padding(
                   padding: EdgeInsets.only(left: 14, right: 10),
                   child: Icon(Icons.percent, color: Color(0xFF1E94F6)),
@@ -133,6 +155,7 @@ class _FinancingFormsState extends State<FinancingForms> {
                 label: 'Valor da prestação',
                 hint: '0,00',
                 controller: _finalValueController,
+                inputFormatters: [DecimalInputFormatter()], // Injeta a máscara aqui
                 prefixIcon: const Padding(
                   padding: EdgeInsets.only(left: 14, right: 10),
                   child: Icon(Icons.payments, color: Color(0xFF1E94F6)),

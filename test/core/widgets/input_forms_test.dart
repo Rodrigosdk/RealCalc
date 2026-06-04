@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:real_calc/core/widgets/input_forms.dart'; // Ajuste o seu import
+import 'package:real_calc/core/widgets/input_forms.dart';
 
 void main() {
   late TextEditingController controller;
@@ -9,10 +9,9 @@ void main() {
   late String hint;
   late Widget prefixIcon;
   late Widget suffixIcon;
-  final formKey = GlobalKey<FormState>(); // Chave global para testar a validação do Form
+  final formKey = GlobalKey<FormState>();
 
   setUpAll(() {
-    // Evita chamadas HTTP do GoogleFonts durante os testes
     GoogleFonts.config.allowRuntimeFetching = false;
   });
 
@@ -28,7 +27,6 @@ void main() {
     controller.dispose();
   });
 
-  // Helper atualizado envolvendo o componente em um Form para possibilitar o teste do validator
   Widget createSut({
     TextInputType keyboardType = TextInputType.number,
     TextInputAction? textInputAction,
