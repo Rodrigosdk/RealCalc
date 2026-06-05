@@ -35,8 +35,7 @@ class CalculateCompoundInterestUseCase {
       final realRate = financing.rate / 100;
       return (log(financing.finalValue / financing.initialValue) /
               log(1 + realRate))
-          .ceil()
-          .toInt();
+          .round();
     });
   }
 
