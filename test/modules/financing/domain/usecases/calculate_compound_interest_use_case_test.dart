@@ -18,7 +18,6 @@ void main() {
     int? monthsParam,
     double? finalValueParam,
   }) {
-
     return Financing(
       initialValue: initialValueParam ?? initialValue,
       rate: rateParam ?? rate,
@@ -161,7 +160,7 @@ void main() {
       'Deve determinar o tipo de cálculo correto para calcular a taxa de juros',
       () {
         final result = useCase.calculate(buildFinancing(rateParam: 0));
-        
+
         expect(result.isSuccess, isTrue);
         expect(result.getOrNull(), closeTo(rate, 0.01));
       },
@@ -174,6 +173,25 @@ void main() {
 
         expect(result.isSuccess, isTrue);
         expect(result.getOrNull(), closeTo(months.toDouble(), 0.01));
+      },
+    );
+  });
+
+  group("CalculateCompoundInterestUseCase - Imprecisão de Ponto Flutuante", () {
+    test(
+      'Deve mitigar a dízima do double e retornar o número exato de meses (48) mesmo com centavos aproximados',
+      () {
+        final inputComDizima = buildFinancing(
+          initialValueParam: 50000.0,
+          rateParam: 1.5,
+          finalValueParam: 102173.91,
+          monthsParam: 0,
+        );
+
+        final result = useCase.calculateMonths(inputComDizima);
+
+        expect(result.isSuccess, isTrue);
+        expect(result.getOrNull(), equals(48));
       },
     );
   });
