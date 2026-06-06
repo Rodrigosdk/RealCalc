@@ -1,6 +1,8 @@
 class AppRoutes {
+  static const String base = '/';
+  
   // Absolutos
-  static const String home = '/';
+  static const String home = base;
 
   // Segmentos relativos (usados dentro do HomeModule)
   static const String financingSegment = 'financing';
