@@ -2,6 +2,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:real_calc/core/routes/app_routes.dart';
 
 import 'financing/module.dart';
+import 'home/module.dart';
 
 class AppModule extends Module {
   @override
@@ -12,6 +13,7 @@ class AppModule extends Module {
 
   @override
   void routes(RouteManager r) {
-    r.module(AppRoutes.home, module: FinancingModule());
+    r.module(AppRoutes.home, module: HomeModule());
+    r.module(AppRoutes.financing, module: FinancingModule());
   }
 }

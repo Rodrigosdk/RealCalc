@@ -19,7 +19,7 @@ class FinancingModule extends Module {
   @override
   void routes(r) {
     r.child(
-      AppRoutes.home,
+      AppRoutes.base,
       child: (_) => BlocProvider(
         create: (_) => Modular.get<FinancingCubit>(),
         child: const FinancingPage(),
