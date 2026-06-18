@@ -33,7 +33,7 @@ void main() {
   }) {
     return MaterialApp(
       theme: ThemeData(
-        extensions: const [
+        extensions: [
           InputFormsResultCardTheme(
             suffixIconColor: ColorTokens.textHint,
             helperTextStyle: AppTextStyles.inputHelperText,

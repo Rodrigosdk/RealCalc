@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:real_calc/core/themes/extensions/help_card_theme.dart';
+import 'package:real_calc/core/themes/extensions/highlight_card_theme.dart';
+import 'package:real_calc/core/themes/extensions/menu_card_theme.dart';
 import 'package:real_calc/core/themes/extensions/options_bottom_forms_theme.dart';
 import 'color_tokens.dart';
 import 'extensions/financing_forms_theme.dart';
+import 'extensions/home_page_theme.dart';
 import 'extensions/input_forms_result_card_theme.dart';
 import 'extensions/title_widget_theme.dart';
 import 'text_styles.dart';
@@ -34,7 +37,7 @@ class AppTheme {
         backgroundColor: ColorTokens.surface,
         elevation: 0,
         centerTitle: true,
-        actionsIconTheme: const IconThemeData(color: ColorTokens.icon),
+        actionsIconTheme: const IconThemeData(color: ColorTokens.accent),
         titleTextStyle: AppTextStyles.headlineMedium,
         iconTheme: IconThemeData(color: ColorTokens.primary),
       ),
@@ -123,14 +126,29 @@ class AppTheme {
         HelpCardTheme(
           messageStyle: AppTextStyles.helpCardMessage,
           backgroundColor: ColorTokens.helpCardBackground,
-          borderColor: ColorTokens.helpCardBorder,
-          iconBackgroundColor: ColorTokens.helpCardIconBackground,
-          iconColor: ColorTokens.helpCardIcon,
+          borderColor: ColorTokens.accent,
+          iconBackgroundColor: ColorTokens.accent,
+          iconColor: Colors.white,
         ),
         // app_theme.dart (dentro de extensions:)
-        const InputFormsResultCardTheme(
+        InputFormsResultCardTheme(
           suffixIconColor: ColorTokens.textHint,
           helperTextStyle: AppTextStyles.inputHelperText,
+        ),
+
+        HomePageTheme(
+          scaffoldBackgroundColor: ColorTokens.homeScaffoldBackground,
+          cardColor: ColorTokens.homeCard,
+          primaryBlue: ColorTokens.accent, // ← era homePrimaryBlue
+          iconContainerColor: ColorTokens.homeIconContainer,
+          appNameStyle: AppTextStyles.appName,
+          sectionHeaderStyle: AppTextStyles.sectionHeader,
+          historyItemStyle: AppTextStyles.historyItem,
+          historyItemIconColor: Colors.white,
+          historyItemArrowColor: Colors.white,
+          bottomNavBackgroundColor: ColorTokens.bottomNavBackground,
+          bottomNavSelectedColor: ColorTokens.accent,
+          bottomNavUnselectedColor: Colors.white,
         ),
         FinancingFormsTheme(
           iconColor: ColorTokens.accent,
@@ -138,6 +156,20 @@ class AppTheme {
           errorBackgroundColor: ColorTokens.errorContainerBg,
           errorBorderColor: ColorTokens.errorContainerBorder,
           errorTextStyle: AppTextStyles.errorBannerText,
+        ),
+        HighlightCardTheme(
+          gradientColors: [ColorTokens.gradientStart, ColorTokens.gradientEnd],
+          titleStyle: AppTextStyles.highlightCardTitle,
+          subtitleStyle: AppTextStyles.highlightCardSubtitle,
+          buttonBackgroundColor: Colors.white,
+          buttonForegroundColor: Colors.white,
+          buttonTextStyle: AppTextStyles.highlightCardButton,
+        ),
+
+        MenuCardTheme(
+          titleStyle: AppTextStyles.menuCardTitle,
+          descriptionStyle: AppTextStyles.menuCardDescription,
+          iconContainerColor: ColorTokens.menuCardIconContainer,
         ),
       ],
     );

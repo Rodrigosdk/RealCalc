@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:real_calc/core/themes/extensions/help_card_theme.dart';
 import 'package:real_calc/core/themes/color_tokens.dart';
@@ -12,13 +13,13 @@ void main() {
     Widget createSut() {
       return MaterialApp(
         theme: ThemeData(
-          extensions: const [
+          extensions: [
             HelpCardTheme(
               messageStyle: AppTextStyles.helpCardMessage,
               backgroundColor: ColorTokens.helpCardBackground,
-              borderColor: ColorTokens.helpCardBorder,
-              iconBackgroundColor: ColorTokens.helpCardIconBackground,
-              iconColor: ColorTokens.helpCardIcon,
+              borderColor: ColorTokens.accent,
+              iconBackgroundColor: ColorTokens.accent,
+              iconColor: Colors.white,
             ),
           ],
         ),
@@ -28,16 +29,32 @@ void main() {
       );
     }
 
+    test('HelpCardTheme deve ter os estilos corretos', () {
+      final theme = HelpCardTheme(
+        messageStyle: AppTextStyles.helpCardMessage,
+        backgroundColor: ColorTokens.helpCardBackground,
+        borderColor: ColorTokens.accent,
+        iconBackgroundColor: ColorTokens.accent,
+        iconColor: Colors.white,
+      );
+
+      expect(theme.messageStyle.color, ColorTokens.textPrimary);
+      expect(theme.messageStyle.fontSize, 14);
+      expect(theme.messageStyle.fontWeight, FontWeight.w400);
+    });
+
     testWidgets('Deve exibir o texto da mensagem e o ícone de lâmpada', (tester) async {
       await tester.pumpWidget(createSut());
 
-      final textFinder = find.text(testMessage);
-      expect(textFinder, findsOneWidget);
+      expect(find.text(testMessage), findsOneWidget);
 
-      final Text textWidget = tester.widget(textFinder);
-      expect(textWidget.style?.color, ColorTokens.textPrimary);
-      expect(textWidget.style?.fontSize, 14);
-      expect(textWidget.style?.fontWeight, FontWeight.w400);
+      final textFinder = find.text(testMessage);
+      final RenderParagraph renderObject = tester.renderObject<RenderParagraph>(textFinder);
+      final resolvedStyle = renderObject.text.style;
+
+      expect(resolvedStyle?.color, ColorTokens.textPrimary);
+      expect(resolvedStyle?.fontSize, 14);
+      expect(resolvedStyle?.fontWeight, FontWeight.w400);
 
       expect(find.byIcon(Icons.lightbulb), findsOneWidget);
     });
@@ -55,7 +72,7 @@ void main() {
 
       final border = mainDecoration.border as Border?;
       expect(border, isNotNull);
-      expect(border!.top.color, ColorTokens.helpCardBorder.withValues(alpha: 0.4));
+      expect(border!.top.color, ColorTokens.accent.withValues(alpha: 0.4));
     });
 
     testWidgets('Deve validar a decoração do container menor que envolve o ícone', (tester) async {
@@ -66,7 +83,7 @@ void main() {
       final iconDecoration = iconContainer.decoration as BoxDecoration?;
 
       expect(iconDecoration, isNotNull);
-      expect(iconDecoration!.color, ColorTokens.helpCardIconBackground);
+      expect(iconDecoration!.color, ColorTokens.accent);
       expect(iconDecoration.borderRadius, BorderRadius.circular(12));
       expect(iconContainer.constraints?.maxWidth, 40);
       expect(iconContainer.constraints?.maxHeight, 40);

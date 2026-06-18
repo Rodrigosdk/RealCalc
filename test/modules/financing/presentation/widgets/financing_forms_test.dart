@@ -34,7 +34,7 @@ void main() {
       theme: ThemeData(
         extensions: [
           // Extensões obrigatórias para os widgets internos
-          const InputFormsResultCardTheme(
+          InputFormsResultCardTheme(
             suffixIconColor: ColorTokens.textHint,
             helperTextStyle: AppTextStyles.inputHelperText,
           ),
