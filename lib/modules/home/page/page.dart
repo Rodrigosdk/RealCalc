@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:real_calc/core/routes/app_routes.dart';
+import 'package:real_calc/core/themes/spacing.dart';
 import 'package:real_calc/core/widgets/title_widget.dart';
-
+import '../../../core/themes/extensions/home_page_theme.dart';
 import '../components/highlight_card.dart';
 import '../components/menu_card.dart';
 
@@ -11,9 +12,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const backgroundColor = Color(0xFF0D1520);
-    const cardColor = Color(0xFF16222F);
-    const primaryBlue = Color(0xFF1E94F6);
+    final theme = Theme.of(context).extension<HomePageTheme>()!;
 
     final funcinalidades = [
       {
@@ -42,65 +41,53 @@ class HomePage extends StatelessWidget {
       },
     ];
 
-    final double larguraMaximaDoCard = MediaQuery.of(context).size.width > 600 
-        ? 180 
+    final double larguraMaximaDoCard = MediaQuery.of(context).size.width > 600
+        ? 180
         : (MediaQuery.of(context).size.width - 64) / 3;
 
     return Scaffold(
-      backgroundColor: backgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header: Logo e Nome do App
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1A2A3D),
+                      color: theme.iconContainerColor,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: primaryBlue.withValues(alpha: 0.3),
+                        color: theme.primaryBlue.withValues(alpha: 0.3),
                       ),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.calculate,
-                      color: primaryBlue,
+                      color: theme.primaryBlue,
                       size: 24,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  const Text(
-                    'RealCalc',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  SizedBox(width: AppSpacing.sm + 4),
+                  Text('RealCalc', style: theme.appNameStyle),
                 ],
               ),
-              const SizedBox(height: 32),
-
-              // Boas-vindas
+              SizedBox(height: AppSpacing.xl),
               TitleWidget(
                 title: 'Olá, Cidadão',
                 subtitle: 'Qual cálculo deseja realizar hoje?',
               ),
-              const SizedBox(height: 32),
-
+              SizedBox(height: AppSpacing.xl),
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: funcinalidades.length,
                 gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: larguraMaximaDoCard, // Passando a largura física em pixels
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 1.0, // Garante formato quadrado ideal
+                  maxCrossAxisExtent: larguraMaximaDoCard,
+                  crossAxisSpacing: AppSpacing.md,
+                  mainAxisSpacing: AppSpacing.md,
+                  childAspectRatio: 1.0,
                 ),
                 itemBuilder: (context, index) {
                   final item = funcinalidades[index];
@@ -108,52 +95,44 @@ class HomePage extends StatelessWidget {
                     icon: item['icon'] as IconData,
                     title: item['title'] as String,
                     description: item['description'] as String,
-                    cardColor: cardColor,
-                    iconColor: primaryBlue,
+                    cardColor: theme.cardColor,
+                    iconColor: theme.primaryBlue,
                     onTap: item['onTap'] as VoidCallback?,
                   );
                 },
               ),
-              const SizedBox(height: 24),
-
+              SizedBox(height: AppSpacing.lg),
               HighlightCard(),
-              const SizedBox(height: 24),
-
-              // Seção Acesso Rápido
+              SizedBox(height: AppSpacing.lg),
               Text(
                 'ACESSO RÁPIDO',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.4),
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
+                style: theme.sectionHeaderStyle.copyWith(
+                  color: theme.sectionHeaderStyle.color?.withValues(alpha: 0.4),
                 ),
               ),
-              const SizedBox(height: 16),
-
-              // Item de Histórico Recente
+              SizedBox(height: AppSpacing.md),
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: cardColor,
+                  color: theme.cardColor,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
                   children: [
                     Icon(
                       Icons.history,
-                      color: Colors.white.withValues(alpha: 0.6),
+                      color: theme.historyItemIconColor.withValues(alpha: 0.6),
                     ),
-                    const SizedBox(width: 16),
-                    const Expanded(
+                    SizedBox(width: AppSpacing.md),
+                    Expanded(
                       child: Text(
                         'Último cálculo: Financiamento Imob.',
-                        style: TextStyle(color: Colors.white, fontSize: 14),
+                        style: theme.historyItemStyle,
                       ),
                     ),
                     Icon(
                       Icons.chevron_right,
-                      color: Colors.white.withValues(alpha: 0.4),
+                      color: theme.historyItemArrowColor.withValues(alpha: 0.4),
                     ),
                   ],
                 ),
@@ -163,17 +142,14 @@ class HomePage extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFF090D14),
-        selectedItemColor: primaryBlue,
-        unselectedItemColor: Colors.white.withValues(alpha: 0.4),
+        backgroundColor: theme.bottomNavBackgroundColor,
+        selectedItemColor: theme.bottomNavSelectedColor,
+        unselectedItemColor: theme.bottomNavUnselectedColor.withValues(alpha: 0.4),
         currentIndex: 0,
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'INÍCIO'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history_toggle_off),
-            label: 'HISTÓRICO',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.history_toggle_off), label: 'HISTÓRICO'),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'AJUSTES'),
         ],
       ),

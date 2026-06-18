@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:real_calc/core/themes/extensions/menu_card_theme.dart';
+import 'package:real_calc/core/themes/text_styles.dart';
 
 class MenuCard extends StatelessWidget {
   final IconData icon;
@@ -20,41 +22,41 @@ class MenuCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final menuTheme = Theme.of(context).extension<MenuCardTheme>()!;
+
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(menuTheme.borderRadius),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final double alturaDisponivel = constraints.maxHeight;
-          
-          final bool telaMuitoPequena = alturaDisponivel < 100;
+          final bool telaMuitoPequena =
+              constraints.maxHeight < menuTheme.heightThreshold;
 
           return Container(
-            padding: EdgeInsets.all(telaMuitoPequena ? 8 : 12),
+            padding: telaMuitoPequena
+                ? menuTheme.compactPadding
+                : menuTheme.padding,
             width: double.infinity,
             decoration: BoxDecoration(
               color: cardColor,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(menuTheme.borderRadius),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Bloco do Ícone
                 Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1A2A3D),
+                    color: menuTheme.iconContainerColor,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
-                    icon, 
-                    color: iconColor, 
+                    icon,
+                    color: iconColor,
                     size: telaMuitoPequena ? 20 : 26,
                   ),
                 ),
-                
-                // Bloco de Textos autoajustável
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,21 +64,27 @@ class MenuCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: telaMuitoPequena ? 11 : 13, // Fonte menor para cartões pequenos
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1, // Reduzido para 1 linha para garantir estabilidade visual no mobile
+                        style: telaMuitoPequena
+                            ? menuTheme.titleStyle.copyWith(
+                                fontSize:
+                                    AppTextStyles.menuCardTitleCompact.fontSize,
+                              )
+                            : menuTheme.titleStyle,
+                        maxLines: 1,
                         overflow: TextOverflow.fade,
                       ),
                       Text(
                         description,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.5),
-                          fontSize: telaMuitoPequena ? 9 : 10,
-                          height: 1.1,
-                        ),
+                        style: telaMuitoPequena
+                            ? menuTheme.descriptionStyle.copyWith(
+                                fontSize: AppTextStyles
+                                    .menuCardDescriptionCompact
+                                    .fontSize,
+                              )
+                            : menuTheme.descriptionStyle.copyWith(
+                                color: menuTheme.descriptionStyle.color
+                                    ?.withValues(alpha: 0.5),
+                              ),
                         maxLines: telaMuitoPequena ? 1 : 2,
                         overflow: TextOverflow.ellipsis,
                       ),

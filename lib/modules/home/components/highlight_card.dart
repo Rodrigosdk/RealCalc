@@ -1,56 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:real_calc/core/themes/extensions/highlight_card_theme.dart';
 
 class HighlightCard extends StatelessWidget {
-  const HighlightCard({super.key});
+  final VoidCallback? onTap;
+
+  const HighlightCard({super.key, this.onTap});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context).extension<HighlightCardTheme>()!;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: theme.padding,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1E70F6), Color(0xFF1E94F6)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+        borderRadius: BorderRadius.circular(theme.borderRadius),
+        gradient: LinearGradient(
+          colors: theme.gradientColors,
+          begin: theme.gradientBegin,
+          end: theme.gradientEnd,
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Selic e Índices',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          Text('Selic e Índices', style: theme.titleStyle),
           const SizedBox(height: 8),
           Text(
             'Acompanhe as taxas oficiais atualizadas diariamente pelo Banco Central.',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.8),
-              fontSize: 14,
+            style: theme.subtitleStyle.copyWith(
+              color: theme.subtitleStyle.color?.withValues(alpha: 0.8),
             ),
           ),
           const SizedBox(height: 20),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: onTap,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white.withValues(alpha: 0.2),
-              foregroundColor: Colors.white,
+              backgroundColor: theme.buttonBackgroundColor.withValues(alpha: 0.2),
+              foregroundColor: theme.buttonForegroundColor,
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
-            child: const Text(
-              'CONSULTAR TAXAS',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-            ),
+            child: Text('CONSULTAR TAXAS', style: theme.buttonTextStyle),
           ),
         ],
       ),
