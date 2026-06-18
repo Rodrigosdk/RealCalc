@@ -1,17 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:real_calc/core/themes/extensions/options_bottom_forms_theme.dart';
 import 'package:real_calc/core/widgets/options_bottom_forms.dart';
 
 void main() {
+  Widget createSut({
+    VoidCallback? onCalculate,
+    VoidCallback? onClear,
+    VoidCallback? onShare,
+    Color calculateBackground = const Color(0xFF1E94F6),
+    Color calculateForeground = Colors.white,
+    Color actionBackground = const Color(0xFF1A222D),
+    Color actionForeground = Colors.white70,
+  }) {
+    return MaterialApp(
+      theme: ThemeData(
+        extensions: [
+          OptionsBottomFormsTheme(
+            calculateButtonBackground: calculateBackground,
+            calculateButtonForeground: calculateForeground,
+            actionButtonBackground: actionBackground,
+            actionButtonForeground: actionForeground,
+          ),
+        ],
+      ),
+      home: Scaffold(
+        body: OptionsBottomForms(
+          onCalculate: onCalculate,
+          onClear: onClear,
+          onShare: onShare,
+        ),
+      ),
+    );
+  }
+
   group('OptionsBottomForms', () {
     testWidgets('Deve renderizar os três botões com os textos e ícones corretos', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: OptionsBottomForms(),
-          ),
-        ),
-      );
+      await tester.pumpWidget(createSut());
 
       expect(find.text('Calcular'), findsOneWidget);
       expect(find.text('Limpar'), findsOneWidget);
@@ -23,30 +48,19 @@ void main() {
     });
 
     testWidgets('Deve aplicar as cores corretas nos botões baseadas no design', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: OptionsBottomForms(),
-          ),
-        ),
-      );
+      await tester.pumpWidget(createSut());
 
-      // Busca todos os ElevatedButton.icon renderizados
-      final buttonFinder = find.byType(ElevatedButton);
-      expect(buttonFinder, findsNWidgets(3));
+      final buttons = tester.widgetList<ElevatedButton>(find.byType(ElevatedButton)).toList();
+      expect(buttons, hasLength(3));
 
-      // Captura a instância do primeiro botão (Calcular)
-      final ElevatedButton calculateButton = tester.widget(buttonFinder.at(0));
-      final calculateColor = calculateButton.style?.backgroundColor?.resolve({});
-      expect(calculateColor, const Color(0xFF1E94F6)); // Azul correspondente
+      final calculateColor = buttons[0].style?.backgroundColor?.resolve({});
+      expect(calculateColor, const Color(0xFF1E94F6));
 
-      // Captura as instâncias dos botões inferiores (Limpar e Compartilhar)
-      final ElevatedButton clearButton = tester.widget(buttonFinder.at(1));
-      final ElevatedButton shareButton = tester.widget(buttonFinder.at(2));
-      
-      final darkButtonColor = const Color(0xFF1A222D);
-      expect(clearButton.style?.backgroundColor?.resolve({}), darkButtonColor);
-      expect(shareButton.style?.backgroundColor?.resolve({}), darkButtonColor);
+      final clearColor = buttons[1].style?.backgroundColor?.resolve({});
+      final shareColor = buttons[2].style?.backgroundColor?.resolve({});
+      const darkColor = Color(0xFF1A222D);
+      expect(clearColor, darkColor);
+      expect(shareColor, darkColor);
     });
 
     testWidgets('Deve disparar os respectivos callbacks ao clicar em cada botão', (tester) async {
@@ -54,17 +68,11 @@ void main() {
       int clearClicks = 0;
       int shareClicks = 0;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: OptionsBottomForms(
-              onCalculate: () => calculateClicks++,
-              onClear: () => clearClicks++,
-              onShare: () => shareClicks++,
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(createSut(
+        onCalculate: () => calculateClicks++,
+        onClear: () => clearClicks++,
+        onShare: () => shareClicks++,
+      ));
 
       await tester.tap(find.text('Calcular'));
       await tester.pump();
