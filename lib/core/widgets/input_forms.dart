@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:real_calc/core/themes/color_tokens.dart';
+import 'package:real_calc/core/themes/spacing.dart';
 
 class InputForms extends StatelessWidget {
   final String label;
@@ -23,22 +24,23 @@ class InputForms extends StatelessWidget {
     this.suffixIcon,
     this.onTap,
     this.textInputAction,
-    this.keyboardType = TextInputType.number, 
-    this.validator, 
+    this.keyboardType = TextInputType.number,
+    this.validator,
     this.inputFormatters,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 10,
+      spacing: AppSpacing.sm,
       children: [
         Text(
           label,
-          style: GoogleFonts.manrope(
-            color: Color(0xFF94A3B8),
-            fontSize: 14,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: ColorTokens.textSecondary,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -49,23 +51,16 @@ class InputForms extends StatelessWidget {
           keyboardType: keyboardType,
           textInputAction: textInputAction,
           onTap: onTap,
-          style: const TextStyle(color: Colors.white, fontSize: 16),
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: ColorTokens.textPrimary,
+          ),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(color: Color(0xFF5B6874)),
+            hintStyle:
+                theme.inputDecorationTheme.hintStyle ??
+                TextStyle(color: ColorTokens.textHint),
             prefixIcon: prefixIcon,
             suffixIcon: suffixIcon,
-            filled: true,
-            fillColor: const Color(0xFF111B27),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFF1E293B), width: 1),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFF1E94F6), width: 1.5),
-            ),
-            contentPadding: const EdgeInsets.symmetric(vertical: 18),
           ),
         ),
       ],

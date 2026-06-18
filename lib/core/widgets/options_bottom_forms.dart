@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:real_calc/core/themes/extensions/options_bottom_forms_theme.dart';
+import 'package:real_calc/core/themes/spacing.dart';
 
 class OptionsBottomForms extends StatelessWidget {
   final VoidCallback? onCalculate;
@@ -14,62 +16,62 @@ class OptionsBottomForms extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const darkButtonColor = Color(0xFF1A222D); 
+    final theme = Theme.of(context);
+    final optionsTheme = theme.extension<OptionsBottomFormsTheme>()!;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
-      spacing: 12,
+      spacing: AppSpacing.sm + 4,
       children: [
         SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
             onPressed: onCalculate,
-            icon: const Icon(Icons.calculate_outlined, color: Colors.white),
+            icon: const Icon(Icons.calculate_outlined),
             label: const Text('Calcular'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1E94F6),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              backgroundColor: optionsTheme.calculateButtonBackground,
+              foregroundColor: optionsTheme.calculateButtonForeground,
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+              textStyle: theme.textTheme.labelLarge
+                  ?.copyWith(fontWeight: FontWeight.w600),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
             ),
           ),
         ),
-
         Row(
-          spacing: 12, // Espaçamento horizontal entre os dois botões
+          spacing: AppSpacing.sm + 4,
           children: [
-            // Botão Limpar
             Expanded(
               child: ElevatedButton.icon(
                 onPressed: onClear,
-                icon: const Icon(Icons.delete_outline, color: Colors.white70),
+                icon: const Icon(Icons.delete_outline),
                 label: const Text('Limpar'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: darkButtonColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  backgroundColor: optionsTheme.actionButtonBackground,
+                  foregroundColor: optionsTheme.actionButtonForeground,
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                  textStyle: theme.textTheme.labelLarge
+                      ?.copyWith(fontWeight: FontWeight.w500),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
               ),
             ),
-            
-            // Botão Compartilhar
             Expanded(
               child: ElevatedButton.icon(
                 onPressed: onShare,
-                icon: const Icon(Icons.share_outlined, color: Colors.white70),
+                icon: const Icon(Icons.share_outlined),
                 label: const Text('Compartilhar'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: darkButtonColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  backgroundColor: optionsTheme.actionButtonBackground,
+                  foregroundColor: optionsTheme.actionButtonForeground,
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                  textStyle: theme.textTheme.labelLarge
+                      ?.copyWith(fontWeight: FontWeight.w500),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),

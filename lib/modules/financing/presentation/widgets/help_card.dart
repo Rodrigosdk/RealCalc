@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:real_calc/core/themes/extensions/help_card_theme.dart';
 
 class HelpCard extends StatelessWidget {
   final String menssage;
@@ -7,13 +8,17 @@ class HelpCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context).extension<HelpCardTheme>()!;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: theme.padding,
       decoration: BoxDecoration(
-        color: const Color(0xFF101A24),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFF1E94F6).withValues(alpha: 0.4)),
+        color: theme.backgroundColor,
+        borderRadius: BorderRadius.circular(theme.borderRadius),
+        border: Border.all(
+          color: theme.borderColor.withValues(alpha: 0.4),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -22,20 +27,21 @@ class HelpCard extends StatelessWidget {
             height: 40,
             width: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFF1E94F6),
+              color: theme.iconBackgroundColor,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.lightbulb, color: Colors.white, size: 22),
+            child: Icon(
+              Icons.lightbulb,
+              color: theme.iconColor,
+              size: theme.iconSize,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  menssage,
-                  style: TextStyle(color: Colors.white, fontSize: 14),
-                ),
+                Text(menssage, style: theme.messageStyle),
               ],
             ),
           ),

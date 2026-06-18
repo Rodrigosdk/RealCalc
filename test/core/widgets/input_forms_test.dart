@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:real_calc/core/themes/app_theme.dart';
+import 'package:real_calc/core/themes/color_tokens.dart';
 import 'package:real_calc/core/widgets/input_forms.dart';
 
 void main() {
@@ -55,7 +57,9 @@ void main() {
   }
 
   group('InputForms', () {
-    testWidgets('Deve exibir o label e o hint text corretamente', (tester) async {
+    testWidgets('Deve exibir o label e o hint text corretamente', (
+      tester,
+    ) async {
       await tester.pumpWidget(createSut());
 
       final labelFinder = find.text(label);
@@ -67,13 +71,13 @@ void main() {
 
       final textFieldFinder = find.byType(TextField);
       final TextField textField = tester.widget(textFieldFinder);
-      
+
       expect(textField.decoration?.hintText, hint);
     });
 
-
-
-    testWidgets('Deve conter o prefixIcon e o suffixIcon configurados', (tester) async {
+    testWidgets('Deve conter o prefixIcon e o suffixIcon configurados', (
+      tester,
+    ) async {
       await tester.pumpWidget(createSut());
 
       expect(find.byIcon(Icons.attach_money), findsOneWidget);
@@ -87,7 +91,9 @@ void main() {
       expect(find.byIcon(Icons.check), findsNothing);
     });
 
-     testWidgets('Deve aplicar as configurações de teclado e ação corretas', (tester) async {
+    testWidgets('Deve aplicar as configurações de teclado e ação corretas', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         createSut(
           keyboardType: TextInputType.emailAddress,
@@ -101,18 +107,22 @@ void main() {
       expect(textField.textInputAction, TextInputAction.done);
     });
 
-    testWidgets('Deve disparar a função onTap ao clicar no campo', (tester) async {
+    testWidgets('Deve disparar a função onTap ao clicar no campo', (
+      tester,
+    ) async {
       int tapCount = 0;
 
       await tester.pumpWidget(createSut(onTap: () => tapCount++));
 
       await tester.tap(find.byType(TextFormField));
-      await tester.pump(); 
+      await tester.pump();
 
       expect(tapCount, 1);
     });
 
-    testWidgets('Deve aceitar entrada de texto e atualizar o controller', (tester) async {
+    testWidgets('Deve aceitar entrada de texto e atualizar o controller', (
+      tester,
+    ) async {
       await tester.pumpWidget(createSut());
 
       await tester.enterText(find.byType(TextFormField), '123.45');
@@ -121,54 +131,46 @@ void main() {
       expect(controller.text, '123.45');
     });
 
-    testWidgets('Deve aplicar os estilos corretos para enabledBorder e focusedBorder', (tester) async {
-      await tester.pumpWidget(createSut());
+    test('AppTheme define corretamente as bordas do InputDecoration', () {
+      final theme = AppTheme.darkTheme;
+      final decoration = theme.inputDecorationTheme;
 
-      final textFieldFinder = find.byType(TextField);
-      TextField textField = tester.widget(textFieldFinder);
+      expect(decoration.enabledBorder, isA<OutlineInputBorder>());
+      final enabled = decoration.enabledBorder as OutlineInputBorder;
+      expect(enabled.borderSide.color, ColorTokens.border);
+      expect(enabled.borderSide.width, 1.0);
+      expect(enabled.borderRadius, BorderRadius.circular(16));
 
-      final decoration = textField.decoration;
-      expect(decoration, isNotNull);
-
-      final enabledBorder = decoration!.enabledBorder as OutlineInputBorder?;
-      expect(enabledBorder, isNotNull);
-      expect(enabledBorder!.borderSide.color, const Color(0xFF1E293B));
-      expect(enabledBorder.borderSide.width, 1.0);
-      expect(enabledBorder.borderRadius, BorderRadius.circular(16));
-
-      await tester.tap(find.byType(TextFormField));
-      await tester.pump(); 
-
-      textField = tester.widget(textFieldFinder);
-      final focusedBorder = textField.decoration?.focusedBorder as OutlineInputBorder?;
-      
-      expect(focusedBorder, isNotNull);
-      expect(focusedBorder!.borderSide.color, const Color(0xFF1E94F6));
-      expect(focusedBorder.borderSide.width, 1.5);
-      expect(focusedBorder.borderRadius, BorderRadius.circular(16));
+      expect(decoration.focusedBorder, isA<OutlineInputBorder>());
+      final focused = decoration.focusedBorder as OutlineInputBorder;
+      expect(focused.borderSide.color, ColorTokens.accent);
+      expect(focused.borderSide.width, 1.5);
+      expect(focused.borderRadius, BorderRadius.circular(16));
     });
 
+    testWidgets(
+      'Deve exibir a mensagem de erro na tela quando o validator falhar',
+      (tester) async {
+        const errorText = 'Este campo possui um valor inválido';
 
-    testWidgets('Deve exibir a mensagem de erro na tela quando o validator falhar', (tester) async {
-      const errorText = 'Este campo possui um valor inválido';
+        await tester.pumpWidget(
+          createSut(
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return errorText;
+              }
+              return null;
+            },
+          ),
+        );
 
-      await tester.pumpWidget(
-        createSut(
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return errorText;
-            }
-            return null;
-          },
-        ),
-      );
+        expect(find.text(errorText), findsNothing);
 
-      expect(find.text(errorText), findsNothing);
+        formKey.currentState?.validate();
+        await tester.pump();
 
-      formKey.currentState?.validate();
-      await tester.pump();
-
-      expect(find.text(errorText), findsOneWidget);
-    });
+        expect(find.text(errorText), findsOneWidget);
+      },
+    );
   });
 }

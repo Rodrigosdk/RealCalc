@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:real_calc/core/themes/color_tokens.dart';
+import 'package:real_calc/core/themes/extensions/input_forms_result_card_theme.dart';
+import 'package:real_calc/core/themes/text_styles.dart';
 import 'package:real_calc/core/utils/decimal_input_formatter.dart';
 import 'package:real_calc/core/widgets/input_forms.dart';
-import 'package:real_calc/modules/financing/presentation/widgets/input_forms_result_card.dart'; // Ajuste o seu import
+import 'package:real_calc/modules/financing/presentation/widgets/input_forms_result_card.dart';
 
 void main() {
   late TextEditingController controller;
@@ -12,10 +14,6 @@ void main() {
   late String hint;
   late Widget prefixIcon;
   final formKey = GlobalKey<FormState>();
-
-  setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  });
 
   setUp(() {
     controller = TextEditingController();
@@ -31,9 +29,17 @@ void main() {
   Widget createSut({
     VoidCallback? onTap,
     String? Function(String?)? validator,
-    List<TextInputFormatter>? inputFormatters, // Adicione esta linha
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return MaterialApp(
+      theme: ThemeData(
+        extensions: [
+          InputFormsResultCardTheme(
+            suffixIconColor: ColorTokens.textHint,
+            helperTextStyle: AppTextStyles.inputHelperText,
+          ),
+        ],
+      ),
       home: Scaffold(
         body: Form(
           key: formKey,
@@ -44,7 +50,7 @@ void main() {
             prefixIcon: prefixIcon,
             onTap: onTap,
             validator: validator,
-            inputFormatters: inputFormatters, // Repasse o parâmetro aqui
+            inputFormatters: inputFormatters,
           ),
         ),
       ),
@@ -65,8 +71,7 @@ void main() {
         expect(helperTextFinder, findsOneWidget);
 
         final Text helperText = tester.widget(helperTextFinder);
-        expect(helperText.style?.color, const Color(0xFF5B6874));
-        expect(helperText.style?.fontSize, 12);
+        expect(helperText.style, AppTextStyles.inputHelperText);
       },
     );
 
@@ -81,28 +86,12 @@ void main() {
     );
 
     testWidgets(
-      'Deve configurar o TextField para teclado decimal e ação concluída',
-      (tester) async {
-        await tester.pumpWidget(createSut());
-
-        final textField = tester.widget<TextField>(find.byType(TextField));
-
-        expect(
-          textField.keyboardType,
-          const TextInputType.numberWithOptions(decimal: true),
-        );
-        expect(textField.textInputAction, TextInputAction.done);
-      },
-    );
-
-    testWidgets(
       'Deve repassar a ação do callback onTap ao clicar na seta lateral',
       (tester) async {
         bool wasTapped = false;
 
         await tester.pumpWidget(createSut(onTap: () => wasTapped = true));
 
-        // CORREÇÃO: O teste agora clica explicitamente no ícone da seta e não no input de texto
         await tester.tap(find.byIcon(Icons.chevron_right));
         await tester.pump();
 
@@ -122,12 +111,29 @@ void main() {
     });
 
     testWidgets(
+      'Deve configurar o TextFormField para teclado decimal e ação concluída',
+      (tester) async {
+        await tester.pumpWidget(createSut());
+
+        // Use TextField, não TextFormField
+        final textField = tester.widget<TextField>(find.byType(TextField));
+
+        expect(
+          textField.keyboardType,
+          const TextInputType.numberWithOptions(decimal: true),
+        );
+        expect(textField.textInputAction, TextInputAction.done);
+      },
+    );
+
+    testWidgets(
       'Deve repassar os inputFormatters configurados para o TextField interno',
       (tester) async {
         await tester.pumpWidget(
           createSut(inputFormatters: [FilteringTextInputFormatter.digitsOnly]),
         );
 
+        // O inputFormatters está no TextField, não no TextFormField
         final textField = tester.widget<TextField>(find.byType(TextField));
 
         expect(textField.inputFormatters, isNotNull);
@@ -138,7 +144,6 @@ void main() {
         );
       },
     );
-
     testWidgets(
       'Deve aplicar a formatação decimal em tempo real ao digitar no card',
       (tester) async {
@@ -146,11 +151,9 @@ void main() {
           createSut(inputFormatters: [DecimalInputFormatter()]),
         );
 
-        // Simula a digitação do número 5 no campo
         await tester.enterText(find.byType(TextFormField), '5');
         await tester.pump();
 
-        // Garante que o formatador decimal agiu e modificou o texto para a máscara PT-BR
         expect(controller.text, '0,05');
         expect(find.text('0,05'), findsOneWidget);
       },
