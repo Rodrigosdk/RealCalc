@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:real_calc/core/themes/extensions/title_widget_theme.dart';
+import 'package:real_calc/core/themes/spacing.dart';
 
 class TitleWidget extends StatelessWidget {
   final String title;
@@ -9,26 +10,14 @@ class TitleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final styles = Theme.of(context).extension<TitleWidgetTheme>()!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 8,
+      spacing: AppSpacing.sm,
       children: [
-        Text(
-          title,
-          style: GoogleFonts.manrope(
-            color: Colors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          subtitle,
-          style: GoogleFonts.manrope(
-            color: Color(0xFF94A3B8),
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        Text(title, style: styles.titleStyle),
+        Text(subtitle, style: styles.subtitleStyle),
       ],
     );
   }

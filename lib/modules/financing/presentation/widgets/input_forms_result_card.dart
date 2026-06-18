@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:real_calc/core/themes/spacing.dart';
 import 'package:real_calc/core/widgets/input_forms.dart';
+
+import '../../../../core/themes/extensions/input_forms_result_card_theme.dart';
 
 class InputFormsResultCard extends StatelessWidget {
   final String label;
   final String hint;
-
   final Widget prefixIcon;
-
   final VoidCallback? onTap;
-  final String? Function(String?)? validator; 
-  
+  final String? Function(String?)? validator;
   final TextEditingController controller;
   final List<TextInputFormatter>? inputFormatters;
 
@@ -20,13 +20,15 @@ class InputFormsResultCard extends StatelessWidget {
     this.onTap,
     required this.label,
     required this.hint,
-    required this.prefixIcon, 
+    required this.prefixIcon,
     this.validator,
-    this.inputFormatters
+    this.inputFormatters,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context).extension<InputFormsResultCardTheme>()!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -41,16 +43,16 @@ class InputFormsResultCard extends StatelessWidget {
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           suffixIcon: GestureDetector(
             onTap: onTap,
-            child: const Padding(
-              padding: EdgeInsets.only(right: 14),
-              child: Icon(Icons.chevron_right, color: Color(0xFF5B6874)),
+            child: Padding(
+              padding: const EdgeInsets.only(right: 14),
+              child: Icon(Icons.chevron_right, color: theme.suffixIconColor),
             ),
           ),
         ),
-        const SizedBox(height: 8),
-        const Text(
+        SizedBox(height: AppSpacing.sm),
+        Text(
           'Toque para calcular automaticamente',
-          style: TextStyle(color: Color(0xFF5B6874), fontSize: 12),
+          style: theme.helperTextStyle,
         ),
       ],
     );
