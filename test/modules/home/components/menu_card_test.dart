@@ -74,6 +74,12 @@ void main() {
       expect(descText.style?.fontSize, 9);
     });
 
+    testWidgets('Não deve overflowar quando o card for pequeno', (tester) async {
+      await tester.pumpWidget(buildTestableWidget(height: 100, width: 100));
+
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('Deve disparar o callback onTap ao ser clicado', (tester) async {
       bool foiClicado = false;
 

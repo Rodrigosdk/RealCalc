@@ -31,11 +31,11 @@ class MenuCard extends StatelessWidget {
         builder: (context, constraints) {
           final bool telaMuitoPequena =
               constraints.maxHeight < menuTheme.heightThreshold;
+          final EdgeInsetsGeometry effectivePadding =
+              telaMuitoPequena ? const EdgeInsets.all(6) : menuTheme.padding;
 
           return Container(
-            padding: telaMuitoPequena
-                ? menuTheme.compactPadding
-                : menuTheme.padding,
+            padding: effectivePadding,
             width: double.infinity,
             decoration: BoxDecoration(
               color: cardColor,
@@ -43,7 +43,7 @@ class MenuCard extends StatelessWidget {
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   padding: const EdgeInsets.all(6),
@@ -57,39 +57,40 @@ class MenuCard extends StatelessWidget {
                     size: telaMuitoPequena ? 20 : 26,
                   ),
                 ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 2,
-                    children: [
-                      Text(
-                        title,
-                        style: telaMuitoPequena
-                            ? menuTheme.titleStyle.copyWith(
-                                fontSize:
-                                    AppTextStyles.menuCardTitleCompact.fontSize,
-                              )
-                            : menuTheme.titleStyle,
-                        maxLines: 1,
-                        overflow: TextOverflow.fade,
-                      ),
-                      Text(
-                        description,
-                        style: telaMuitoPequena
-                            ? menuTheme.descriptionStyle.copyWith(
-                                fontSize: AppTextStyles
-                                    .menuCardDescriptionCompact
-                                    .fontSize,
-                              )
-                            : menuTheme.descriptionStyle.copyWith(
-                                color: menuTheme.descriptionStyle.color
-                                    ?.withValues(alpha: 0.5),
-                              ),
-                        maxLines: telaMuitoPequena ? 1 : 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
+                SizedBox(height: telaMuitoPequena ? 4 : 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      title,
+                      style: telaMuitoPequena
+                          ? menuTheme.titleStyle.copyWith(
+                              fontSize:
+                                  AppTextStyles.menuCardTitleCompact.fontSize,
+                            )
+                          : menuTheme.titleStyle,
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      description,
+                      style: telaMuitoPequena
+                          ? menuTheme.descriptionStyle.copyWith(
+                              fontSize: AppTextStyles
+                                  .menuCardDescriptionCompact
+                                  .fontSize,
+                            )
+                          : menuTheme.descriptionStyle.copyWith(
+                              color: menuTheme.descriptionStyle.color
+                                  ?.withValues(alpha: 0.5),
+                            ),
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ],
             ),
