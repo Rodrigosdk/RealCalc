@@ -39,3 +39,16 @@ enum FinancingValidationMessage implements ErrorMessages {
   
   const FinancingValidationMessage(this.message);
 }
+
+enum RegularDepositsValidationMessage implements ErrorMessages {
+  positiveDepositValue('O valor do deposito deve ser maior que zero'),
+  positiveFinalValue('O valor final deve ser maior que zero'),
+  positiveRate('O valor da taxa deve ser maior que zero'),
+  positiveMonths('A quantidade de meses deve ser maior que zero'),
+  unableToDetermineCalculationType('Não foi possível determinar o tipo de cálculo. Verifique os parâmetros informados.');
+
+  @override
+  final String message;
+  
+  const RegularDepositsValidationMessage(this.message);
+}

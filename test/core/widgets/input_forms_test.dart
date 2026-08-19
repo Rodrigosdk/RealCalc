@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:real_calc/core/themes/app_theme.dart';
 import 'package:real_calc/core/themes/color_tokens.dart';
 import 'package:real_calc/core/widgets/input_forms.dart';
@@ -12,10 +11,6 @@ void main() {
   late Widget prefixIcon;
   late Widget suffixIcon;
   final formKey = GlobalKey<FormState>();
-
-  setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  });
 
   setUp(() {
     controller = TextEditingController();
