@@ -8,6 +8,7 @@ void main() {
   late int months;
   late double rate;
   late double finalValue;
+  late DepositCalculatorUseCase useCase;
 
   RegularDeposit buildEntity({
     double? initalValueParams,
@@ -28,13 +29,14 @@ void main() {
     months = 12;
     rate = 1.50;
     finalValue = 1323.68;
+
+    useCase = useCase;
   });
 
   group("DepositCalculatorUseCase", () {
     test("Deve conseguir calcular o valor futuro do deposito", () {
       final params = buildEntity(finalValueParams: 0);
-
-      final sut = DepositCalculatorUseCase.calculateFinalValue(params);
+      final sut = useCase.calculateFinalValue(params);
 
       expect(sut.isSuccess, true);
       expect(sut.getOrNull(), closeTo(finalValue, 0.01));
@@ -44,7 +46,7 @@ void main() {
         final params = buildEntity(rateParams: 0, finalValueParams: 0);
         final result = 1200;
 
-        final sut = DepositCalculatorUseCase.calculateFinalValue(params);
+        final sut = useCase.calculateFinalValue(params);
 
         expect(sut.isSuccess, true);
         expect(sut.getOrNull(), result);
@@ -54,7 +56,7 @@ void main() {
     test("Deve conseguir calcular o valor de depósito regular", () {
       final params = buildEntity(initalValueParams: 0);
 
-      final sut = DepositCalculatorUseCase.calculateDepositAmount(params);
+      final sut = useCase.calculateDepositAmount(params);
 
       expect(sut.isSuccess, true);
       expect(sut.getOrNull(), closeTo(initalValue, 0.01));
@@ -62,13 +64,13 @@ void main() {
     
     test("Deve conseguir calcular o valor de depósito regular quando a taxa de juros for ZERO", () {
       final params = buildEntity(
-        initalValueParams: 0.0,    
+        initalValueParams: 0.0,
         finalValueParams: 1200.00,
-        monthsParams: 12,          
-        rateParams: 0.0,           
+        monthsParams: 12,
+        rateParams: 0.0,
       );
 
-      final sut = DepositCalculatorUseCase.calculateDepositAmount(params);
+      final sut = useCase.calculateDepositAmount(params);
 
       expect(sut.isSuccess, true);
       expect(sut.getOrNull(), 100.00);
@@ -77,7 +79,7 @@ void main() {
     test("Deve conseguir calcular o número do mes", () {
       final params = buildEntity(monthsParams: 0);
 
-      final sut = DepositCalculatorUseCase.calculateNumberOfMonths(params);
+      final sut = useCase.calculateNumberOfMonths(params);
 
       expect(sut.isSuccess, true);
       expect(sut.getOrNull(), closeTo(months, 0.01));
@@ -87,10 +89,10 @@ void main() {
       final params = buildEntity(
         rateParams: 0,
         finalValueParams: 1200,
-        monthsParams: 0,               
+        monthsParams: 0,
       );
 
-      final sut = DepositCalculatorUseCase.calculateNumberOfMonths(params);
+      final sut = useCase.calculateNumberOfMonths(params);
 
       expect(sut.isSuccess, true);
       expect(sut.getOrNull(), 12);
@@ -98,14 +100,14 @@ void main() {
 
     test("Deve conseguir calcular a taxa de juros mensal quando houver rendimento", () {
       final params = buildEntity(
-        rateParams: 0.0, 
+        rateParams: 0.0,
         finalValueParams: 1323.68,
       );
 
-      final sut = DepositCalculatorUseCase.calculateInterestRate(params);
+      final sut = useCase.calculateInterestRate(params);
 
       expect(sut.isSuccess, true);
-      expect(sut.getOrNull(), closeTo(rate, 0.01)); 
+      expect(sut.getOrNull(), closeTo(rate, 0.01));
     });
 
     test("Deve retornar taxa ZERO quando o valor final for exatamente igual à soma linear dos depósitos", () {
@@ -114,7 +116,7 @@ void main() {
         finalValueParams: 1200.00,
       );
 
-      final sut = DepositCalculatorUseCase.calculateInterestRate(paramsSemJuros);
+      final sut = useCase.calculateInterestRate(paramsSemJuros);
 
       expect(sut.isSuccess, true);
       expect(sut.getOrNull(), 0.0);
@@ -126,7 +128,7 @@ void main() {
         finalValueParams: 1100.00,
       );
 
-      final sut = DepositCalculatorUseCase.calculateInterestRate(paramsComPerda);
+      final sut = useCase.calculateInterestRate(paramsComPerda);
 
       expect(sut.isSuccess, true);
       expect(sut.getOrNull(), 0.0);
