@@ -30,7 +30,7 @@ void main() {
     rate = 1.50;
     finalValue = 1323.68;
 
-    useCase = useCase;
+    useCase = DepositCalculatorUseCase();
   });
 
   group("DepositCalculatorUseCase", () {
