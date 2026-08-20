@@ -113,6 +113,19 @@ void main() {
       expect(find.text('AJUSTES'), findsOneWidget);
     });
 
+    testWidgets('Deve navegar para a tela de depósitos regulares ao clicar no card correspondente', (tester) async {
+      when(() => mockNavigator.pushNamed(any())).thenAnswer((_) async => null);
+      await tester.pumpWidget(buildTestableWidget());
+
+      final cardFinanciamento = find.widgetWithText(MenuCard, 'Depósitos Regulares');
+      expect(cardFinanciamento, findsOneWidget);
+
+      await tester.tap(cardFinanciamento);
+      await tester.pumpAndSettle();
+
+      verify(() => mockNavigator.pushNamed(AppRoutes.deposits)).called(1);
+    });
+
     testWidgets('Deve navegar para a tela de financiamento ao clicar no card correspondente', (tester) async {
       when(() => mockNavigator.pushNamed(any())).thenAnswer((_) async => null);
       await tester.pumpWidget(buildTestableWidget());

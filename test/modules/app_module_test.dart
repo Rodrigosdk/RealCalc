@@ -10,6 +10,7 @@ import 'package:real_calc/modules/app_widget.dart';
 import 'package:real_calc/modules/financing/presentation/cubit/financing_cubit.dart';
 import 'package:real_calc/modules/financing/presentation/pages/page.dart';
 import 'package:real_calc/modules/home/page/page.dart';
+import 'package:real_calc/modules/regular_deposits/presentation/pages/page.dart';
 
 class MockFinancingCubit extends MockCubit<FinancingState>
     implements FinancingCubit {}
@@ -110,6 +111,30 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(FinancingPage), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Deve garantir que a rota mapeada para AppRoutes.deposits seja acessível',
+      (tester) async {
+        resizeScreen(tester);
+        addTearDown(() => tester.view.resetPhysicalSize());
+
+        await tester.pumpWidget(
+          ModularApp(
+            module: AppModuleTest(customCubit: mockCubit),
+            child: const AppWidget(),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        Modular.to.navigate(AppRoutes.deposits);
+
+        await tester.idle();
+        await tester.pumpAndSettle();
+
+        expect(find.byType(RegularDepositsPage), findsOneWidget);
       },
     );
   });

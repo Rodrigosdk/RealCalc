@@ -5,7 +5,7 @@ class RegularDeposit extends Entity {
   final double rate;
   final int months;
   final double finalValue;
-  
+
   RegularDeposit({
     super.id,
     this.depositAmount = 0,
@@ -13,4 +13,18 @@ class RegularDeposit extends Entity {
     this.months = 0,
     this.finalValue = 0,
   });
+
+  RegularDeposit copyWith({
+    double? depositAmount,
+    double? rate,
+    int? months,
+    double? finalValue,
+  }) {
+    return RegularDeposit(
+      depositAmount: depositAmount ?? this.depositAmount,
+      rate: rate ?? this.rate,
+      months: months ?? this.months,
+      finalValue: finalValue ?? this.finalValue,
+    );
+  }
 }

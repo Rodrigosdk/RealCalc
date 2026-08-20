@@ -31,7 +31,7 @@ class HomePage extends StatelessWidget {
         'icon': Icons.savings,
         'title': 'Depósitos Regulares',
         'description': 'Aplicação mensal com rendimentos',
-        'onTap': null,
+        'onTap': () => Modular.to.pushNamed(AppRoutes.deposits),
       },
       {
         'icon': Icons.bar_chart,
