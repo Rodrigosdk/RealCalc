@@ -52,3 +52,16 @@ enum RegularDepositsValidationMessage implements ErrorMessages {
   
   const RegularDepositsValidationMessage(this.message);
 }
+
+enum FutureValueValidationMessage implements ErrorMessages {
+  positiveCapital('O capital deve ser maior que zero'),
+  positiveFinalValue('O valor final deve ser maior que zero'),
+  positiveInterestRate('A taxa de juros deve ser maior que zero'),
+  positiveMonths('A quantidade de meses deve ser maior que zero'),
+  unableToDetermineCalculationType('Não foi possível determinar o tipo de cálculo. Verifique os parâmetros informados.');
+
+  @override
+  final String message;
+
+  const FutureValueValidationMessage(this.message);
+}
