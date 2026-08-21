@@ -37,7 +37,7 @@ class HomePage extends StatelessWidget {
         'icon': Icons.bar_chart,
         'title': 'Valor Futuro',
         'description': 'Calcule o capital ao final do prazo',
-        'onTap': null,
+        'onTap': () => Modular.to.pushNamed(AppRoutes.futureValue),
       },
     ];
 
