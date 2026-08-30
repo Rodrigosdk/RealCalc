@@ -1,0 +1,37 @@
+name: ✨ Feature Request
+description: Sugerir uma nova funcionalidade
+title: "[FEATURE] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: Que problema isso resolve?
+      description: Descreva a dor atual do usuário/negócio
+    validations:
+      required: true
+
+  - type: textarea
+    id: solucao
+    attributes:
+      label: Solução proposta
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternativas
+    attributes:
+      label: Alternativas consideradas
+    validations:
+      required: false
+
+  - type: textarea
+    id: criterios
+    attributes:
+      label: Critérios de aceite
+      placeholder: |
+        Dado que...
+        Quando...
+        Então...
+    validations:
+      required: false

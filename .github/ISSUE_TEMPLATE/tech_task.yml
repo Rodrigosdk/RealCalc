@@ -1,0 +1,26 @@
+name: 🔧 Task Técnica
+description: Débito técnico, refatoração ou tarefa sem valor direto de usuário
+title: "[TECH] "
+labels: ["tech-debt"]
+body:
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto
+      description: Por que essa mudança é necessária?
+    validations:
+      required: true
+
+  - type: textarea
+    id: o-que-fazer
+    attributes:
+      label: O que fazer
+    validations:
+      required: true
+
+  - type: textarea
+    id: criterio
+    attributes:
+      label: Critério de aceite
+    validations:
+      required: true

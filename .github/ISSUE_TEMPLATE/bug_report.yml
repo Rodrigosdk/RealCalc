@@ -1,0 +1,66 @@
+name: 🐛 Bug Report
+description: Reportar um comportamento inesperado no app
+title: "[BUG] "
+labels: ["bug", "triagem"]
+body:
+  - type: textarea
+    id: descricao
+    attributes:
+      label: Descrição
+      description: O que aconteceu?
+      placeholder: O botão de finalizar pedido trava o app...
+    validations:
+      required: true
+
+  - type: textarea
+    id: passos
+    attributes:
+      label: Passos para reproduzir
+      description: Liste o passo a passo
+      placeholder: |
+        1. Adicionar 21 itens ao carrinho
+        2. Ir para checkout
+        3. Tocar em "Finalizar pedido"
+    validations:
+      required: true
+
+  - type: textarea
+    id: esperado
+    attributes:
+      label: Comportamento esperado
+    validations:
+      required: true
+
+  - type: textarea
+    id: observado
+    attributes:
+      label: Comportamento observado
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severidade
+    attributes:
+      label: Severidade
+      options:
+        - Baixa
+        - Média
+        - Alta
+        - Crítica
+    validations:
+      required: true
+
+  - type: input
+    id: versao
+    attributes:
+      label: Versão do app
+      placeholder: "4.2.1"
+    validations:
+      required: false
+
+  - type: textarea
+    id: evidencia
+    attributes:
+      label: Evidência (logs, prints, vídeo)
+    validations:
+      required: false
