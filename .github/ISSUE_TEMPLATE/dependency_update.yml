@@ -1,0 +1,39 @@
+name: 📦 Atualização de Dependência
+description: Solicitar atualização de um pacote no pubspec.yaml
+title: "[CHORE] Atualizar "
+labels: ["chore", "dependencies"]
+body:
+  - type: input
+    id: pacote
+    attributes:
+      label: Pacote
+      placeholder: "http"
+    validations:
+      required: true
+
+  - type: input
+    id: versoes
+    attributes:
+      label: Versão atual → versão desejada
+      placeholder: "1.2.0 → 1.4.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: motivo
+    attributes:
+      label: Motivo
+      options:
+        - Correção de segurança
+        - Nova funcionalidade necessária
+        - Manutenção de rotina
+    validations:
+      required: true
+
+  - type: textarea
+    id: changelog
+    attributes:
+      label: Changelog relevante
+      description: Link ou resumo do que muda na nova versão
+    validations:
+      required: false

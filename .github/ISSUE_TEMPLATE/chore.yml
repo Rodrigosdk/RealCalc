@@ -1,0 +1,42 @@
+name: 🧹 Chore
+description: Anunciar uma tarefa de manutenção (chore) antes de criar a branch
+title: "[CHORE] "
+labels: ["chore"]
+body:
+  - type: textarea
+    id: descricao
+    attributes:
+      label: O que precisa ser feito
+      placeholder: Atualizar pacote http, remover código morto, renomear pasta, etc.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: tipo
+    attributes:
+      label: Tipo de chore
+      options:
+        - Atualização de dependência
+        - Limpeza de código morto
+        - Renomeação/reorganização de arquivos
+        - Atualização de configuração/CI
+        - Outro
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivo
+    attributes:
+      label: Motivo
+      description: Por que isso precisa ser feito agora
+    validations:
+      required: true
+
+  - type: textarea
+    id: impacto
+    attributes:
+      label: Impacto esperado
+      description: Isso muda comportamento visível ao usuário? Risco de quebra?
+    validations:
+      required: false
+
