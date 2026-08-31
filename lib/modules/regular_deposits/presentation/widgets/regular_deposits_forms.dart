@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:real_calc/core/themes/color_tokens.dart';
 import 'package:real_calc/core/themes/spacing.dart';
 import 'package:real_calc/core/utils/decimal_input_formatter.dart';
 import 'package:real_calc/core/widgets/options_bottom_forms.dart';
@@ -91,7 +92,8 @@ class _RegularDepositsFormsState extends State<RegularDepositsForms> {
   @override
   Widget build(BuildContext context) {
     final cubit = BlocProvider.of<RegularDepositsCubit>(context);
-
+    final colorIconInput = ColorTokens.accent;
+    
     return BlocConsumer<RegularDepositsCubit, RegularDepositsState>(
       listener: (context, state) {
         if (state is RegularDepositsCalculated) {
@@ -131,9 +133,9 @@ class _RegularDepositsFormsState extends State<RegularDepositsForms> {
                 hint: '0,00',
                 controller: _depositAmountController,
                 inputFormatters: [DecimalInputFormatter()],
-                prefixIcon: const Padding(
-                  padding: EdgeInsets.only(left: 14, right: 10),
-                  child: Icon(Icons.savings_outlined),
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.only(left: 14, right: 10),
+                  child: Icon(Icons.savings_outlined, color: colorIconInput),
                 ),
                 onTap: () => cubit.calculate(_getRegularDepositFromInputs()),
               ),
@@ -143,9 +145,9 @@ class _RegularDepositsFormsState extends State<RegularDepositsForms> {
                 hint: '0',
                 controller: _monthsController,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                prefixIcon: const Padding(
-                  padding: EdgeInsets.only(left: 14, right: 10),
-                  child: Icon(Icons.calendar_today_outlined),
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.only(left: 14, right: 10),
+                  child: Icon(Icons.calendar_today_outlined, color: colorIconInput ),
                 ),
                 onTap: () => cubit.calculate(_getRegularDepositFromInputs()),
               ),
@@ -155,9 +157,9 @@ class _RegularDepositsFormsState extends State<RegularDepositsForms> {
                 hint: '0,00',
                 controller: _rateController,
                 inputFormatters: [DecimalInputFormatter()],
-                prefixIcon: const Padding(
-                  padding: EdgeInsets.only(left: 14, right: 10),
-                  child: Icon(Icons.percent),
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.only(left: 14, right: 10),
+                  child: Icon(Icons.percent, color: colorIconInput),
                 ),
                 onTap: () => cubit.calculate(_getRegularDepositFromInputs()),
               ),
@@ -167,9 +169,9 @@ class _RegularDepositsFormsState extends State<RegularDepositsForms> {
                 hint: '0,00',
                 controller: _finalValueController,
                 inputFormatters: [DecimalInputFormatter()],
-                prefixIcon: const Padding(
-                  padding: EdgeInsets.only(left: 14, right: 10),
-                  child: Icon(Icons.wallet_outlined),
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.only(left: 14, right: 10),
+                  child: Icon(Icons.wallet_outlined, color: colorIconInput),
                 ),
                 onTap: () => cubit.calculate(_getRegularDepositFromInputs()),
               ),
