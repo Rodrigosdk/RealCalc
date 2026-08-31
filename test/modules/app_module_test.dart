@@ -9,26 +9,34 @@ import 'package:real_calc/modules/app_module.dart';
 import 'package:real_calc/modules/app_widget.dart';
 import 'package:real_calc/modules/financing/presentation/cubit/financing_cubit.dart';
 import 'package:real_calc/modules/financing/presentation/pages/page.dart';
+import 'package:real_calc/modules/future_value/presentation/pages/page.dart';
+import 'package:real_calc/modules/future_value/presentation/cubit/future_value_cubit.dart';
 import 'package:real_calc/modules/home/page/page.dart';
 import 'package:real_calc/modules/regular_deposits/presentation/pages/page.dart';
 
 class MockFinancingCubit extends MockCubit<FinancingState>
     implements FinancingCubit {}
 
+class MockFutureValueCubit extends MockCubit<FutureValueState>
+  implements FutureValueCubit {}
+
 class AppModuleTest extends AppModule {
   final FinancingCubit customCubit;
+  final FutureValueCubit futureValueCubit;
 
-  AppModuleTest({required this.customCubit});
+  AppModuleTest({required this.customCubit, required this.futureValueCubit});
 
   @override
   void binds(Injector i) {
     super.binds(i);
     i.addInstance<FinancingCubit>(customCubit);
+    i.addInstance<FutureValueCubit>(futureValueCubit);
   }
 }
 
 void main() {
   late FinancingCubit mockCubit;
+  late FutureValueCubit mockFutureValueCubit;
 
   setUpAll(() {
     GoogleFonts.config.allowRuntimeFetching = false;
@@ -36,7 +44,9 @@ void main() {
 
   setUp(() {
     mockCubit = MockFinancingCubit();
+    mockFutureValueCubit = MockFutureValueCubit();
     when(() => mockCubit.state).thenReturn(FinancingInitial());
+    when(() => mockFutureValueCubit.state).thenReturn(FutureValueInitial());
     Modular.destroy();
   });
 
@@ -56,7 +66,7 @@ void main() {
 
         await tester.pumpWidget(
           ModularApp(
-            module: AppModuleTest(customCubit: mockCubit),
+            module: AppModuleTest(customCubit: mockCubit, futureValueCubit: mockFutureValueCubit),
             child: const AppWidget(),
           ),
         );
@@ -74,7 +84,7 @@ void main() {
 
         await tester.pumpWidget(
           ModularApp(
-            module: AppModuleTest(customCubit: mockCubit),
+            module: AppModuleTest(customCubit: mockCubit, futureValueCubit: mockFutureValueCubit),
             child: const AppWidget(),
           ),
         );
@@ -91,6 +101,30 @@ void main() {
     );
 
     testWidgets(
+      'Deve garantir que a rota mapeada para AppRoutes.futureValue seja acessível',
+      (tester) async {
+        resizeScreen(tester);
+        addTearDown(() => tester.view.resetPhysicalSize());
+
+        await tester.pumpWidget(
+          ModularApp(
+            module: AppModuleTest(customCubit: mockCubit, futureValueCubit: mockFutureValueCubit),
+            child: const AppWidget(),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        Modular.to.navigate(AppRoutes.futureValue);
+
+        await tester.idle();
+        await tester.pumpAndSettle();
+
+        expect(find.byType(FutureValuePage), findsOneWidget);
+      },
+    );
+
+    testWidgets(
       'Deve garantir que a rota mapeada para AppRoutes.financing seja acessível',
       (tester) async {
         resizeScreen(tester);
@@ -98,7 +132,7 @@ void main() {
 
         await tester.pumpWidget(
           ModularApp(
-            module: AppModuleTest(customCubit: mockCubit),
+            module: AppModuleTest(customCubit: mockCubit, futureValueCubit: mockFutureValueCubit),
             child: const AppWidget(),
           ),
         );
@@ -122,7 +156,7 @@ void main() {
 
         await tester.pumpWidget(
           ModularApp(
-            module: AppModuleTest(customCubit: mockCubit),
+            module: AppModuleTest(customCubit: mockCubit, futureValueCubit: mockFutureValueCubit),
             child: const AppWidget(),
           ),
         );
