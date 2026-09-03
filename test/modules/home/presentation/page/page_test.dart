@@ -14,9 +14,9 @@ import 'package:real_calc/core/themes/extensions/options_bottom_forms_theme.dart
 import 'package:real_calc/core/themes/extensions/title_widget_theme.dart';
 import 'package:real_calc/core/themes/text_styles.dart';
 import 'package:real_calc/core/widgets/title_widget.dart';
-import 'package:real_calc/modules/home/components/highlight_card.dart';
-import 'package:real_calc/modules/home/components/menu_card.dart';
-import 'package:real_calc/modules/home/page/page.dart';
+import 'package:real_calc/modules/home/presentation/components/highlight_card.dart';
+import 'package:real_calc/modules/home/presentation/components/menu_card.dart';
+import 'package:real_calc/modules/home/presentation/page/page.dart';
 
 class MockNavigator extends Mock implements IModularNavigator {}
 
@@ -65,6 +65,7 @@ void main() {
             bottomNavBackgroundColor: ColorTokens.surface,
             bottomNavSelectedColor: ColorTokens.accentAmber,
             bottomNavUnselectedColor: Colors.white,
+            lineColor: ColorTokens.surface,
           ),
           FinancingFormsTheme(
             iconColor: ColorTokens.accentAmber,
@@ -87,7 +88,13 @@ void main() {
           MenuCardTheme(
             titleStyle: AppTextStyles.menuCardTitle,
             descriptionStyle: AppTextStyles.menuCardDescription,
-            iconContainerColor: ColorTokens.iconColor,
+            titleStyleCompact: AppTextStyles.menuCardTitleCompact,
+            descriptionStyleCompact: AppTextStyles.menuCardDescriptionCompact,
+            titleStyleFeatured: AppTextStyles.menuCardTitleFeatured,
+            descriptionStyleFeatured: AppTextStyles.menuCardDescriptionFeatured,
+            featuredBorderColor: ColorTokens.accentAmber,
+            disabledLabelColor: ColorTokens.textHint,
+            disabledTextStyle: AppTextStyles.menuCardDescription,
           ),
         ],
       ),
@@ -154,24 +161,20 @@ void main() {
       verify(() => mockNavigator.pushNamed(AppRoutes.financing)).called(1);
     });
 
-    testWidgets('Deve calcular largura do card para Mobile quando a tela for menor que 600px', (tester) async {
+    testWidgets('Deve renderizar o divisor e os cards em duas colunas no mobile', (tester) async {
       await tester.pumpWidget(buildTestableWidget(width: 360.0));
 
-      final gridViewFinder = find.byType(GridView);
-      final GridView gridViewWidget = tester.widget(gridViewFinder);
-      final delegate = gridViewWidget.gridDelegate as SliverGridDelegateWithMaxCrossAxisExtent;
-
-      expect(delegate.maxCrossAxisExtent, closeTo(98.66, 0.01));
+      expect(find.byType(VerticalDivider), findsOneWidget);
+      expect(find.byType(MenuCard), findsNWidgets(4));
+      expect(tester.takeException(), isNull);
     });
 
-    testWidgets('Deve cravar largura máxima do card em 180px quando for Desktop/Web (width > 600px)', (tester) async {
+    testWidgets('Deve manter os cards e o divisor em telas largas', (tester) async {
       await tester.pumpWidget(buildTestableWidget(width: 1024.0));
 
-      final gridViewFinder = find.byType(GridView);
-      final GridView gridViewWidget = tester.widget(gridViewFinder);
-      final delegate = gridViewWidget.gridDelegate as SliverGridDelegateWithMaxCrossAxisExtent;
-
-      expect(delegate.maxCrossAxisExtent, 180.0);
+      expect(find.byType(VerticalDivider), findsOneWidget);
+      expect(find.byType(MenuCard), findsNWidgets(4));
+      expect(tester.takeException(), isNull);
     });
   });
 }

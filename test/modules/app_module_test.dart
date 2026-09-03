@@ -11,7 +11,7 @@ import 'package:real_calc/modules/financing/presentation/cubit/financing_cubit.d
 import 'package:real_calc/modules/financing/presentation/pages/page.dart';
 import 'package:real_calc/modules/future_value/presentation/pages/page.dart';
 import 'package:real_calc/modules/future_value/presentation/cubit/future_value_cubit.dart';
-import 'package:real_calc/modules/home/page/page.dart';
+import 'package:real_calc/modules/home/presentation/page/page.dart';
 import 'package:real_calc/modules/regular_deposits/presentation/pages/page.dart';
 
 class MockFinancingCubit extends MockCubit<FinancingState>

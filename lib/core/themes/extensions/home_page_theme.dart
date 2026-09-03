@@ -12,6 +12,7 @@ class HomePageTheme extends ThemeExtension<HomePageTheme> {
   final Color bottomNavBackgroundColor;
   final Color bottomNavSelectedColor;
   final Color bottomNavUnselectedColor;
+  final Color lineColor;
 
   const HomePageTheme({
     required this.scaffoldBackgroundColor,
@@ -25,6 +26,7 @@ class HomePageTheme extends ThemeExtension<HomePageTheme> {
     required this.bottomNavBackgroundColor,
     required this.bottomNavSelectedColor,
     required this.bottomNavUnselectedColor,
+    required this.lineColor,
   });
 
   @override
@@ -40,6 +42,8 @@ class HomePageTheme extends ThemeExtension<HomePageTheme> {
     Color? bottomNavBackgroundColor,
     Color? bottomNavSelectedColor,
     Color? bottomNavUnselectedColor,
+    Color? iconContainerColor,
+    Color? lineColor,
   }) {
     return HomePageTheme(
       scaffoldBackgroundColor: scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
@@ -53,6 +57,7 @@ class HomePageTheme extends ThemeExtension<HomePageTheme> {
       bottomNavBackgroundColor: bottomNavBackgroundColor ?? this.bottomNavBackgroundColor,
       bottomNavSelectedColor: bottomNavSelectedColor ?? this.bottomNavSelectedColor,
       bottomNavUnselectedColor: bottomNavUnselectedColor ?? this.bottomNavUnselectedColor,
+      lineColor: lineColor ?? this.lineColor,
     );
   }
 
@@ -71,6 +76,7 @@ class HomePageTheme extends ThemeExtension<HomePageTheme> {
       bottomNavBackgroundColor: Color.lerp(bottomNavBackgroundColor, other.bottomNavBackgroundColor, t)!,
       bottomNavSelectedColor: Color.lerp(bottomNavSelectedColor, other.bottomNavSelectedColor, t)!,
       bottomNavUnselectedColor: Color.lerp(bottomNavUnselectedColor, other.bottomNavUnselectedColor, t)!,
+      lineColor: Color.lerp(lineColor, other.lineColor, t)!,
     );
   }
 }
