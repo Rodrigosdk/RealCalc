@@ -12,7 +12,10 @@ void main() {
         theme: ThemeData(
           extensions:  [
             HighlightCardTheme(
-              gradientColors: [ColorTokens.gradientStart, ColorTokens.gradientEnd],
+              gradientColors: [
+                ColorTokens.surface,
+                ColorTokens.accentAmber.withValues(alpha: 0.32),
+              ],
               titleStyle: AppTextStyles.highlightCardTitle,
               subtitleStyle: AppTextStyles.highlightCardSubtitle,
               buttonBackgroundColor: Colors.white,
@@ -49,7 +52,9 @@ void main() {
 
       final LinearGradient gradient = decoration.gradient as LinearGradient;
 
-      expect(gradient.colors, const [ColorTokens.gradientStart, ColorTokens.gradientEnd]);
+      expect(gradient.colors.length, greaterThanOrEqualTo(2));
+      expect(gradient.colors.first, ColorTokens.surface);
+      expect(gradient.colors.last, ColorTokens.accentAmber.withValues(alpha: 0.32));
       expect(gradient.begin, Alignment.topLeft);
       expect(gradient.end, Alignment.bottomRight);
     });

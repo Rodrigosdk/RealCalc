@@ -92,7 +92,7 @@ class _RegularDepositsFormsState extends State<RegularDepositsForms> {
   @override
   Widget build(BuildContext context) {
     final cubit = BlocProvider.of<RegularDepositsCubit>(context);
-    final colorIconInput = ColorTokens.accent;
+    final colorIconInput = ColorTokens.iconColor;
     
     return BlocConsumer<RegularDepositsCubit, RegularDepositsState>(
       listener: (context, state) {

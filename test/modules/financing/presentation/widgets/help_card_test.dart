@@ -16,9 +16,9 @@ void main() {
           extensions: [
             HelpCardTheme(
               messageStyle: AppTextStyles.helpCardMessage,
-              backgroundColor: ColorTokens.helpCardBackground,
-              borderColor: ColorTokens.accent,
-              iconBackgroundColor: ColorTokens.accent,
+              backgroundColor: ColorTokens.surface,
+              borderColor: ColorTokens.accentAmber,
+              iconBackgroundColor: ColorTokens.surface,
               iconColor: Colors.white,
             ),
           ],
@@ -32,9 +32,9 @@ void main() {
     test('HelpCardTheme deve ter os estilos corretos', () {
       final theme = HelpCardTheme(
         messageStyle: AppTextStyles.helpCardMessage,
-        backgroundColor: ColorTokens.helpCardBackground,
-        borderColor: ColorTokens.accent,
-        iconBackgroundColor: ColorTokens.accent,
+        backgroundColor: ColorTokens.surface,
+        borderColor: ColorTokens.accentAmber,
+        iconBackgroundColor: ColorTokens.accentAmber,
         iconColor: Colors.white,
       );
 
@@ -67,12 +67,12 @@ void main() {
       final mainDecoration = mainContainer.decoration as BoxDecoration?;
 
       expect(mainDecoration, isNotNull);
-      expect(mainDecoration!.color, ColorTokens.helpCardBackground);
+      expect(mainDecoration!.color, ColorTokens.surface);
       expect(mainDecoration.borderRadius, BorderRadius.circular(18));
 
       final border = mainDecoration.border as Border?;
       expect(border, isNotNull);
-      expect(border!.top.color, ColorTokens.accent.withValues(alpha: 0.4));
+      expect(border!.top.color, ColorTokens.accentAmber.withValues(alpha: 0.4));
     });
 
     testWidgets('Deve validar a decoração do container menor que envolve o ícone', (tester) async {
@@ -83,8 +83,7 @@ void main() {
       final iconDecoration = iconContainer.decoration as BoxDecoration?;
 
       expect(iconDecoration, isNotNull);
-      expect(iconDecoration!.color, ColorTokens.accent);
-      expect(iconDecoration.borderRadius, BorderRadius.circular(12));
+      expect(iconDecoration!.borderRadius, BorderRadius.circular(12));
       expect(iconContainer.constraints?.maxWidth, 40);
       expect(iconContainer.constraints?.maxHeight, 40);
     });

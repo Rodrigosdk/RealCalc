@@ -57,15 +57,15 @@ class HomePage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
-                      color: theme.iconContainerColor,
+                      color: theme.scaffoldBackgroundColor,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: theme.primaryBlue.withValues(alpha: 0.3),
+                        //color: theme.primaryBlue.withValues(alpha: 0.3),
                       ),
                     ),
                     child: Icon(
                       Icons.calculate,
-                      color: theme.primaryBlue,
+                      color: theme.iconContainerColor,
                       size: 24,
                     ),
                   ),
@@ -96,7 +96,7 @@ class HomePage extends StatelessWidget {
                     title: item['title'] as String,
                     description: item['description'] as String,
                     cardColor: theme.cardColor,
-                    iconColor: theme.primaryBlue,
+                    iconColor: theme.iconContainerColor,
                     onTap: item['onTap'] as VoidCallback?,
                   );
                 },
