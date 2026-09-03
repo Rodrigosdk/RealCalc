@@ -3,7 +3,8 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:real_calc/core/routes/app_routes.dart';
 import 'package:real_calc/core/themes/spacing.dart';
 import 'package:real_calc/core/widgets/title_widget.dart';
-import '../../../core/themes/extensions/home_page_theme.dart';
+import 'package:real_calc/modules/home/domain/enum/menu_card_variant.dart';
+import '../../../../core/themes/extensions/home_page_theme.dart';
 import '../components/highlight_card.dart';
 import '../components/menu_card.dart';
 
@@ -13,37 +14,6 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).extension<HomePageTheme>()!;
-
-    final funcinalidades = [
-      {
-        'icon': Icons.trending_up,
-        'title': 'Correção de Valores',
-        'description': 'Atualize valores por índices de inflação',
-        'onTap': null,
-      },
-      {
-        'icon': Icons.account_balance,
-        'title': 'Financiamento',
-        'description': 'Prestações fixas com juros compostos',
-        'onTap': () => Modular.to.pushNamed(AppRoutes.financing),
-      },
-      {
-        'icon': Icons.savings,
-        'title': 'Depósitos Regulares',
-        'description': 'Aplicação mensal com rendimentos',
-        'onTap': () => Modular.to.pushNamed(AppRoutes.deposits),
-      },
-      {
-        'icon': Icons.bar_chart,
-        'title': 'Valor Futuro',
-        'description': 'Calcule o capital ao final do prazo',
-        'onTap': () => Modular.to.pushNamed(AppRoutes.futureValue),
-      },
-    ];
-
-    final double larguraMaximaDoCard = MediaQuery.of(context).size.width > 600
-        ? 180
-        : (MediaQuery.of(context).size.width - 64) / 3;
 
     return Scaffold(
       body: SafeArea(
@@ -79,27 +49,60 @@ class HomePage extends StatelessWidget {
                 subtitle: 'Qual cálculo deseja realizar hoje?',
               ),
               SizedBox(height: AppSpacing.xl),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: funcinalidades.length,
-                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: larguraMaximaDoCard,
-                  crossAxisSpacing: AppSpacing.md,
-                  mainAxisSpacing: AppSpacing.md,
-                  childAspectRatio: 1.0,
+
+              MenuCard(
+                icon: Icons.account_balance,
+                title: 'Financiamento',
+                description: 'Prestações com juros compostos',
+                cardColor: theme.cardColor,
+                iconColor: theme.iconContainerColor,
+                onTap: () => Modular.to.pushNamed(AppRoutes.financing),
+                variant: MenuCardVariant.featured,
+              ),
+              SizedBox(height: AppSpacing.md),
+              SizedBox(
+                height: 100,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: MenuCard(
+                        icon: Icons.account_balance,
+                        title: 'Depósitos Regulares',
+                        description: 'Prestações com juros compostos',
+                        cardColor: theme.cardColor,
+                        iconColor: theme.iconContainerColor,
+                        onTap: () => Modular.to.pushNamed(AppRoutes.deposits),
+                        variant: MenuCardVariant.standard,
+                      ),
+                    ),
+                    VerticalDivider(
+                      color: theme.lineColor,
+                      thickness: 1,
+                      width: AppSpacing.md,
+                    ),
+                    Expanded(
+                      child: MenuCard(
+                        icon: Icons.bar_chart,
+                        title: 'Valor Futuro',
+                        description: 'Prestações com juros compostos',
+                        cardColor: theme.cardColor,
+                        iconColor: theme.iconContainerColor,
+                        onTap: () => Modular.to.pushNamed(AppRoutes.futureValue),
+                        variant: MenuCardVariant.standard,
+                      ),
+                    ),
+                  ],
                 ),
-                itemBuilder: (context, index) {
-                  final item = funcinalidades[index];
-                  return MenuCard(
-                    icon: item['icon'] as IconData,
-                    title: item['title'] as String,
-                    description: item['description'] as String,
-                    cardColor: theme.cardColor,
-                    iconColor: theme.iconContainerColor,
-                    onTap: item['onTap'] as VoidCallback?,
-                  );
-                },
+              ),
+              SizedBox(height: AppSpacing.md),
+              MenuCard(
+                icon: Icons.trending_up,
+                title: 'Correção de Valores',
+                description: 'Atualize valores por índices de inflação',
+                cardColor: theme.cardColor,
+                iconColor: theme.iconContainerColor,
+                onTap: null,
+                variant: MenuCardVariant.disabled,
               ),
               SizedBox(height: AppSpacing.lg),
               HighlightCard(),
@@ -144,12 +147,17 @@ class HomePage extends StatelessWidget {
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: theme.bottomNavBackgroundColor,
         selectedItemColor: theme.bottomNavSelectedColor,
-        unselectedItemColor: theme.bottomNavUnselectedColor.withValues(alpha: 0.4),
+        unselectedItemColor: theme.bottomNavUnselectedColor.withValues(
+          alpha: 0.4,
+        ),
         currentIndex: 0,
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'INÍCIO'),
-          BottomNavigationBarItem(icon: Icon(Icons.history_toggle_off), label: 'HISTÓRICO'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history_toggle_off),
+            label: 'HISTÓRICO',
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'AJUSTES'),
         ],
       ),
