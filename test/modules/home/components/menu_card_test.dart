@@ -23,7 +23,7 @@ void main() {
             MenuCardTheme(
               titleStyle: AppTextStyles.menuCardTitle,
               descriptionStyle: AppTextStyles.menuCardDescription,
-              iconContainerColor: ColorTokens.menuCardIconContainer,
+              iconContainerColor: ColorTokens.iconColor,
             ),
           ],
         ),

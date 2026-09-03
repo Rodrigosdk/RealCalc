@@ -33,9 +33,9 @@ void main() {
       theme: ThemeData(
         extensions: [
           OptionsBottomFormsTheme(
-            calculateButtonBackground: ColorTokens.accent,
+            calculateButtonBackground: ColorTokens.accentAmber,
             calculateButtonForeground: Colors.white,
-            actionButtonBackground: ColorTokens.surfaceVariant,
+            actionButtonBackground: ColorTokens.surface,
             actionButtonForeground: ColorTokens.textSecondary,
           ),
           TitleWidgetTheme(
@@ -44,9 +44,9 @@ void main() {
           ),
           HelpCardTheme(
             messageStyle: AppTextStyles.helpCardMessage,
-            backgroundColor: ColorTokens.helpCardBackground,
-            borderColor: ColorTokens.accent,
-            iconBackgroundColor: ColorTokens.accent,
+            backgroundColor: ColorTokens.surface,
+            borderColor: ColorTokens.accentAmber,
+            iconBackgroundColor: ColorTokens.accentAmber,
             iconColor: Colors.white,
           ),
           InputFormsResultCardTheme(
@@ -54,28 +54,30 @@ void main() {
             helperTextStyle: AppTextStyles.inputHelperText,
           ),
           HomePageTheme(
-            scaffoldBackgroundColor: ColorTokens.homeScaffoldBackground,
-            cardColor: ColorTokens.homeCard,
-            primaryBlue: ColorTokens.accent,
-            iconContainerColor: ColorTokens.homeIconContainer,
+            scaffoldBackgroundColor: ColorTokens.background,
+            cardColor: ColorTokens.surface,
+            iconContainerColor: ColorTokens.iconColor,
             appNameStyle: AppTextStyles.appName,
             sectionHeaderStyle: AppTextStyles.sectionHeader,
             historyItemStyle: AppTextStyles.historyItem,
             historyItemIconColor: Colors.white,
             historyItemArrowColor: Colors.white,
-            bottomNavBackgroundColor: ColorTokens.bottomNavBackground,
-            bottomNavSelectedColor: ColorTokens.accent,
+            bottomNavBackgroundColor: ColorTokens.surface,
+            bottomNavSelectedColor: ColorTokens.accentAmber,
             bottomNavUnselectedColor: Colors.white,
           ),
           FinancingFormsTheme(
-            iconColor: ColorTokens.accent,
-            progressIndicatorColor: ColorTokens.accent,
+            iconColor: ColorTokens.accentAmber,
+            progressIndicatorColor: ColorTokens.accentAmber,
             errorBackgroundColor: ColorTokens.errorContainerBg,
             errorBorderColor: ColorTokens.errorContainerBorder,
             errorTextStyle: AppTextStyles.errorBannerText,
           ),
           HighlightCardTheme(
-            gradientColors: [ColorTokens.gradientStart, ColorTokens.gradientEnd],
+            gradientColors: [
+              ColorTokens.surface,
+              ColorTokens.accentAmber.withValues(alpha: 0.32),
+            ],
             titleStyle: AppTextStyles.highlightCardTitle,
             subtitleStyle: AppTextStyles.highlightCardSubtitle,
             buttonBackgroundColor: Colors.white,
@@ -85,7 +87,7 @@ void main() {
           MenuCardTheme(
             titleStyle: AppTextStyles.menuCardTitle,
             descriptionStyle: AppTextStyles.menuCardDescription,
-            iconContainerColor: ColorTokens.menuCardIconContainer,
+            iconContainerColor: ColorTokens.iconColor,
           ),
         ],
       ),

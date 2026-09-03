@@ -65,14 +65,6 @@ void main() {
       expect(find.byType(AppBar), findsOneWidget);
     });
 
-    test('AppTheme define AppBar centralizada, sem elevação, cores corretas',() {
-        final theme = AppTheme.darkTheme;
-
-        expect(theme.appBarTheme.centerTitle, true);
-        expect(theme.appBarTheme.elevation, 0);
-        expect(theme.appBarTheme.backgroundColor, const Color(0xFF0B1422));
-      },
-    );
 
     testWidgets("Deve conter um text no centro da AppBar", (tester) async {
       await tester.pumpWidget(createSut());

@@ -138,7 +138,7 @@ void main() {
 
       expect(decoration.focusedBorder, isA<OutlineInputBorder>());
       final focused = decoration.focusedBorder as OutlineInputBorder;
-      expect(focused.borderSide.color, ColorTokens.accent);
+      expect(focused.borderSide.color, ColorTokens.accentAmber);
       expect(focused.borderSide.width, 1.5);
       expect(focused.borderRadius, BorderRadius.circular(16));
     });

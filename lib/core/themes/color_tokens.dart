@@ -1,50 +1,33 @@
 import 'package:flutter/material.dart';
 
 abstract class ColorTokens {
-  // Primárias
-  static const Color primary = Color(0xFF6C63FF);
-  static const Color primaryVariant = Color(0xFF5A52D5);
-
   // Superfícies
-  static const Color background = Color(0xFF121212);
-  static const Color surface = Color(0xFF0B1422);
-  static const Color surfaceVariant = Color(0xFF2C2C2C);
-  static const Color surfaceDark = Color(0xFF111B27);
+  static const Color background = Color(0xFF0A0D12);
+  static const Color surface = Color(0xFF0E1116);
 
   // Texto
-  static const Color textPrimary = Color(0xFFFFFFFF);
-  static const Color textSecondary = Color(0xFF94A3B8);
-  static const Color textHint = Color(0xFF5B6874);
+  static const Color textPrimary = Color(0xFFEDEFF2);
+  static const Color textSecondary = Color(0xFF8B929C);
+  static const Color textHint = Color(0xFF5C636E);
 
   // Borda
-  static const Color border = Color(0xFF1E293B);
+  static const Color border = Color.fromARGB(20, 255, 255, 255);
 
-  // Acento (azul destaque)
-  static const Color accent = Color(0xFF1E94F6);
+  static const Color accentAmber = Color(0xFFD4A657);
 
   // Feedback
-  static const Color error = Color(0xFFCF6679);
-  static const Color success = Color(0xFF4CAF50);
+  static const Color error = Color(0xFFE24B4A);
+  static const Color success = Color(0xFF6FCF97);
   static const Color warning = Color(0xFFFFC107);
 
   // Container de erro
-  static const Color errorContainerBg = Color(0x26FF0000);
-  static const Color errorContainerBorder = Color(0x80FF5252);
+  static const Color errorContainerBg = Color.fromARGB(25, 226, 75, 74);
+  static const Color errorContainerBorder = Color.fromARGB(25, 226, 75, 74);
 
-  // Gradientes
-  static const Color gradientStart = Color(0xFF1E70F6);
-  static const Color gradientEnd = Color(0xFF1E94F6);
+  // Container de success
+  static const Color successContainerBg = Color.fromARGB(25, 111, 207, 151);
+  static const Color successContainerBorder = Color.fromARGB(25, 111, 207, 151);
 
-  // Home
-  static const Color homeScaffoldBackground = Color(0xFF0D1520);
-  static const Color homeCard = Color(0xFF16222F);
-  static const Color homeIconContainer = Color(0xFF1A2A3D);
-  static const Color bottomNavBackground = Color(0xFF090D14);
-
-  // Cards
-  static const Color helpCardBackground = Color(0xFF101A24);
-  static const Color menuCardIconContainer = Color(0xFF1A2A3D);
-
-  // Botão
-  static const Color buttonDark = Color(0xFF1A222D);
+  //icons
+  static const Color iconColor = Color(0xFFFFFFFF);
 }

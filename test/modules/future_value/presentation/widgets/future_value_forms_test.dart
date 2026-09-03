@@ -36,14 +36,14 @@ void main() {
             helperTextStyle: AppTextStyles.inputHelperText,
           ),
           const OptionsBottomFormsTheme(
-            calculateButtonBackground: ColorTokens.accent,
+            calculateButtonBackground: ColorTokens.accentAmber,
             calculateButtonForeground: Colors.white,
-            actionButtonBackground: ColorTokens.surfaceVariant,
+            actionButtonBackground: ColorTokens.surface,
             actionButtonForeground: ColorTokens.textSecondary,
           ),
           FinancingFormsTheme(
-            iconColor: ColorTokens.accent,
-            progressIndicatorColor: ColorTokens.accent,
+            iconColor: ColorTokens.accentAmber,
+            progressIndicatorColor: ColorTokens.accentAmber,
             errorBackgroundColor: ColorTokens.errorContainerBg,
             errorBorderColor: ColorTokens.errorContainerBorder,
             errorTextStyle: AppTextStyles.errorBannerText,
