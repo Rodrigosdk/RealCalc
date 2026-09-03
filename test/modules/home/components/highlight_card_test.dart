@@ -16,11 +16,11 @@ void main() {
                 ColorTokens.surface,
                 ColorTokens.accentAmber.withValues(alpha: 0.32),
               ],
-              titleStyle: AppTextStyles.highlightCardTitle,
-              subtitleStyle: AppTextStyles.highlightCardSubtitle,
+              titleStyle: AppTextStyles.menuCardTitleFeatured,
+              subtitleStyle: AppTextStyles.menuCardDescriptionFeatured,
               buttonBackgroundColor: Colors.white,
               buttonForegroundColor: Colors.white,
-              buttonTextStyle: AppTextStyles.highlightCardButton,
+              buttonTextStyle: AppTextStyles.menuCardDescriptionFeatured,
             ),
           ],
         ),
@@ -63,16 +63,16 @@ void main() {
       await tester.pumpWidget(buildTestableWidget());
 
       final titleText = tester.widget<Text>(find.text('Selic e Índices'));
-      expect(titleText.style, AppTextStyles.highlightCardTitle);
+      expect(titleText.style, AppTextStyles.menuCardTitleFeatured);
 
       final descText = tester.widget<Text>(
         find.text('Acompanhe as taxas oficiais atualizadas diariamente pelo Banco Central.'),
       );
-      expect(descText.style?.fontSize, AppTextStyles.highlightCardSubtitle.fontSize);
-      expect(descText.style?.fontWeight, AppTextStyles.highlightCardSubtitle.fontWeight);
+      expect(descText.style?.fontSize, AppTextStyles.menuCardDescriptionFeatured.fontSize);
+      expect(descText.style?.fontWeight, AppTextStyles.menuCardDescriptionFeatured.fontWeight);
       expect(
         descText.style?.color,
-        AppTextStyles.highlightCardSubtitle.color?.withValues(alpha: 0.8),
+        AppTextStyles.menuCardDescriptionFeatured.color?.withValues(alpha: 0.8),
       );
     });
 
