@@ -59,7 +59,10 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: ColorTokens.accentAmber, width: 1.5),
+          borderSide: const BorderSide(
+            color: ColorTokens.accentAmber,
+            width: 1.5,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -135,7 +138,7 @@ class AppTheme {
 
         HomePageTheme(
           scaffoldBackgroundColor: ColorTokens.background,
-          cardColor: ColorTokens.surface,
+          cardColor: ColorTokens.background,
           iconContainerColor: ColorTokens.iconColor,
           appNameStyle: AppTextStyles.appName,
           sectionHeaderStyle: AppTextStyles.sectionHeader,
@@ -145,6 +148,7 @@ class AppTheme {
           bottomNavBackgroundColor: ColorTokens.surface,
           bottomNavSelectedColor: ColorTokens.accentAmber,
           bottomNavUnselectedColor: Colors.white,
+          lineColor: ColorTokens.border,
         ),
         FinancingFormsTheme(
           iconColor: ColorTokens.iconColor,
@@ -168,7 +172,13 @@ class AppTheme {
         MenuCardTheme(
           titleStyle: AppTextStyles.menuCardTitle,
           descriptionStyle: AppTextStyles.menuCardDescription,
-          iconContainerColor: ColorTokens.surface,
+          titleStyleCompact: AppTextStyles.menuCardTitleCompact,
+          descriptionStyleCompact: AppTextStyles.menuCardDescriptionCompact,
+          titleStyleFeatured: AppTextStyles.menuCardTitleFeatured,
+          descriptionStyleFeatured: AppTextStyles.menuCardDescriptionFeatured,
+          featuredBorderColor: ColorTokens.accentAmber,
+          disabledLabelColor: ColorTokens.textHint,
+          disabledTextStyle: AppTextStyles.menuCardDescription
         ),
       ],
     );
