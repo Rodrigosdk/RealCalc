@@ -71,7 +71,7 @@ void main() {
       expect(titleText.style?.fontSize, 11);
 
       final descText = tester.widget<Text>(find.text(description));
-      expect(descText.style?.fontSize, 9);
+      expect(descText.style?.fontSize, 11);
     });
 
     testWidgets('Não deve overflowar quando o card for pequeno', (tester) async {

@@ -158,11 +158,11 @@ class AppTheme {
             ColorTokens.surface,
             ColorTokens.accentAmber.withValues(alpha: 0.32),
           ],
-          titleStyle: AppTextStyles.highlightCardTitle,
-          subtitleStyle: AppTextStyles.highlightCardSubtitle,
+          titleStyle: AppTextStyles.menuCardTitleFeatured,
+          subtitleStyle: AppTextStyles.menuCardDescriptionFeatured,
           buttonBackgroundColor: Colors.white,
           buttonForegroundColor: Colors.white,
-          buttonTextStyle: AppTextStyles.highlightCardButton,
+          buttonTextStyle: AppTextStyles.menuCardDescriptionFeatured,
         ),
 
         MenuCardTheme(
