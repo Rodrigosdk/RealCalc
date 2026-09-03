@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:real_calc/core/themes/color_tokens.dart';
 import 'package:real_calc/core/themes/extensions/highlight_card_theme.dart';
 import 'package:real_calc/core/themes/text_styles.dart';
-import 'package:real_calc/modules/home/components/highlight_card.dart';
+import 'package:real_calc/modules/home/presentation/components/highlight_card.dart';
 
 void main() {
   group('HighlightCard Widget Tests', () {
