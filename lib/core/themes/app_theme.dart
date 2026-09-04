@@ -7,6 +7,7 @@ import 'color_tokens.dart';
 import 'extensions/financing_forms_theme.dart';
 import 'extensions/home_page_theme.dart';
 import 'extensions/input_forms_result_card_theme.dart';
+import 'extensions/metric_card_theme.dart';
 import 'extensions/title_widget_theme.dart';
 import 'text_styles.dart';
 
@@ -178,7 +179,22 @@ class AppTheme {
           descriptionStyleFeatured: AppTextStyles.menuCardDescriptionFeatured,
           featuredBorderColor: ColorTokens.accentAmber,
           disabledLabelColor: ColorTokens.textHint,
-          disabledTextStyle: AppTextStyles.menuCardDescription
+          disabledTextStyle: AppTextStyles.menuCardDescription,
+        ),
+
+        MetricCardTheme(
+          backgroundColor: ColorTokens.surface,
+          borderColor: ColorTokens.accentAmber.withValues(alpha: 0.25),
+          labelStyle: AppTextStyles.metricLabel,
+          valueStyle: AppTextStyles.metricValue,
+          valueUnitStyle: AppTextStyles.metricLabel,
+          captionStyle: AppTextStyles.metricCaption,
+          variationTextStyle: AppTextStyles.stateBadge,
+          variationPositiveColor: ColorTokens.success,
+          variationNegativeColor: ColorTokens.error,
+          variationNeutralColor: ColorTokens.textSecondary,
+          skeletonColor: ColorTokens.surfaceVariant,
+          
         ),
       ],
     );
