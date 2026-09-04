@@ -4,6 +4,7 @@ abstract class ColorTokens {
   // Superfícies
   static const Color background = Color(0xFF0A0D12);
   static const Color surface = Color(0xFF0E1116);
+  static const Color surfaceVariant = Color(0xFF12161D);
 
   // Texto
   static const Color textPrimary = Color(0xFFEDEFF2);
