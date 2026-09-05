@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:real_calc/core/routes/app_routes.dart';
 import 'package:real_calc/core/themes/spacing.dart';
 import 'package:real_calc/core/widgets/title_widget.dart';
 import 'package:real_calc/modules/home/domain/enum/menu_card_variant.dart';
 import '../../../../core/themes/extensions/home_page_theme.dart';
-import '../components/highlight_card.dart';
 import '../components/menu_card.dart';
+import '../components/metric_card.dart';
+import '../cubit/selic_cubit.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -49,7 +51,36 @@ class HomePage extends StatelessWidget {
                 subtitle: 'Qual cálculo deseja realizar hoje?',
               ),
               SizedBox(height: AppSpacing.xl),
+BlocBuilder<SelicCubit, SelicState>(
+                builder: (context, state) {
+                  if (state is SelicLoading || state is SelicInitial) {
+                    return const MetricCard.loading();
+                  }
 
+                  final metric = state.metric;
+                  if (state is SelicLoaded && metric != null) {
+                    return MetricCard.data(
+                      ratePercent: metric.anualRate,
+                      variationPercent: metric.variationPercent,
+                      sparklineData: metric.sparklineData,
+                      caption: 'Atualizada pelo Banco Central',
+                      onTap: BlocProvider.of<SelicCubit>(context).retry,
+                    );
+                  }
+
+                  return MetricCard.offline(
+                    ratePercent: metric?.anualRate,
+                    variationPercent: metric?.variationPercent,
+                    sparklineData: metric?.sparklineData ?? const [],
+                    caption: state is SelicError
+                        ? state.error.message
+                        : 'Não foi possível carregar a taxa Selic',
+                    onTap: BlocProvider.of<SelicCubit>(context).retry,
+                  );
+                },
+              ),
+              SizedBox(height: AppSpacing.lg),
+              
               MenuCard(
                 icon: Icons.account_balance,
                 title: 'Financiamento',
@@ -104,8 +135,6 @@ class HomePage extends StatelessWidget {
                 onTap: null,
                 variant: MenuCardVariant.disabled,
               ),
-              SizedBox(height: AppSpacing.lg),
-              HighlightCard(),
               SizedBox(height: AppSpacing.lg),
               Text(
                 'ACESSO RÁPIDO',

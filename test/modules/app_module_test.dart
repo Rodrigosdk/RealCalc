@@ -11,7 +11,9 @@ import 'package:real_calc/modules/financing/presentation/cubit/financing_cubit.d
 import 'package:real_calc/modules/financing/presentation/pages/page.dart';
 import 'package:real_calc/modules/future_value/presentation/pages/page.dart';
 import 'package:real_calc/modules/future_value/presentation/cubit/future_value_cubit.dart';
+import 'package:real_calc/modules/home/presentation/cubit/selic_cubit.dart';
 import 'package:real_calc/modules/home/presentation/page/page.dart';
+import 'package:real_calc/modules/metrics/domain/entites/metric.dart';
 import 'package:real_calc/modules/regular_deposits/presentation/pages/page.dart';
 
 class MockFinancingCubit extends MockCubit<FinancingState>
@@ -20,23 +22,33 @@ class MockFinancingCubit extends MockCubit<FinancingState>
 class MockFutureValueCubit extends MockCubit<FutureValueState>
   implements FutureValueCubit {}
 
+
+class MockSelicCubit extends MockCubit<SelicState> implements SelicCubit {}
+
 class AppModuleTest extends AppModule {
   final FinancingCubit customCubit;
   final FutureValueCubit futureValueCubit;
+  final SelicCubit selicCubit;
 
-  AppModuleTest({required this.customCubit, required this.futureValueCubit});
+  AppModuleTest({
+    required this.customCubit,
+    required this.futureValueCubit,
+    required this.selicCubit,
+  });
 
   @override
   void binds(Injector i) {
     super.binds(i);
     i.addInstance<FinancingCubit>(customCubit);
     i.addInstance<FutureValueCubit>(futureValueCubit);
+    i.addInstance<SelicCubit>(selicCubit);
   }
 }
 
 void main() {
   late FinancingCubit mockCubit;
   late FutureValueCubit mockFutureValueCubit;
+  late SelicCubit mockSelicCubit;
 
   setUpAll(() {
     GoogleFonts.config.allowRuntimeFetching = false;
@@ -45,10 +57,39 @@ void main() {
   setUp(() {
     mockCubit = MockFinancingCubit();
     mockFutureValueCubit = MockFutureValueCubit();
+    mockSelicCubit = MockSelicCubit();
+
     when(() => mockCubit.state).thenReturn(FinancingInitial());
     when(() => mockFutureValueCubit.state).thenReturn(FutureValueInitial());
+
+    // Estado estável (SelicLoaded), não SelicInitial/SelicLoading — evita
+    // ativar o skeleton animado durante esses testes de rota, que não têm
+    // nenhum interesse no comportamento do card de métrica em si.
+    whenListen(
+      mockSelicCubit,
+      const Stream<SelicState>.empty(),
+      initialState: SelicLoaded(
+        Metric(
+          anualRate: 10.75,
+          variationPercent: 0.25,
+          sparklineData: const [10.5, 10.6, 10.75],
+        ),
+      ),
+    );
+
+    // HomeModule chama `..load()` na criação do cubit (via Modular.get)
+    // — sem estubar isso, a chamada no mock pode lançar erro de tipo por
+    // método não configurado.
+    when(() => mockSelicCubit.load()).thenAnswer((_) async {});
+
     Modular.destroy();
   });
+
+  AppModuleTest buildModule() => AppModuleTest(
+        customCubit: mockCubit,
+        futureValueCubit: mockFutureValueCubit,
+        selicCubit: mockSelicCubit,
+      );
 
   group('AppModule & AppWidget - Testes de Rotas', () {
     // Helper local para definir a resolução correta da tela usando o tester
@@ -66,7 +107,7 @@ void main() {
 
         await tester.pumpWidget(
           ModularApp(
-            module: AppModuleTest(customCubit: mockCubit, futureValueCubit: mockFutureValueCubit),
+            module: buildModule(),
             child: const AppWidget(),
           ),
         );
@@ -84,7 +125,7 @@ void main() {
 
         await tester.pumpWidget(
           ModularApp(
-            module: AppModuleTest(customCubit: mockCubit, futureValueCubit: mockFutureValueCubit),
+            module: buildModule(),
             child: const AppWidget(),
           ),
         );
@@ -108,7 +149,7 @@ void main() {
 
         await tester.pumpWidget(
           ModularApp(
-            module: AppModuleTest(customCubit: mockCubit, futureValueCubit: mockFutureValueCubit),
+            module: buildModule(),
             child: const AppWidget(),
           ),
         );
@@ -132,7 +173,7 @@ void main() {
 
         await tester.pumpWidget(
           ModularApp(
-            module: AppModuleTest(customCubit: mockCubit, futureValueCubit: mockFutureValueCubit),
+            module: buildModule(),
             child: const AppWidget(),
           ),
         );
@@ -156,7 +197,7 @@ void main() {
 
         await tester.pumpWidget(
           ModularApp(
-            module: AppModuleTest(customCubit: mockCubit, futureValueCubit: mockFutureValueCubit),
+            module: buildModule(),
             child: const AppWidget(),
           ),
         );

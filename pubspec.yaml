@@ -41,6 +41,7 @@ dependencies:
   intl: ^0.20.3
   shadcn_flutter: ^0.0.54
   shadcn_flutter_material: ^0.0.54
+  dio: ^5.11.1
 
 dev_dependencies:
   flutter_test:
