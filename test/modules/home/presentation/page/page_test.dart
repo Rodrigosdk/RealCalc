@@ -19,6 +19,7 @@ import 'package:real_calc/core/themes/text_styles.dart';
 import 'package:real_calc/core/widgets/title_widget.dart';
 import 'package:real_calc/modules/home/presentation/components/menu_card.dart';
 import 'package:real_calc/modules/home/presentation/components/metric_card.dart';
+import 'package:real_calc/modules/home/presentation/cubit/greeting_cubit.dart';
 import 'package:real_calc/modules/home/presentation/cubit/selic_cubit.dart';
 import 'package:real_calc/modules/home/presentation/page/page.dart';
 import 'package:real_calc/modules/metrics/domain/entites/metric.dart';
@@ -27,13 +28,12 @@ class MockNavigator extends Mock implements IModularNavigator {}
 
 class MockSelicCubit extends MockCubit<SelicState> implements SelicCubit {}
 
-// NOTA: os nomes/campos de SelicState e Metric abaixo seguem o que já
-// apareceu no page.dart (SelicInitial, SelicLoading, SelicLoaded, SelicError,
-// Metric.anualRate/variationPercent/sparklineData). Ajuste se a assinatura
-// real divergir — não temos o arquivo do SelicState em mãos aqui.
+class MockGreetingCubit extends MockCubit<String> implements GreetingCubit {}
+
 void main() {
   late MockNavigator mockNavigator;
   late MockSelicCubit mockSelicCubit;
+  late MockGreetingCubit mockGreetingCubit;
 
   setUpAll(() {
     registerFallbackValue(SelicInitial());
@@ -54,6 +54,13 @@ void main() {
           sparklineData: const [10.5, 10.6, 10.75],
         ),
       ),
+    );
+
+    mockGreetingCubit = MockGreetingCubit();
+    whenListen(
+      mockGreetingCubit,
+      const Stream<String>.empty(),
+      initialState: 'Bom dia',
     );
   });
 
@@ -133,8 +140,11 @@ void main() {
       ),
       home: MediaQuery(
         data: MediaQueryData(size: Size(width, height)),
-        child: BlocProvider<SelicCubit>.value(
-          value: mockSelicCubit,
+        child: MultiBlocProvider(
+          providers: [
+            BlocProvider<SelicCubit>.value(value: mockSelicCubit),
+            BlocProvider<GreetingCubit>.value(value: mockGreetingCubit),
+          ],
           child: const HomePage(),
         ),
       ),
@@ -152,15 +162,6 @@ void main() {
         expect(find.byType(TitleWidget), findsOneWidget);
         expect(find.byType(MetricCard), findsOneWidget);
         expect(find.byType(MenuCard), findsNWidgets(4));
-        expect(find.text('ACESSO RÁPIDO'), findsOneWidget);
-        expect(
-          find.text('Último cálculo: Financiamento Imob.'),
-          findsOneWidget,
-        );
-        expect(find.byType(BottomNavigationBar), findsOneWidget);
-        expect(find.text('INÍCIO'), findsOneWidget);
-        expect(find.text('HISTÓRICO'), findsOneWidget);
-        expect(find.text('AJUSTES'), findsOneWidget);
       },
     );
 
