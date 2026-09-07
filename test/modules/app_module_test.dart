@@ -11,6 +11,7 @@ import 'package:real_calc/modules/financing/presentation/cubit/financing_cubit.d
 import 'package:real_calc/modules/financing/presentation/pages/page.dart';
 import 'package:real_calc/modules/future_value/presentation/pages/page.dart';
 import 'package:real_calc/modules/future_value/presentation/cubit/future_value_cubit.dart';
+import 'package:real_calc/modules/home/presentation/cubit/greeting_cubit.dart';
 import 'package:real_calc/modules/home/presentation/cubit/selic_cubit.dart';
 import 'package:real_calc/modules/home/presentation/page/page.dart';
 import 'package:real_calc/modules/metrics/domain/entites/metric.dart';
@@ -25,15 +26,19 @@ class MockFutureValueCubit extends MockCubit<FutureValueState>
 
 class MockSelicCubit extends MockCubit<SelicState> implements SelicCubit {}
 
+class MockGreetingCubit extends MockCubit<String> implements GreetingCubit {}
+
 class AppModuleTest extends AppModule {
   final FinancingCubit customCubit;
   final FutureValueCubit futureValueCubit;
   final SelicCubit selicCubit;
+  final GreetingCubit greetingCubit;
 
   AppModuleTest({
     required this.customCubit,
     required this.futureValueCubit,
     required this.selicCubit,
+    required this.greetingCubit,
   });
 
   @override
@@ -42,6 +47,7 @@ class AppModuleTest extends AppModule {
     i.addInstance<FinancingCubit>(customCubit);
     i.addInstance<FutureValueCubit>(futureValueCubit);
     i.addInstance<SelicCubit>(selicCubit);
+    i.addInstance<GreetingCubit>(greetingCubit);
   }
 }
 
@@ -49,6 +55,7 @@ void main() {
   late FinancingCubit mockCubit;
   late FutureValueCubit mockFutureValueCubit;
   late SelicCubit mockSelicCubit;
+  late GreetingCubit mockGreetingCubit;
 
   setUpAll(() {
     GoogleFonts.config.allowRuntimeFetching = false;
@@ -58,13 +65,12 @@ void main() {
     mockCubit = MockFinancingCubit();
     mockFutureValueCubit = MockFutureValueCubit();
     mockSelicCubit = MockSelicCubit();
+    mockGreetingCubit = MockGreetingCubit();
 
     when(() => mockCubit.state).thenReturn(FinancingInitial());
     when(() => mockFutureValueCubit.state).thenReturn(FutureValueInitial());
+    when(() => mockGreetingCubit.state).thenReturn('Olá, usuário!');
 
-    // Estado estável (SelicLoaded), não SelicInitial/SelicLoading — evita
-    // ativar o skeleton animado durante esses testes de rota, que não têm
-    // nenhum interesse no comportamento do card de métrica em si.
     whenListen(
       mockSelicCubit,
       const Stream<SelicState>.empty(),
@@ -77,11 +83,14 @@ void main() {
       ),
     );
 
-    // HomeModule chama `..load()` na criação do cubit (via Modular.get)
-    // — sem estubar isso, a chamada no mock pode lançar erro de tipo por
-    // método não configurado.
     when(() => mockSelicCubit.load()).thenAnswer((_) async {});
 
+     mockGreetingCubit = MockGreetingCubit();
+    whenListen(
+      mockGreetingCubit,
+      const Stream<String>.empty(),
+      initialState: 'Bom dia',
+    );
     Modular.destroy();
   });
 
@@ -89,6 +98,7 @@ void main() {
         customCubit: mockCubit,
         futureValueCubit: mockFutureValueCubit,
         selicCubit: mockSelicCubit,
+        greetingCubit: mockGreetingCubit,
       );
 
   group('AppModule & AppWidget - Testes de Rotas', () {

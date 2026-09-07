@@ -4,6 +4,7 @@ import 'package:real_calc/modules/home/presentation/page/page.dart';
 
 import '../../core/routes/app_routes.dart';
 import '../metrics/module.dart';
+import 'presentation/cubit/greeting_cubit.dart';
 import 'presentation/cubit/selic_cubit.dart';
 
 class HomeModule extends Module {
@@ -12,6 +13,7 @@ class HomeModule extends Module {
 
   @override
   void binds(i) {
+    i.add(GreetingCubit.new);
     i.add(SelicCubit.new);
   }
 
@@ -19,8 +21,11 @@ class HomeModule extends Module {
   void routes(r) {
     r.child(
       AppRoutes.base,
-      child: (_) => BlocProvider(
-        create: (_) => Modular.get<SelicCubit>()..load(),
+      child: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => Modular.get<GreetingCubit>()),
+          BlocProvider(create: (_) => Modular.get<SelicCubit>()..load()),
+        ],
         child: const HomePage(),
       ),
     );
