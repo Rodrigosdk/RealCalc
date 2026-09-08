@@ -19,7 +19,7 @@ class HomePage extends StatelessWidget {
   ) {
     return BlocBuilder<GreetingCubit, String>(
       builder: (context, greeting) =>
-          TitleWidget(title: greeting, subtitle: 'O que vamos calcular?'),
+          TitleWidget(title: greeting, subtitle: 'O que vamos calcular?', invert: true),
     );
   }
 

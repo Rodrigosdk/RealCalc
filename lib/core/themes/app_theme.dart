@@ -116,13 +116,13 @@ class AppTheme {
           actionButtonForeground: ColorTokens.textSecondary,
         ),
         TitleWidgetTheme(
-          titleStyle: AppTextStyles.bodyMedium.copyWith(
-            color: ColorTokens.textSecondary,
-            fontWeight: FontWeight.w500,
-          ),
-          subtitleStyle: AppTextStyles.headlineMedium.copyWith(
+          titleStyle: AppTextStyles.headlineMedium.copyWith(
             color: ColorTokens.textPrimary,
             fontWeight: FontWeight.bold,
+          ),
+          subtitleStyle: AppTextStyles.bodyMedium.copyWith(
+            color: ColorTokens.textSecondary,
+            fontWeight: FontWeight.w500,
           ),
         ),
         HelpCardTheme(

@@ -5,8 +5,14 @@ import 'package:real_calc/core/themes/spacing.dart';
 class TitleWidget extends StatelessWidget {
   final String title;
   final String subtitle;
+  final bool? invert;
 
-  const TitleWidget({super.key, required this.title, required this.subtitle});
+  const TitleWidget({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    this.invert = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,8 +22,14 @@ class TitleWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: AppSpacing.sm,
       children: [
-        Text(title, style: styles.titleStyle),
-        Text(subtitle, style: styles.subtitleStyle),
+        Text(
+          title,
+          style: invert == false ? styles.titleStyle : styles.subtitleStyle,
+        ),
+        Text(
+          subtitle,
+          style: invert == false ? styles.subtitleStyle : styles.titleStyle,
+        ),
       ],
     );
   }
