@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:real_calc/core/themes/spacing.dart';
+import 'package:real_calc/core/widgets/page_header.dart';
 import 'package:real_calc/core/widgets/title_widget.dart';
 import 'package:real_calc/modules/financing/presentation/widgets/help_card.dart';
 import '../widgets/regular_deposits_forms.dart';
@@ -15,7 +16,7 @@ class _RegularDepositsPageState extends State<RegularDepositsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Depósitos Regulares')),
+      appBar: PageHeader(title:'Depósitos Regulares'),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(

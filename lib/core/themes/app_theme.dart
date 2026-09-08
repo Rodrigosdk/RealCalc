@@ -8,6 +8,7 @@ import 'extensions/financing_forms_theme.dart';
 import 'extensions/home_page_theme.dart';
 import 'extensions/input_forms_result_card_theme.dart';
 import 'extensions/metric_card_theme.dart';
+import 'extensions/page_header_theme.dart';
 import 'extensions/title_widget_theme.dart';
 import 'text_styles.dart';
 
@@ -115,13 +116,13 @@ class AppTheme {
           actionButtonForeground: ColorTokens.textSecondary,
         ),
         TitleWidgetTheme(
-          titleStyle: AppTextStyles.bodyMedium.copyWith(
-            color: ColorTokens.textSecondary,
-            fontWeight: FontWeight.w500,
-          ),
-          subtitleStyle: AppTextStyles.headlineMedium.copyWith(
+          titleStyle: AppTextStyles.headlineMedium.copyWith(
             color: ColorTokens.textPrimary,
             fontWeight: FontWeight.bold,
+          ),
+          subtitleStyle: AppTextStyles.bodyMedium.copyWith(
+            color: ColorTokens.textSecondary,
+            fontWeight: FontWeight.w500,
           ),
         ),
         HelpCardTheme(
@@ -195,6 +196,13 @@ class AppTheme {
           variationNeutralColor: ColorTokens.textSecondary,
           skeletonColor: ColorTokens.surfaceVariant,
           
+        ),
+        PageHeaderTheme(
+          backgroundColor: ColorTokens.background,
+          iconColor: ColorTokens.textSecondary,
+          titleStyle: AppTextStyles.headlineMedium.copyWith(
+            color: ColorTokens.textPrimary,
+          ),
         ),
       ],
     );

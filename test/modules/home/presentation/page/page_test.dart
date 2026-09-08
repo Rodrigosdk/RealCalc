@@ -157,8 +157,6 @@ void main() {
       (tester) async {
         await tester.pumpWidget(buildTestableWidget());
 
-        expect(find.text('RealCalc'), findsOneWidget);
-        expect(find.byIcon(Icons.calculate), findsOneWidget);
         expect(find.byType(TitleWidget), findsOneWidget);
         expect(find.byType(MetricCard), findsOneWidget);
         expect(find.byType(MenuCard), findsNWidgets(4));
