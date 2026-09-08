@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:real_calc/core/themes/spacing.dart';
+import 'package:real_calc/core/widgets/page_header.dart';
 import 'package:real_calc/core/widgets/title_widget.dart';
 import 'package:real_calc/modules/future_value/presentation/widgets/future_value_forms.dart';
 import 'package:real_calc/modules/future_value/presentation/widgets/help_card.dart';
@@ -15,7 +16,7 @@ class _FutureValuePageState extends State<FutureValuePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Calculadora de Valor Futuro')),
+      appBar: PageHeader(title: 'Valor Futuro'),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(

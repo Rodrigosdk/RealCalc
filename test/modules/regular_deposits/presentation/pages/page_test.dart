@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:real_calc/core/themes/app_theme.dart';
+import 'package:real_calc/core/widgets/page_header.dart';
 import 'package:real_calc/core/widgets/title_widget.dart';
 import 'package:real_calc/modules/financing/presentation/widgets/help_card.dart';
 import 'package:real_calc/modules/regular_deposits/presentation/cubit/regular_deposits_cubit.dart';
@@ -37,7 +38,7 @@ void main() {
     testWidgets('Deve renderizar a árvore de componentes completa com sucesso', (tester) async {
       await tester.pumpWidget(createSut());
 
-      expect(find.byType(AppBar), findsOneWidget);
+      expect(find.byType(PageHeader), findsOneWidget);
       expect(find.byType(TitleWidget), findsOneWidget);
       expect(find.byType(HelpCard), findsOneWidget);
       expect(find.byType(RegularDepositsForms), findsOneWidget);

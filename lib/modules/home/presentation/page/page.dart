@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:real_calc/core/routes/app_routes.dart';
-import 'package:real_calc/core/themes/app_image.dart';
 import 'package:real_calc/core/themes/spacing.dart';
 import 'package:real_calc/core/widgets/title_widget.dart';
 import 'package:real_calc/modules/home/domain/enum/menu_card_variant.dart';
@@ -15,21 +13,6 @@ import '../cubit/selic_cubit.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
-
-  PreferredSizeWidget _buildAppBar(BuildContext context, HomePageTheme theme) {
-    return AppBar(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      title: Text('RealCalc', style: theme.appNameStyle),
-      centerTitle: false,
-      leading: Padding(
-  padding: const EdgeInsets.all(AppSpacing.sm), // 12
-  child: SvgPicture.asset(
-    AppImage.appLogo,
-    semanticsLabel: 'Logo da Empresa',
-    fit: BoxFit.contain,
-  ))
-    );
-  }
 
   BlocBuilder<GreetingCubit, String> _buildGreetingWidget(
     BuildContext context,
