@@ -40,6 +40,19 @@ enum SelicValidationMessage implements ErrorMessages {
   const SelicValidationMessage(this.message);
 }
 
+
+enum FinancialCalculationValidationMessage implements ErrorMessages {
+  allParametersNull('Informe os parâmetros do cálculo'),
+  invalidParameterCount(
+    'Informe exatamente três parâmetros para realizar o cálculo',
+  );
+
+  @override
+  final String message;
+
+  const FinancialCalculationValidationMessage(this.message);
+}
+
 enum FinancingValidationMessage implements ErrorMessages {
   positiveInitialValue('O valor inicial deve ser maior que zero'),
   positiveFinalValue('O valor final deve ser maior que zero'),
