@@ -5,7 +5,7 @@ sealed class FutureValueState {}
 final class FutureValueInitial extends FutureValueState {}
 
 class FutureValueCalculated extends FutureValueState {
-  final FutureValue value;
+  final FinancialCalculation value;
 
   FutureValueCalculated(this.value);
 }

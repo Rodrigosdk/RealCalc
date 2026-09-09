@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:real_calc/core/themes/spacing.dart';
 import 'package:real_calc/core/widgets/page_header.dart';
 import 'package:real_calc/core/widgets/title_widget.dart';
-import 'package:real_calc/modules/future_value/presentation/widgets/future_value_forms.dart';
-import 'package:real_calc/modules/future_value/presentation/widgets/help_card.dart';
+import 'package:real_calc/modules/financial_calculators/presentation/widgets/future_value_forms.dart';
+import 'package:real_calc/modules/financial_calculators/presentation/widgets/help_card.dart';
 
 class FutureValuePage extends StatefulWidget {
   const FutureValuePage({super.key});
