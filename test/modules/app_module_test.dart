@@ -7,15 +7,15 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:real_calc/core/routes/app_routes.dart';
 import 'package:real_calc/modules/app_module.dart';
 import 'package:real_calc/modules/app_widget.dart';
-import 'package:real_calc/modules/financing/presentation/cubit/financing_cubit.dart';
-import 'package:real_calc/modules/financing/presentation/pages/page.dart';
-import 'package:real_calc/modules/future_value/presentation/pages/page.dart';
-import 'package:real_calc/modules/future_value/presentation/cubit/future_value_cubit.dart';
+import 'package:real_calc/modules/financial_calculators/presentation/cubit/financing/financing_cubit.dart';
+import 'package:real_calc/modules/financial_calculators/presentation/pages/financing_page.dart';
+import 'package:real_calc/modules/financial_calculators/presentation/pages/future_value_page.dart';
+import 'package:real_calc/modules/financial_calculators/presentation/cubit/future_value/future_value_cubit.dart';
 import 'package:real_calc/modules/home/presentation/cubit/greeting_cubit.dart';
 import 'package:real_calc/modules/home/presentation/cubit/selic_cubit.dart';
 import 'package:real_calc/modules/home/presentation/page/page.dart';
 import 'package:real_calc/modules/metrics/domain/entites/metric.dart';
-import 'package:real_calc/modules/regular_deposits/presentation/pages/page.dart';
+import 'package:real_calc/modules/financial_calculators/presentation/pages/regular_deposits_page.dart';
 
 class MockFinancingCubit extends MockCubit<FinancingState>
     implements FinancingCubit {}
