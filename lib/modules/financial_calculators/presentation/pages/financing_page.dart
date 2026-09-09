@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:real_calc/core/themes/spacing.dart';
 import 'package:real_calc/core/widgets/page_header.dart';
 import 'package:real_calc/core/widgets/title_widget.dart';
-import 'package:real_calc/modules/financing/presentation/widgets/financing_forms.dart';
-import 'package:real_calc/modules/financing/presentation/widgets/help_card.dart';
+import 'package:real_calc/modules/financial_calculators/presentation/widgets/financing_forms.dart';
+import 'package:real_calc/modules/financial_calculators/presentation/widgets/help_card.dart';
 
 class FinancingPage extends StatefulWidget {
   const FinancingPage({super.key});

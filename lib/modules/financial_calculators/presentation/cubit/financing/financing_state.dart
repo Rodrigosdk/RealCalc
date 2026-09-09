@@ -5,7 +5,7 @@ sealed class FinancingState {}
 final class FinancingInitial extends FinancingState {}
 
 class FinancingCalculated extends FinancingState {
-  final Financing value;
+  final FinancialCalculation value;
 
   FinancingCalculated(this.value);
 }

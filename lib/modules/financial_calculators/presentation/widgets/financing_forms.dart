@@ -5,8 +5,8 @@ import 'package:real_calc/core/themes/extensions/financing_forms_theme.dart';
 import 'package:real_calc/core/themes/spacing.dart';
 import 'package:real_calc/core/utils/decimal_input_formatter.dart';
 import 'package:real_calc/core/widgets/options_bottom_forms.dart';
-import '../../domain/entities/financing.dart';
-import '../cubit/financing_cubit.dart';
+import '../../domain/entities/financial_calculation.dart';
+import '../cubit/financing/financing_cubit.dart';
 import 'input_forms_result_card.dart';
 
 class FinancingForms extends StatefulWidget {
@@ -42,7 +42,7 @@ class _FinancingFormsState extends State<FinancingForms> {
     _finalValueController.clear();
   }
 
-  void _updateInputsFromState(Financing financing) {
+  void _updateInputsFromState(FinancialCalculation financing) {
     final formatter = DecimalInputFormatter();
     _initialValueController.value = financing.initialValue > 0
         ? formatter.formatEditUpdate(
@@ -54,7 +54,7 @@ class _FinancingFormsState extends State<FinancingForms> {
           )
         : TextEditingValue.empty;
     _monthsController.text =
-        financing.months > 0 ? financing.months.toString() : '';
+      financing.periods > 0 ? financing.periods.toString() : '';
     _rateController.value = financing.rate > 0
         ? formatter.formatEditUpdate(
             TextEditingValue.empty,
@@ -79,10 +79,10 @@ class _FinancingFormsState extends State<FinancingForms> {
     return double.tryParse(cleaned) ?? 0;
   }
 
-  Financing _getFinancingFromInputs() {
-    return Financing(
+  FinancialCalculation _getFinancingFromInputs() {
+    return FinancialCalculation(
       initialValue: _parseFormattedDouble(_initialValueController.text),
-      months: int.tryParse(_monthsController.text) ?? 0,
+      periods: int.tryParse(_monthsController.text) ?? 0,
       rate: _parseFormattedDouble(_rateController.text),
       finalValue: _parseFormattedDouble(_finalValueController.text),
     );

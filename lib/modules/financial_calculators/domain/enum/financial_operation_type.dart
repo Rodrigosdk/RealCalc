@@ -1,0 +1,4 @@
+enum FinancialOperationType {
+  compoundInterest,
+  regularDeposit,
+}
