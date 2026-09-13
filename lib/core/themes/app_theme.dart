@@ -7,6 +7,8 @@ import 'color_tokens.dart';
 import 'extensions/financing_forms_theme.dart';
 import 'extensions/home_page_theme.dart';
 import 'extensions/input_forms_result_card_theme.dart';
+import 'extensions/metric_card_theme.dart';
+import 'extensions/page_header_theme.dart';
 import 'extensions/title_widget_theme.dart';
 import 'text_styles.dart';
 
@@ -17,13 +19,10 @@ class AppTheme {
       useMaterial3: true,
 
       // Cores base
-      primaryColor: ColorTokens.primary,
       scaffoldBackgroundColor: ColorTokens.background,
 
       // ColorScheme do Material 3
       colorScheme: const ColorScheme.dark(
-        primary: ColorTokens.primary,
-        secondary: ColorTokens.primaryVariant,
         surface: ColorTokens.surface,
         error: ColorTokens.error,
         onPrimary: Colors.white,
@@ -37,9 +36,9 @@ class AppTheme {
         backgroundColor: ColorTokens.surface,
         elevation: 0,
         centerTitle: true,
-        actionsIconTheme: const IconThemeData(color: ColorTokens.accent),
+        actionsIconTheme: const IconThemeData(color: ColorTokens.accentAmber),
         titleTextStyle: AppTextStyles.headlineMedium,
-        iconTheme: IconThemeData(color: ColorTokens.primary),
+        iconTheme: IconThemeData(color: ColorTokens.iconColor),
       ),
 
       // TextTheme
@@ -54,15 +53,18 @@ class AppTheme {
       // Inputs
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: ColorTokens.surfaceDark,
+        fillColor: ColorTokens.background,
         hintStyle: TextStyle(color: ColorTokens.textHint),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: ColorTokens.border, width: 1.0),
+          borderRadius: BorderRadius.circular(5),
+          borderSide: const BorderSide(color: ColorTokens.background, width: 1.0),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: ColorTokens.accent, width: 1.5),
+          borderRadius: BorderRadius.circular(5),
+          borderSide: const BorderSide(
+            color: ColorTokens.background,
+            width: 1.5,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -81,7 +83,7 @@ class AppTheme {
       // Botões elevados
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: ColorTokens.primary,
+          backgroundColor: ColorTokens.surface,
           foregroundColor: Colors.white,
           minimumSize: const Size(double.infinity, 48),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -91,8 +93,8 @@ class AppTheme {
 
       // BottomNavigationBar
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: ColorTokens.surface,
-        selectedItemColor: ColorTokens.primary,
+        backgroundColor: ColorTokens.background,
+        selectedItemColor: ColorTokens.surface,
         unselectedItemColor: ColorTokens.textSecondary,
         type: BottomNavigationBarType.fixed,
         elevation: 8,
@@ -100,7 +102,7 @@ class AppTheme {
 
       // SnackBar
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: ColorTokens.surfaceVariant,
+        backgroundColor: ColorTokens.surface,
         contentTextStyle: const TextStyle(color: ColorTokens.textPrimary),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         behavior: SnackBarBehavior.floating,
@@ -108,9 +110,9 @@ class AppTheme {
 
       extensions: [
         const OptionsBottomFormsTheme(
-          calculateButtonBackground: ColorTokens.accent,
+          calculateButtonBackground: ColorTokens.accentAmber,
           calculateButtonForeground: Colors.white,
-          actionButtonBackground: ColorTokens.surfaceVariant,
+          actionButtonBackground: ColorTokens.surface,
           actionButtonForeground: ColorTokens.textSecondary,
         ),
         TitleWidgetTheme(
@@ -125,51 +127,87 @@ class AppTheme {
         ),
         HelpCardTheme(
           messageStyle: AppTextStyles.helpCardMessage,
-          backgroundColor: ColorTokens.helpCardBackground,
-          borderColor: ColorTokens.accent,
-          iconBackgroundColor: ColorTokens.accent,
+          backgroundColor: ColorTokens.surface,
+          borderColor: ColorTokens.accentAmber,
+          iconBackgroundColor: ColorTokens.surface,
           iconColor: Colors.white,
         ),
         // app_theme.dart (dentro de extensions:)
         InputFormsResultCardTheme(
-          suffixIconColor: ColorTokens.textHint,
-          helperTextStyle: AppTextStyles.inputHelperText,
+          neutralBorderColor: ColorTokens.border,
+          neutralLabelColor: ColorTokens.textSecondary,
+          neutralIconColor: ColorTokens.textSecondary,
+          highlightedColor: ColorTokens.accentAmber,
+          calculatedColor: ColorTokens.success,
+          errorColor: ColorTokens.error,
+          badgeStyle: AppTextStyles.stateBadge,
         ),
 
         HomePageTheme(
-          scaffoldBackgroundColor: ColorTokens.homeScaffoldBackground,
-          cardColor: ColorTokens.homeCard,
-          primaryBlue: ColorTokens.accent, // ← era homePrimaryBlue
-          iconContainerColor: ColorTokens.homeIconContainer,
+          scaffoldBackgroundColor: ColorTokens.background,
+          cardColor: ColorTokens.background,
+          iconContainerColor: ColorTokens.iconColor,
           appNameStyle: AppTextStyles.appName,
           sectionHeaderStyle: AppTextStyles.sectionHeader,
           historyItemStyle: AppTextStyles.historyItem,
           historyItemIconColor: Colors.white,
           historyItemArrowColor: Colors.white,
-          bottomNavBackgroundColor: ColorTokens.bottomNavBackground,
-          bottomNavSelectedColor: ColorTokens.accent,
+          bottomNavBackgroundColor: ColorTokens.surface,
+          bottomNavSelectedColor: ColorTokens.accentAmber,
           bottomNavUnselectedColor: Colors.white,
+          lineColor: ColorTokens.border,
         ),
         FinancingFormsTheme(
-          iconColor: ColorTokens.accent,
-          progressIndicatorColor: ColorTokens.accent,
+          iconColor: ColorTokens.iconColor,
+          progressIndicatorColor: ColorTokens.accentAmber,
           errorBackgroundColor: ColorTokens.errorContainerBg,
           errorBorderColor: ColorTokens.errorContainerBorder,
           errorTextStyle: AppTextStyles.errorBannerText,
         ),
         HighlightCardTheme(
-          gradientColors: [ColorTokens.gradientStart, ColorTokens.gradientEnd],
-          titleStyle: AppTextStyles.highlightCardTitle,
-          subtitleStyle: AppTextStyles.highlightCardSubtitle,
+          gradientColors: [
+            ColorTokens.surface,
+            ColorTokens.accentAmber.withValues(alpha: 0.32),
+          ],
+          titleStyle: AppTextStyles.menuCardTitleFeatured,
+          subtitleStyle: AppTextStyles.menuCardDescriptionFeatured,
           buttonBackgroundColor: Colors.white,
           buttonForegroundColor: Colors.white,
-          buttonTextStyle: AppTextStyles.highlightCardButton,
+          buttonTextStyle: AppTextStyles.menuCardDescriptionFeatured,
         ),
 
         MenuCardTheme(
           titleStyle: AppTextStyles.menuCardTitle,
           descriptionStyle: AppTextStyles.menuCardDescription,
-          iconContainerColor: ColorTokens.menuCardIconContainer,
+          titleStyleCompact: AppTextStyles.menuCardTitleCompact,
+          descriptionStyleCompact: AppTextStyles.menuCardDescriptionCompact,
+          titleStyleFeatured: AppTextStyles.menuCardTitleFeatured,
+          descriptionStyleFeatured: AppTextStyles.menuCardDescriptionFeatured,
+          featuredBorderColor: ColorTokens.accentAmber,
+          disabledLabelColor: ColorTokens.textHint,
+          disabledTextStyle: AppTextStyles.menuCardDescription,
+        ),
+
+        MetricCardTheme(
+          backgroundColor: ColorTokens.surface,
+          borderColor: ColorTokens.accentAmber.withValues(alpha: 0.25),
+          labelStyle: AppTextStyles.metricLabel,
+          valueStyle: AppTextStyles.metricValue,
+          valueUnitStyle: AppTextStyles.metricLabel,
+          captionStyle: AppTextStyles.metricCaption,
+          variationTextStyle: AppTextStyles.stateBadge,
+          variationPositiveColor: ColorTokens.success,
+          variationNegativeColor: ColorTokens.error,
+          variationNeutralColor: ColorTokens.textSecondary,
+          skeletonColor: ColorTokens.surfaceVariant,
+          
+        ),
+        PageHeaderTheme(
+          backgroundColor: ColorTokens.background,
+          iconColor: ColorTokens.textSecondary,
+          titleStyle: AppTextStyles.headlineMedium.copyWith(
+            color: ColorTokens.textPrimary,
+          ),
         ),
       ],
     );

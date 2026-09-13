@@ -27,6 +27,32 @@ enum ServerErrorMessages implements ErrorMessages {
   const ServerErrorMessages(this.message);
 }
 
+enum SelicValidationMessage implements ErrorMessages {
+  invalidDate('Informe datas válidas no formato dd/MM/yyyy'),
+  initialDateAfterFinalDate(
+    'A data inicial deve ser anterior à data final',
+  ),
+  periodExceedsLimit('O período consultado não pode ser maior que 10 anos');
+
+  @override
+  final String message;
+
+  const SelicValidationMessage(this.message);
+}
+
+
+enum FinancialCalculationValidationMessage implements ErrorMessages {
+  allParametersNull('Informe os parâmetros do cálculo'),
+  invalidParameterCount(
+    'Informe exatamente três parâmetros para realizar o cálculo',
+  );
+
+  @override
+  final String message;
+
+  const FinancialCalculationValidationMessage(this.message);
+}
+
 enum FinancingValidationMessage implements ErrorMessages {
   positiveInitialValue('O valor inicial deve ser maior que zero'),
   positiveFinalValue('O valor final deve ser maior que zero'),

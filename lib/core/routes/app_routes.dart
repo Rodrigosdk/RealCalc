@@ -14,8 +14,8 @@ class AppRoutes {
 
   // Absolutos para navegação
   static const String financing = '/home/$financingSegment';
-  static const String futureValue = '/home/$futureValueSegment';
-  static const String deposits = '/home/$depositsSegment';
+  static const String futureValue = '$financing/$futureValueSegment';
+  static const String deposits = '$financing/$depositsSegment';
   static const String correction = '/home/$correctionSegment';
   static const String history = '/home/$historySegment';
   static const String profile = '/home/$profileSegment';

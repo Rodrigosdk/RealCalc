@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 class HomePageTheme extends ThemeExtension<HomePageTheme> {
   final Color scaffoldBackgroundColor;
   final Color cardColor;
-  final Color primaryBlue;
   final Color iconContainerColor;
   final TextStyle appNameStyle;
   final TextStyle sectionHeaderStyle;
@@ -13,11 +12,11 @@ class HomePageTheme extends ThemeExtension<HomePageTheme> {
   final Color bottomNavBackgroundColor;
   final Color bottomNavSelectedColor;
   final Color bottomNavUnselectedColor;
+  final Color lineColor;
 
   const HomePageTheme({
     required this.scaffoldBackgroundColor,
     required this.cardColor,
-    required this.primaryBlue,
     required this.iconContainerColor,
     required this.appNameStyle,
     required this.sectionHeaderStyle,
@@ -27,6 +26,7 @@ class HomePageTheme extends ThemeExtension<HomePageTheme> {
     required this.bottomNavBackgroundColor,
     required this.bottomNavSelectedColor,
     required this.bottomNavUnselectedColor,
+    required this.lineColor,
   });
 
   @override
@@ -34,7 +34,6 @@ class HomePageTheme extends ThemeExtension<HomePageTheme> {
     Color? scaffoldBackgroundColor,
     Color? cardColor,
     Color? primaryBlue,
-    Color? iconContainerColor,
     TextStyle? appNameStyle,
     TextStyle? sectionHeaderStyle,
     TextStyle? historyItemStyle,
@@ -43,11 +42,12 @@ class HomePageTheme extends ThemeExtension<HomePageTheme> {
     Color? bottomNavBackgroundColor,
     Color? bottomNavSelectedColor,
     Color? bottomNavUnselectedColor,
+    Color? iconContainerColor,
+    Color? lineColor,
   }) {
     return HomePageTheme(
       scaffoldBackgroundColor: scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
       cardColor: cardColor ?? this.cardColor,
-      primaryBlue: primaryBlue ?? this.primaryBlue,
       iconContainerColor: iconContainerColor ?? this.iconContainerColor,
       appNameStyle: appNameStyle ?? this.appNameStyle,
       sectionHeaderStyle: sectionHeaderStyle ?? this.sectionHeaderStyle,
@@ -57,6 +57,7 @@ class HomePageTheme extends ThemeExtension<HomePageTheme> {
       bottomNavBackgroundColor: bottomNavBackgroundColor ?? this.bottomNavBackgroundColor,
       bottomNavSelectedColor: bottomNavSelectedColor ?? this.bottomNavSelectedColor,
       bottomNavUnselectedColor: bottomNavUnselectedColor ?? this.bottomNavUnselectedColor,
+      lineColor: lineColor ?? this.lineColor,
     );
   }
 
@@ -66,7 +67,6 @@ class HomePageTheme extends ThemeExtension<HomePageTheme> {
     return HomePageTheme(
       scaffoldBackgroundColor: Color.lerp(scaffoldBackgroundColor, other.scaffoldBackgroundColor, t)!,
       cardColor: Color.lerp(cardColor, other.cardColor, t)!,
-      primaryBlue: Color.lerp(primaryBlue, other.primaryBlue, t)!,
       iconContainerColor: Color.lerp(iconContainerColor, other.iconContainerColor, t)!,
       appNameStyle: TextStyle.lerp(appNameStyle, other.appNameStyle, t)!,
       sectionHeaderStyle: TextStyle.lerp(sectionHeaderStyle, other.sectionHeaderStyle, t)!,
@@ -76,6 +76,7 @@ class HomePageTheme extends ThemeExtension<HomePageTheme> {
       bottomNavBackgroundColor: Color.lerp(bottomNavBackgroundColor, other.bottomNavBackgroundColor, t)!,
       bottomNavSelectedColor: Color.lerp(bottomNavSelectedColor, other.bottomNavSelectedColor, t)!,
       bottomNavUnselectedColor: Color.lerp(bottomNavUnselectedColor, other.bottomNavUnselectedColor, t)!,
+      lineColor: Color.lerp(lineColor, other.lineColor, t)!,
     );
   }
 }

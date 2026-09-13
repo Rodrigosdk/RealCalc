@@ -1,0 +1,8 @@
+<svg width="160" height="160" viewBox="0 0 380 380" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>Ícone do app com um símbolo de porcentagem estilizado</title>
+  <desc>Quadrado arredondado escuro com um traço diagonal âmbar, um anel no topo e duas barras ascendentes na base, formando um símbolo de porcentagem combinado com um gráfico de crescimento.</desc>
+  <line x1="128" y1="272" x2="252" y2="108" stroke="#D4A657" stroke-width="20" stroke-linecap="round"/>
+  <circle cx="128" cy="140" r="28" fill="none" stroke="#D4A657" stroke-width="16"/>
+  <rect x="222" y="250" width="22" height="40" rx="6" fill="#D4A657"/>
+  <rect x="252" y="215" width="22" height="75" rx="6" fill="#D4A657"/>
+</svg>

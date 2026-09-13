@@ -132,15 +132,15 @@ void main() {
 
       expect(decoration.enabledBorder, isA<OutlineInputBorder>());
       final enabled = decoration.enabledBorder as OutlineInputBorder;
-      expect(enabled.borderSide.color, ColorTokens.border);
+      expect(enabled.borderSide.color, ColorTokens.background);
       expect(enabled.borderSide.width, 1.0);
-      expect(enabled.borderRadius, BorderRadius.circular(16));
+      expect(enabled.borderRadius, BorderRadius.circular(5));
 
       expect(decoration.focusedBorder, isA<OutlineInputBorder>());
       final focused = decoration.focusedBorder as OutlineInputBorder;
-      expect(focused.borderSide.color, ColorTokens.accent);
+      expect(focused.borderSide.color, ColorTokens.background);
       expect(focused.borderSide.width, 1.5);
-      expect(focused.borderRadius, BorderRadius.circular(16));
+      expect(focused.borderRadius, BorderRadius.circular(5));
     });
 
     testWidgets(
