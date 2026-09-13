@@ -5,6 +5,7 @@ import 'package:real_calc/core/errors/failures.dart';
 import 'package:real_calc/core/errors/messages.dart';
 import 'package:real_calc/core/seed_works/result.dart';
 import 'package:real_calc/modules/financial_calculators/domain/entities/financial_calculation.dart';
+import 'package:real_calc/modules/financial_calculators/domain/enum/financial_calculation_target.dart';
 import 'package:real_calc/modules/financial_calculators/use_case/financing/i_calculate_financing.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/cubit/financing/financing_cubit.dart'; // Ajuste o import do seu cubit
 
@@ -108,6 +109,10 @@ void main() {
           (s) => s.value.finalValue,
           'finalValue',
           1180.50,
+        ).having(
+          (s) => s.calculatedField,
+          'calculatedField',
+          FinancialCalculationTarget.finalValue,
         ),
       ],
     );
@@ -129,6 +134,10 @@ void main() {
           (s) => s.value.periods,
           'periods',
           9, // Verifica se o .toInt() do switch funcionou
+        ).having(
+          (s) => s.calculatedField,
+          'calculatedField',
+          FinancialCalculationTarget.periods,
         ),
       ],
     );

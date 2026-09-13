@@ -6,8 +6,9 @@ final class FinancingInitial extends FinancingState {}
 
 class FinancingCalculated extends FinancingState {
   final FinancialCalculation value;
+  final FinancialCalculationTarget calculatedField;
 
-  FinancingCalculated(this.value);
+  FinancingCalculated(this.value, this.calculatedField);
 }
 
 class FinancingLoading extends FinancingState {
