@@ -6,8 +6,9 @@ final class FutureValueInitial extends FutureValueState {}
 
 class FutureValueCalculated extends FutureValueState {
   final FinancialCalculation value;
+  final FinancialCalculationTarget calculatedField;
 
-  FutureValueCalculated(this.value);
+  FutureValueCalculated(this.value, this.calculatedField);
 }
 
 class FutureValueLoading extends FutureValueState {}

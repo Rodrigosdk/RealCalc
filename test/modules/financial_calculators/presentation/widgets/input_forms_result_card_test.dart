@@ -1,162 +1,235 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:real_calc/core/themes/color_tokens.dart';
 import 'package:real_calc/core/themes/extensions/input_forms_result_card_theme.dart';
-import 'package:real_calc/core/themes/text_styles.dart';
-import 'package:real_calc/core/utils/decimal_input_formatter.dart';
-import 'package:real_calc/core/widgets/input_forms.dart';
+import 'package:real_calc/modules/financial_calculators/domain/enum/input_field_state.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/widgets/input_forms_result_card.dart';
 
 void main() {
-  late TextEditingController controller;
-  late String label;
-  late String hint;
-  late Widget prefixIcon;
-  final formKey = GlobalKey<FormState>();
+  final testTheme = InputFormsResultCardTheme(
+    neutralIconColor: Colors.grey,
+    neutralBorderColor: Colors.grey.shade300,
+    neutralLabelColor: Colors.black54,
+    highlightedColor: Colors.orange,
+    calculatedColor: Colors.blue,
+    errorColor: Colors.red,
+    borderRadius: 12,
+    badgeStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+  );
 
-  setUp(() {
-    controller = TextEditingController();
-    label = 'Valor Base';
-    hint = 'R\$ 0,00';
-    prefixIcon = const Icon(Icons.monetization_on);
-  });
-
-  tearDown(() {
-    controller.dispose();
-  });
-
-  Widget createSut({
-    VoidCallback? onTap,
+  Widget buildTestWidget({
+    required TextEditingController controller,
+    String label = 'Valor',
+    String hint = 'Digite o valor',
+    IconData icon = Icons.attach_money,
+    InputFieldState state = InputFieldState.neutral,
     String? Function(String?)? validator,
     List<TextInputFormatter>? inputFormatters,
+    VoidCallback? onTap,
   }) {
     return MaterialApp(
-      theme: ThemeData(
-        extensions: [
-          InputFormsResultCardTheme(
-            suffixIconColor: ColorTokens.textHint,
-            helperTextStyle: AppTextStyles.inputHelperText,
-          ),
-        ],
-      ),
+      theme: ThemeData(extensions: [testTheme]),
       home: Scaffold(
-        body: Form(
-          key: formKey,
-          child: InputFormsResultCard(
-            controller: controller,
-            label: label,
-            hint: hint,
-            prefixIcon: prefixIcon,
-            onTap: onTap,
-            validator: validator,
-            inputFormatters: inputFormatters,
-          ),
+        body: InputFormsResultCard(
+          controller: controller,
+          label: label,
+          hint: hint,
+          icon: icon,
+          state: state,
+          validator: validator,
+          inputFormatters: inputFormatters,
+          onTap: onTap,
         ),
       ),
     );
   }
 
   group('InputFormsResultCard', () {
-    testWidgets(
-      'Deve exibir o InputForms interno e a legenda de ajuda abaixo',
-      (tester) async {
-        await tester.pumpWidget(createSut());
+    late TextEditingController controller;
 
-        expect(find.byType(InputForms), findsOneWidget);
+    setUp(() {
+      controller = TextEditingController();
+    });
 
-        final helperTextFinder = find.text(
-          'Toque para calcular automaticamente',
-        );
-        expect(helperTextFinder, findsOneWidget);
+    tearDown(() {
+      controller.dispose();
+    });
 
-        final Text helperText = tester.widget(helperTextFinder);
-        expect(helperText.style, AppTextStyles.inputHelperText);
-      },
-    );
+    testWidgets('renderiza label, hint e ícone corretamente', (tester) async {
+      await tester.pumpWidget(buildTestWidget(
+        controller: controller,
+        label: 'Preço do imóvel',
+        hint: 'R\$ 0,00',
+        icon: Icons.home,
+      ));
 
-    testWidgets(
-      'Deve repassar o prefixIcon e fixar o chevron_right como suffixIcon',
-      (tester) async {
-        await tester.pumpWidget(createSut());
+      expect(find.text('Preço do imóvel'), findsOneWidget);
+      expect(find.byIcon(Icons.home), findsOneWidget);
 
-        expect(find.byIcon(Icons.monetization_on), findsOneWidget);
-        expect(find.byIcon(Icons.chevron_right), findsOneWidget);
-      },
-    );
+      final textField = tester.widget<TextField>(find.byType(TextField));
+      expect(textField.decoration?.hintText, 'R\$ 0,00');
+    });
 
-    testWidgets(
-      'Deve repassar a ação do callback onTap ao clicar na seta lateral',
-      (tester) async {
-        bool wasTapped = false;
+    testWidgets('não exibe badge quando o estado é neutro', (tester) async {
+      await tester.pumpWidget(buildTestWidget(
+        controller: controller,
+        state: InputFieldState.neutral,
+      ));
 
-        await tester.pumpWidget(createSut(onTap: () => wasTapped = true));
+      expect(find.text('vazio'), findsNothing);
+      expect(find.text('calculado'), findsNothing);
+    });
 
-        await tester.tap(find.byIcon(Icons.chevron_right));
-        await tester.pump();
+    testWidgets('exibe badge "vazio" quando o estado é highlighted',
+        (tester) async {
+      await tester.pumpWidget(buildTestWidget(
+        controller: controller,
+        state: InputFieldState.highlighted,
+      ));
 
-        expect(wasTapped, true);
-      },
-    );
+      expect(find.text('vazio'), findsOneWidget);
+    });
 
-    testWidgets('Deve repassar e exibir o erro do validator se configurado', (
-      tester,
-    ) async {
-      await tester.pumpWidget(createSut(validator: (value) => 'Erro do card'));
+    testWidgets('exibe badge "calculado" quando o estado é calculated',
+        (tester) async {
+      await tester.pumpWidget(buildTestWidget(
+        controller: controller,
+        state: InputFieldState.calculated,
+      ));
 
-      formKey.currentState?.validate();
-      await tester.pump();
+      expect(find.text('calculado'), findsOneWidget);
+    });
 
-      expect(find.text('Erro do card'), findsOneWidget);
+    testWidgets('não exibe badge quando o estado é error', (tester) async {
+      await tester.pumpWidget(buildTestWidget(
+        controller: controller,
+        state: InputFieldState.error,
+      ));
+
+      expect(find.text('vazio'), findsNothing);
+      expect(find.text('calculado'), findsNothing);
+    });
+
+    testWidgets('aplica a cor de destaque correta ao ícone conforme o estado',
+        (tester) async {
+      await tester.pumpWidget(buildTestWidget(
+        controller: controller,
+        icon: Icons.percent,
+        state: InputFieldState.calculated,
+      ));
+
+      final iconWidget = tester.widget<Icon>(find.byIcon(Icons.percent));
+      expect(iconWidget.color, testTheme.calculatedColor);
+    });
+
+    testWidgets('usa a borda neutra e fina quando o estado é neutro',
+        (tester) async {
+      await tester.pumpWidget(buildTestWidget(
+        controller: controller,
+        state: InputFieldState.neutral,
+      ));
+
+      final container = tester.widget<Container>(find.byType(Container).first);
+      final decoration = container.decoration as BoxDecoration;
+      final border = decoration.border as Border;
+
+      expect(border.top.width, 0.5);
+      expect(decoration.color, isNull);
     });
 
     testWidgets(
-      'Deve configurar o TextFormField para teclado decimal e ação concluída',
-      (tester) async {
-        await tester.pumpWidget(createSut());
+        'usa borda destacada e fundo tintado quando o estado não é neutro',
+        (tester) async {
+      await tester.pumpWidget(buildTestWidget(
+        controller: controller,
+        state: InputFieldState.error,
+      ));
 
-        // Use TextField, não TextFormField
-        final textField = tester.widget<TextField>(find.byType(TextField));
+      final container = tester.widget<Container>(find.byType(Container).first);
+      final decoration = container.decoration as BoxDecoration;
+      final border = decoration.border as Border;
 
-        expect(
-          textField.keyboardType,
-          const TextInputType.numberWithOptions(decimal: true),
-        );
-        expect(textField.textInputAction, TextInputAction.done);
-      },
-    );
+      expect(border.top.width, 1);
+      expect(decoration.color, isNotNull);
+    });
 
-    testWidgets(
-      'Deve repassar os inputFormatters configurados para o TextField interno',
-      (tester) async {
-        await tester.pumpWidget(
-          createSut(inputFormatters: [FilteringTextInputFormatter.digitsOnly]),
-        );
+    testWidgets('permite digitar texto e atualiza o controller',
+        (tester) async {
+      await tester.pumpWidget(buildTestWidget(controller: controller));
 
-        // O inputFormatters está no TextField, não no TextFormField
-        final textField = tester.widget<TextField>(find.byType(TextField));
+      await tester.enterText(find.byType(TextFormField), '1500');
+      await tester.pump();
 
-        expect(textField.inputFormatters, isNotNull);
-        expect(textField.inputFormatters!.length, 1);
-        expect(
-          textField.inputFormatters!.first,
-          isA<FilteringTextInputFormatter>(),
-        );
-      },
-    );
-    testWidgets(
-      'Deve aplicar a formatação decimal em tempo real ao digitar no card',
-      (tester) async {
-        await tester.pumpWidget(
-          createSut(inputFormatters: [DecimalInputFormatter()]),
-        );
+      expect(controller.text, '1500');
+    });
 
-        await tester.enterText(find.byType(TextFormField), '5');
-        await tester.pump();
+    testWidgets('chama onTap ao tocar no campo', (tester) async {
+      var tapped = false;
 
-        expect(controller.text, '0,05');
-        expect(find.text('0,05'), findsOneWidget);
-      },
-    );
+      await tester.pumpWidget(buildTestWidget(
+        controller: controller,
+        onTap: () => tapped = true,
+      ));
+
+      await tester.tap(find.byType(TextFormField));
+      await tester.pump();
+
+      expect(tapped, isTrue);
+    });
+
+    testWidgets('valida o campo e exibe mensagem de erro do validator',
+        (tester) async {
+      final formKey = GlobalKey<FormState>();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(extensions: [testTheme]),
+          home: Scaffold(
+            body: Form(
+              key: formKey,
+              child: InputFormsResultCard(
+                controller: controller,
+                label: 'Valor',
+                hint: 'Digite o valor',
+                icon: Icons.attach_money,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Campo obrigatório';
+                  }
+                  return null;
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      formKey.currentState!.validate();
+      await tester.pump();
+
+      expect(find.text('Campo obrigatório'), findsOneWidget);
+    });
+
+    testWidgets('respeita os inputFormatters ao digitar', (tester) async {
+      await tester.pumpWidget(buildTestWidget(
+        controller: controller,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      ));
+
+      await tester.enterText(find.byType(TextFormField), 'a1b2c3');
+      await tester.pump();
+
+      expect(controller.text, '123');
+    });
+
+    testWidgets('usa teclado numérico com casas decimais', (tester) async {
+      await tester.pumpWidget(buildTestWidget(controller: controller));
+
+      final textField = tester.widget<TextField>(find.byType(TextField));
+      expect(
+        textField.keyboardType,
+        const TextInputType.numberWithOptions(decimal: true),
+      );
+    });
   });
 }

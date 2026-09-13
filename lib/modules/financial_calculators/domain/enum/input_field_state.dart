@@ -1,0 +1,1 @@
+enum InputFieldState { neutral, highlighted, calculated, error }
