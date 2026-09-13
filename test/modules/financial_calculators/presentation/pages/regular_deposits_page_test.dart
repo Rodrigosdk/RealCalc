@@ -1,34 +1,41 @@
-import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:real_calc/core/themes/app_theme.dart';
 import 'package:real_calc/core/widgets/page_header.dart';
 import 'package:real_calc/core/widgets/title_widget.dart';
+import 'package:real_calc/modules/financial_calculators/domain/enum/financial_calculation_target.dart';
+import 'package:real_calc/modules/financial_calculators/presentation/cubit/forms/financing_form_cubit.dart';
+import 'package:real_calc/modules/financial_calculators/presentation/widgets/forms_view.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/widgets/help_card.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/cubit/regular_deposits/regular_deposits_cubit.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/pages/regular_deposits_page.dart';
-import 'package:real_calc/modules/financial_calculators/presentation/widgets/regular_deposits_forms.dart';
 
-class MockRegularDepositsCubit extends MockCubit<RegularDepositsState>
-    implements RegularDepositsCubit {}
+import '../../../../test_harness.dart';
 
 void main() {
-  late RegularDepositsCubit mockCubit;
-
+  late TestHarness harness;
+ 
   setUp(() {
-    mockCubit = MockRegularDepositsCubit();
-    when(() => mockCubit.state).thenReturn(RegularDepositsInitial());
+    harness = TestHarness()..setUpDefaults();
   });
-
+ 
+  tearDown(() => harness.dispose());
+ 
   Widget createSut() {
     return MaterialApp(
-      theme: AppTheme.darkTheme,
+      theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.dark,
-      home: BlocProvider<RegularDepositsCubit>.value(
-        value: mockCubit,
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider<RegularDepositsCubit>.value(
+            value: harness.regularDepositsCubit,
+          ),
+          BlocProvider<FinancingFormCubit>.value(
+            value: harness.financingFormCubit,
+          ),
+        ],
         child: const RegularDepositsPage(),
       ),
     );
@@ -41,7 +48,7 @@ void main() {
       expect(find.byType(PageHeader), findsOneWidget);
       expect(find.byType(TitleWidget), findsOneWidget);
       expect(find.byType(HelpCard), findsOneWidget);
-      expect(find.byType(RegularDepositsForms), findsOneWidget);
+      expect(find.byType(FormsView<FinancialCalculationTarget>), findsOneWidget);
 
       expect(find.text('Depósitos Regulares'), findsNWidgets(2));
       expect(
