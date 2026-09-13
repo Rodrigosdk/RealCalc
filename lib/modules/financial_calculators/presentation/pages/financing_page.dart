@@ -109,7 +109,7 @@ class FinancingPage extends StatelessWidget {
                 subtitle: 'Calcule o valor da prestação do seu financiamento.',
               ),
               const HelpCard(
-                menssage:
+                message:
                     'Preencha 3 campos e toque no 4° para calcular automaticamente',
               ),
               _buildForms(),

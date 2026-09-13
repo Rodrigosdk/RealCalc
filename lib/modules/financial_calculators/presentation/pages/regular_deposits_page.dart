@@ -111,7 +111,7 @@ class RegularDepositsPage extends StatelessWidget {
                     'Calcule o valor futuro, a taxa, o prazo ou o depósito mensal.',
               ),
               const HelpCard(
-                menssage:
+                message:
                     'Preencha 3 campos e toque no 4° para calcular automaticamente',
               ),
               _buildForms(),
