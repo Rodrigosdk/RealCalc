@@ -109,7 +109,7 @@ class FutureValuePage extends StatelessWidget {
                 subtitle: 'Calcule o valor futuro do seu capital.',
               ),
               const HelpCard(
-                menssage:
+                message:
                     'Preencha 3 campos e toque no 4° para calcular automaticamente',
               ),
               _buildForms(),
