@@ -18,7 +18,10 @@ void main() {
     Modular.destroy();
   });
 
-  tearDown(() => harness.dispose());
+  tearDown((){
+    harness.dispose();
+    Modular.destroy();
+  });
 
   // Helper local para definir a resolução correta da tela usando o tester.
   void resizeScreen(WidgetTester tester) {
