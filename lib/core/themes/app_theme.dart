@@ -53,16 +53,16 @@ class AppTheme {
       // Inputs
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: ColorTokens.surface,
+        fillColor: ColorTokens.background,
         hintStyle: TextStyle(color: ColorTokens.textHint),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: ColorTokens.border, width: 1.0),
+          borderRadius: BorderRadius.circular(5),
+          borderSide: const BorderSide(color: ColorTokens.background, width: 1.0),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(5),
           borderSide: const BorderSide(
-            color: ColorTokens.accentAmber,
+            color: ColorTokens.background,
             width: 1.5,
           ),
         ),
@@ -134,8 +134,13 @@ class AppTheme {
         ),
         // app_theme.dart (dentro de extensions:)
         InputFormsResultCardTheme(
-          suffixIconColor: ColorTokens.textHint,
-          helperTextStyle: AppTextStyles.inputHelperText,
+          neutralBorderColor: ColorTokens.border,
+          neutralLabelColor: ColorTokens.textSecondary,
+          neutralIconColor: ColorTokens.textSecondary,
+          highlightedColor: ColorTokens.accentAmber,
+          calculatedColor: ColorTokens.success,
+          errorColor: ColorTokens.error,
+          badgeStyle: AppTextStyles.stateBadge,
         ),
 
         HomePageTheme(
