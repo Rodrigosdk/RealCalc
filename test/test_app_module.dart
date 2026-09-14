@@ -21,12 +21,11 @@ class AppModuleTest extends AppModule {
     required this.selicCubit,
     required this.greetingCubit,
     required this.financingFormCubit,
-    required this.regularDepositsCubit
+    required this.regularDepositsCubit,
   });
 
   @override
   void binds(Injector i) {
-    super.binds(i);
     i.addInstance<FinancingCubit>(financingCubit);
     i.addInstance<FutureValueCubit>(futureValueCubit);
     i.addInstance<SelicCubit>(selicCubit);

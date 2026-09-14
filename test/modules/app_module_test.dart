@@ -3,6 +3,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:real_calc/core/routes/app_routes.dart';
 import 'package:real_calc/modules/app_widget.dart';
+import 'package:real_calc/modules/financial_calculators/presentation/cubit/regular_deposits/regular_deposits_cubit.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/pages/financing_page.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/pages/future_value_page.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/pages/regular_deposits_page.dart';
@@ -14,11 +15,11 @@ void main() {
   late TestHarness harness;
 
   setUp(() {
-    harness = TestHarness()..setUpDefaults();
     cleanModular();
+    harness = TestHarness()..setUpDefaults();
   });
 
-  tearDown((){
+  tearDown(() {
     harness.dispose();
     cleanModular();
   });
@@ -113,6 +114,9 @@ void main() {
         );
 
         await tester.pumpAndSettle();
+
+        expect(Modular.get<RegularDepositsCubit>(), isNotNull);
+
         Modular.to.navigate(AppRoutes.deposits);
         await tester.idle();
         await tester.pumpAndSettle();
