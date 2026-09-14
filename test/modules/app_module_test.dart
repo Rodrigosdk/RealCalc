@@ -15,12 +15,12 @@ void main() {
 
   setUp(() {
     harness = TestHarness()..setUpDefaults();
-    Modular.destroy();
+    cleanModular();
   });
 
   tearDown((){
     harness.dispose();
-    Modular.destroy();
+    cleanModular();
   });
 
   // Helper local para definir a resolução correta da tela usando o tester.
