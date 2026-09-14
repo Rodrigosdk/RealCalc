@@ -6,8 +6,9 @@ final class RegularDepositsInitial extends RegularDepositsState {}
 
 class RegularDepositsCalculated extends RegularDepositsState {
   final FinancialCalculation value;
+  final FinancialCalculationTarget calculatedField;
 
-  RegularDepositsCalculated(this.value);
+  RegularDepositsCalculated(this.value, this.calculatedField);
 }
 
 class RegularDepositsLoading extends RegularDepositsState {}

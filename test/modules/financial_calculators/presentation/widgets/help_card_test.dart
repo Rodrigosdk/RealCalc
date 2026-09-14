@@ -24,7 +24,7 @@ void main() {
           ],
         ),
         home: const Scaffold(
-          body: HelpCard(menssage: testMessage),
+          body: HelpCard(message: testMessage),
         ),
       );
     }

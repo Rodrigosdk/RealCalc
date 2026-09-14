@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:real_calc/core/themes/extensions/help_card_theme.dart';
 
 class HelpCard extends StatelessWidget {
-  final String menssage;
+  final String message;
 
-  const HelpCard({super.key, required this.menssage});
+  const HelpCard({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +41,7 @@ class HelpCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(menssage, style: theme.messageStyle),
+                Text(message, style: theme.messageStyle),
               ],
             ),
           ),

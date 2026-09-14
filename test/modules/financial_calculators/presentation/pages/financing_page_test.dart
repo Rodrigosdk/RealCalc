@@ -1,40 +1,42 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:real_calc/core/themes/app_theme.dart';
 import 'package:real_calc/core/widgets/page_header.dart';
 import 'package:real_calc/core/widgets/title_widget.dart';
+import 'package:real_calc/modules/financial_calculators/domain/enum/financial_calculation_target.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/cubit/financing/financing_cubit.dart';
+import 'package:real_calc/modules/financial_calculators/presentation/cubit/forms/financing_form_cubit.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/pages/financing_page.dart';
-import 'package:real_calc/modules/financial_calculators/presentation/widgets/financing_forms.dart';
+import 'package:real_calc/modules/financial_calculators/presentation/widgets/forms_view.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/widgets/help_card.dart';
 
-class MockFinancingCubit extends MockCubit<FinancingState> implements FinancingCubit {}
+import '../../../../test_harness.dart';
+
 
 void main() {
-  late FinancingCubit mockCubit;
-
-  setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  });
-
+  late TestHarness harness;
+ 
   setUp(() {
-    mockCubit = MockFinancingCubit();
-    when(() => mockCubit.state).thenReturn(FinancingInitial());
+    harness = TestHarness()..setUpDefaults();
   });
-
+ 
+  tearDown(() => harness.dispose());
+  
   Widget createSut() {
     return MaterialApp(
-      theme: AppTheme.darkTheme,
-      darkTheme: AppTheme.lightTheme,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.dark,
-      home: BlocProvider<FinancingCubit>.value(
-        value: mockCubit,
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider<FinancingCubit>.value(value: harness.financingCubit),
+          BlocProvider<FinancingFormCubit>.value(
+            value: harness.financingFormCubit,
+          ),
+        ],
         child: const FinancingPage(),
       ),
     );
@@ -48,7 +50,7 @@ void main() {
       expect(find.byType(PageHeader), findsOneWidget);
       expect(find.byType(TitleWidget), findsOneWidget);
       expect(find.byType(HelpCard), findsOneWidget);
-      expect(find.byType(FinancingForms), findsOneWidget);
+      expect(find.byType(FormsView<FinancialCalculationTarget>), findsOneWidget);
 
     });
 

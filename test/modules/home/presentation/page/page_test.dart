@@ -86,8 +86,13 @@ void main() {
             iconColor: Colors.white,
           ),
           InputFormsResultCardTheme(
-            suffixIconColor: ColorTokens.textHint,
-            helperTextStyle: AppTextStyles.inputHelperText,
+            neutralBorderColor: ColorTokens.border,
+            neutralLabelColor: ColorTokens.textSecondary,
+            neutralIconColor: ColorTokens.textSecondary,
+            highlightedColor: ColorTokens.accentAmber,
+            calculatedColor: ColorTokens.success,
+            errorColor: ColorTokens.error,
+            badgeStyle: AppTextStyles.stateBadge,
           ),
           HomePageTheme(
             scaffoldBackgroundColor: ColorTokens.background,

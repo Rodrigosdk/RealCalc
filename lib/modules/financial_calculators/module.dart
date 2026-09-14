@@ -7,6 +7,7 @@ import 'package:real_calc/modules/financial_calculators/use_case/regular_deposit
 
 import '../../core/routes/app_routes.dart';
 import 'presentation/cubit/financing/financing_cubit.dart';
+import 'presentation/cubit/forms/financing_form_cubit.dart';
 import 'presentation/cubit/future_value/future_value_cubit.dart';
 import 'presentation/cubit/regular_deposits/regular_deposits_cubit.dart';
 import 'presentation/pages/financing_page.dart';
@@ -16,7 +17,7 @@ import 'use_case/financing/i_calculate_financing.dart';
 import 'use_case/future_value/calculate_future_value.dart';
 import 'use_case/regular_deposits/calculate_deposit.dart';
 
-class FinancialCalculatorsModule extends AppModule{
+class FinancialCalculatorsModule extends AppModule {
   @override
   void binds(i) {
     i.addLazySingleton<ICalculateFinancing>(CalculateFinancing.new);
@@ -26,32 +27,40 @@ class FinancialCalculatorsModule extends AppModule{
     i.add(FutureValueCubit.new);
     i.add(RegularDepositsCubit.new);
     i.add(FinancingCubit.new);
+    i.add(FinancingFormCubit.new);
   }
 
   @override
   void routes(r) {
     r.child(
       AppRoutes.base,
-      child: (_) => BlocProvider(
-        create: (_) => Modular.get<FinancingCubit>(),
+      child: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => Modular.get<FinancingCubit>()),
+          BlocProvider(create: (_) => Modular.get<FinancingFormCubit>()),
+        ],
         child: const FinancingPage(),
       ),
     );
     r.child(
       '/${AppRoutes.depositsSegment}',
-      child: (_) => BlocProvider(
-        create: (_) => Modular.get<RegularDepositsCubit>(),
+      child: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => Modular.get<RegularDepositsCubit>()),
+          BlocProvider(create: (_) => Modular.get<FinancingFormCubit>()),
+        ],
         child: const RegularDepositsPage(),
       ),
     );
     r.child(
       '/${AppRoutes.futureValueSegment}',
-      child: (_) => BlocProvider(
-        create: (_) => Modular.get<FutureValueCubit>(),
+      child: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => Modular.get<FutureValueCubit>()),
+          BlocProvider(create: (_) => Modular.get<FinancingFormCubit>()),
+        ],
         child: const FutureValuePage(),
       ),
     );
-    
   }
 }
-
