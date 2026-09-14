@@ -75,5 +75,6 @@ class TestHarness {
     selicCubit: selicCubit,
     greetingCubit: greetingCubit,
     financingFormCubit: financingFormCubit,
+    regularDepositsCubit: regularDepositsCubit,
   );
 }
