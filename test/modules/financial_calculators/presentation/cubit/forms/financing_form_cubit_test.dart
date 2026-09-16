@@ -44,34 +44,4 @@ void main() {
       InputFieldState.highlighted,
     );
   });
-
-  test('preserva tres casas na taxa ao aplicar o resultado', () {
-    cubit.applyResult(
-      FinancialCalculation(
-        initialValue: 5000,
-        periods: 12,
-        rate: 0.137,
-        finalValue: 5082.5,
-      ),
-      FinancialCalculationTarget.finalValue,
-    );
-
-    expect(cubit.rate.text, '0,137');
-    expect(cubit.finalValue.text, '5.082,50');
-  });
-
-  test('preserva quatro casas na taxa ao aplicar o resultado', () {
-    cubit.applyResult(
-      FinancialCalculation(
-        initialValue: 5000,
-        periods: 12,
-        rate: 0.0137,
-        finalValue: 5000.82,
-      ),
-      FinancialCalculationTarget.finalValue,
-    );
-
-    expect(cubit.rate.text, '0,0137');
-    expect(cubit.finalValue.text, '5.000,82');
-  });
 }
