@@ -56,12 +56,14 @@ void main() {
     });
 
     testWidgets('renderiza label, hint e ícone corretamente', (tester) async {
-      await tester.pumpWidget(buildTestWidget(
-        controller: controller,
-        label: 'Preço do imóvel',
-        hint: 'R\$ 0,00',
-        icon: Icons.home,
-      ));
+      await tester.pumpWidget(
+        buildTestWidget(
+          controller: controller,
+          label: 'Preço do imóvel',
+          hint: 'R\$ 0,00',
+          icon: Icons.home,
+        ),
+      );
 
       expect(find.text('Preço do imóvel'), findsOneWidget);
       expect(find.byIcon(Icons.home), findsOneWidget);
@@ -71,63 +73,70 @@ void main() {
     });
 
     testWidgets('não exibe badge quando o estado é neutro', (tester) async {
-      await tester.pumpWidget(buildTestWidget(
-        controller: controller,
-        state: InputFieldState.neutral,
-      ));
+      await tester.pumpWidget(
+        buildTestWidget(controller: controller, state: InputFieldState.neutral),
+      );
 
       expect(find.text('vazio'), findsNothing);
       expect(find.text('calculado'), findsNothing);
     });
 
-    testWidgets('exibe badge "vazio" quando o estado é highlighted',
-        (tester) async {
-      await tester.pumpWidget(buildTestWidget(
-        controller: controller,
-        state: InputFieldState.highlighted,
-      ));
+    testWidgets('exibe badge "vazio" quando o estado é highlighted', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildTestWidget(
+          controller: controller,
+          state: InputFieldState.highlighted,
+        ),
+      );
 
       expect(find.text('vazio'), findsOneWidget);
     });
 
-    testWidgets('exibe badge "calculado" quando o estado é calculated',
-        (tester) async {
-      await tester.pumpWidget(buildTestWidget(
-        controller: controller,
-        state: InputFieldState.calculated,
-      ));
+    testWidgets('exibe badge "calculado" quando o estado é calculated', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildTestWidget(
+          controller: controller,
+          state: InputFieldState.calculated,
+        ),
+      );
 
       expect(find.text('calculado'), findsOneWidget);
     });
 
     testWidgets('não exibe badge quando o estado é error', (tester) async {
-      await tester.pumpWidget(buildTestWidget(
-        controller: controller,
-        state: InputFieldState.error,
-      ));
+      await tester.pumpWidget(
+        buildTestWidget(controller: controller, state: InputFieldState.error),
+      );
 
       expect(find.text('vazio'), findsNothing);
       expect(find.text('calculado'), findsNothing);
     });
 
-    testWidgets('aplica a cor de destaque correta ao ícone conforme o estado',
-        (tester) async {
-      await tester.pumpWidget(buildTestWidget(
-        controller: controller,
-        icon: Icons.percent,
-        state: InputFieldState.calculated,
-      ));
+    testWidgets('aplica a cor de destaque correta ao ícone conforme o estado', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildTestWidget(
+          controller: controller,
+          icon: Icons.percent,
+          state: InputFieldState.calculated,
+        ),
+      );
 
       final iconWidget = tester.widget<Icon>(find.byIcon(Icons.percent));
       expect(iconWidget.color, testTheme.calculatedColor);
     });
 
-    testWidgets('usa a borda neutra e fina quando o estado é neutro',
-        (tester) async {
-      await tester.pumpWidget(buildTestWidget(
-        controller: controller,
-        state: InputFieldState.neutral,
-      ));
+    testWidgets('usa a borda neutra e fina quando o estado é neutro', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildTestWidget(controller: controller, state: InputFieldState.neutral),
+      );
 
       final container = tester.widget<Container>(find.byType(Container).first);
       final decoration = container.decoration as BoxDecoration;
@@ -138,23 +147,26 @@ void main() {
     });
 
     testWidgets(
-        'usa borda destacada e fundo tintado quando o estado não é neutro',
-        (tester) async {
-      await tester.pumpWidget(buildTestWidget(
-        controller: controller,
-        state: InputFieldState.error,
-      ));
+      'usa borda destacada e fundo tintado quando o estado não é neutro',
+      (tester) async {
+        await tester.pumpWidget(
+          buildTestWidget(controller: controller, state: InputFieldState.error),
+        );
 
-      final container = tester.widget<Container>(find.byType(Container).first);
-      final decoration = container.decoration as BoxDecoration;
-      final border = decoration.border as Border;
+        final container = tester.widget<Container>(
+          find.byType(Container).first,
+        );
+        final decoration = container.decoration as BoxDecoration;
+        final border = decoration.border as Border;
 
-      expect(border.top.width, 1);
-      expect(decoration.color, isNotNull);
-    });
+        expect(border.top.width, 1);
+        expect(decoration.color, isNotNull);
+      },
+    );
 
-    testWidgets('permite digitar texto e atualiza o controller',
-        (tester) async {
+    testWidgets('permite digitar texto e atualiza o controller', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildTestWidget(controller: controller));
 
       await tester.enterText(find.byType(TextFormField), '1500');
@@ -166,10 +178,9 @@ void main() {
     testWidgets('chama onTap ao tocar no campo', (tester) async {
       var tapped = false;
 
-      await tester.pumpWidget(buildTestWidget(
-        controller: controller,
-        onTap: () => tapped = true,
-      ));
+      await tester.pumpWidget(
+        buildTestWidget(controller: controller, onTap: () => tapped = true),
+      );
 
       await tester.tap(find.byType(TextFormField));
       await tester.pump();
@@ -177,8 +188,9 @@ void main() {
       expect(tapped, isTrue);
     });
 
-    testWidgets('valida o campo e exibe mensagem de erro do validator',
-        (tester) async {
+    testWidgets('valida o campo e exibe mensagem de erro do validator', (
+      tester,
+    ) async {
       final formKey = GlobalKey<FormState>();
 
       await tester.pumpWidget(
@@ -211,10 +223,12 @@ void main() {
     });
 
     testWidgets('respeita os inputFormatters ao digitar', (tester) async {
-      await tester.pumpWidget(buildTestWidget(
-        controller: controller,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-      ));
+      await tester.pumpWidget(
+        buildTestWidget(
+          controller: controller,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        ),
+      );
 
       await tester.enterText(find.byType(TextFormField), 'a1b2c3');
       await tester.pump();
@@ -230,6 +244,150 @@ void main() {
         textField.keyboardType,
         const TextInputType.numberWithOptions(decimal: true),
       );
+    });
+
+    group("hint dinâmico", () {
+      testWidgets(
+        'exibe hint "toque para calcular" quando estado é highlighted e campo vazio',
+        (tester) async {
+          await tester.pumpWidget(
+            buildTestWidget(
+              controller: controller,
+              hint: 'Digite o valor',
+              state: InputFieldState.highlighted,
+            ),
+          );
+
+          final textField = tester.widget<TextField>(find.byType(TextField));
+          expect(textField.decoration?.hintText, 'toque para calcular');
+        },
+      );
+
+      testWidgets(
+        'mantém o hint original quando estado é highlighted mas o campo tem texto',
+        (tester) async {
+          controller.text = '1500';
+
+          await tester.pumpWidget(
+            buildTestWidget(
+              controller: controller,
+              hint: 'Digite o valor',
+              state: InputFieldState.highlighted,
+            ),
+          );
+
+          final textField = tester.widget<TextField>(find.byType(TextField));
+          expect(textField.decoration?.hintText, 'Digite o valor');
+        },
+      );
+
+      testWidgets(
+        'mantém o hint original quando o campo está vazio mas o estado não é highlighted',
+        (tester) async {
+          await tester.pumpWidget(
+            buildTestWidget(
+              controller: controller,
+              hint: 'Digite o valor',
+              state: InputFieldState.neutral,
+            ),
+          );
+
+          final textField = tester.widget<TextField>(find.byType(TextField));
+          expect(textField.decoration?.hintText, 'Digite o valor');
+        },
+      );
+
+      testWidgets(
+        'aplica a cor de destaque (accent) no hint quando é mensagem "toque para calcular"',
+        (tester) async {
+          await tester.pumpWidget(
+            buildTestWidget(
+              controller: controller,
+              hint: 'Digite o valor',
+              state: InputFieldState.highlighted,
+            ),
+          );
+
+          final textField = tester.widget<TextField>(find.byType(TextField));
+          final hintStyle = textField.decoration?.hintStyle;
+
+          expect(hintStyle?.color, testTheme.highlightedColor);
+        },
+      );
+
+      testWidgets(
+        'aplica a cor neutra no hint quando não é mensagem "toque para calcular"',
+        (tester) async {
+          await tester.pumpWidget(
+            buildTestWidget(
+              controller: controller,
+              hint: 'Digite o valor',
+              state: InputFieldState.neutral,
+            ),
+          );
+
+          final textField = tester.widget<TextField>(find.byType(TextField));
+          final hintStyle = textField.decoration?.hintStyle;
+
+          expect(hintStyle?.color, testTheme.neutralLabelColor);
+        },
+      );
+
+      testWidgets(
+        'aplica a cor neutra no hint quando o estado é highlighted mas o campo tem texto',
+        (tester) async {
+          controller.text = '1500';
+
+          await tester.pumpWidget(
+            buildTestWidget(
+              controller: controller,
+              hint: 'Digite o valor',
+              state: InputFieldState.highlighted,
+            ),
+          );
+
+          final textField = tester.widget<TextField>(find.byType(TextField));
+          final hintStyle = textField.decoration?.hintStyle;
+
+          expect(hintStyle?.color, testTheme.neutralLabelColor);
+        },
+      );
+
+      testWidgets('o hint muda quando onTap altera o estado para calculado', (
+        tester,
+      ) async {
+        InputFieldState state = InputFieldState.highlighted;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(extensions: [testTheme]),
+            home: Scaffold(
+              body: StatefulBuilder(
+                builder: (context, setState) {
+                  return InputFormsResultCard(
+                    controller: controller,
+                    label: 'Valor',
+                    hint: 'Digite o valor',
+                    icon: Icons.attach_money,
+                    state: state,
+                    onTap: () =>
+                        setState(() => state = InputFieldState.calculated),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+
+        var textField = tester.widget<TextField>(find.byType(TextField));
+        expect(textField.decoration?.hintText, 'toque para calcular');
+
+        await tester.tap(find.byType(TextFormField));
+        await tester.pump();
+
+        textField = tester.widget<TextField>(find.byType(TextField));
+        expect(textField.decoration?.hintText, 'Digite o valor');
+      });
     });
   });
 }
