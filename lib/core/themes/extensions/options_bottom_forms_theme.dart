@@ -6,12 +6,14 @@ class OptionsBottomFormsTheme extends ThemeExtension<OptionsBottomFormsTheme> {
   final Color calculateButtonForeground;
   final Color actionButtonBackground;
   final Color actionButtonForeground;
+  final Color borderButtonColor;
 
   const OptionsBottomFormsTheme({
     required this.calculateButtonBackground,
     required this.calculateButtonForeground,
     required this.actionButtonBackground,
-    required this.actionButtonForeground,
+    required this.actionButtonForeground, 
+    required this.borderButtonColor,
   });
 
   @override
@@ -20,12 +22,14 @@ class OptionsBottomFormsTheme extends ThemeExtension<OptionsBottomFormsTheme> {
     Color? calculateButtonForeground,
     Color? actionButtonBackground,
     Color? actionButtonForeground,
+    Color? borderButtonColor
   }) {
     return OptionsBottomFormsTheme(
       calculateButtonBackground: calculateButtonBackground ?? this.calculateButtonBackground,
       calculateButtonForeground: calculateButtonForeground ?? this.calculateButtonForeground,
       actionButtonBackground: actionButtonBackground ?? this.actionButtonBackground,
-      actionButtonForeground: actionButtonForeground ?? this.actionButtonForeground,
+      actionButtonForeground: actionButtonForeground ?? this.actionButtonForeground, 
+      borderButtonColor: borderButtonColor ?? this.borderButtonColor,
     );
   }
 
@@ -40,6 +44,8 @@ class OptionsBottomFormsTheme extends ThemeExtension<OptionsBottomFormsTheme> {
       calculateButtonForeground: Color.lerp(calculateButtonForeground, other.calculateButtonForeground, t)!,
       actionButtonBackground: Color.lerp(actionButtonBackground, other.actionButtonBackground, t)!,
       actionButtonForeground: Color.lerp(actionButtonForeground, other.actionButtonForeground, t)!,
+      borderButtonColor: Color.lerp(borderButtonColor, other.borderButtonColor, t)!,
+      
     );
   }
 }
