@@ -43,6 +43,7 @@ void main() {
     calculateButtonForeground: Colors.white,
     actionButtonBackground: Colors.grey,
     actionButtonForeground: Colors.black87,
+    borderButtonColor: ColorTokens.successContainerBorder,
   );
 
   final financingFormsTheme = FinancingFormsTheme(
@@ -306,7 +307,8 @@ void main() {
               calculateButtonBackground: ColorTokens.accentAmber,
               calculateButtonForeground: Colors.white,
               actionButtonBackground: ColorTokens.surface,
-              actionButtonForeground: ColorTokens.textSecondary,
+              actionButtonForeground: ColorTokens.textSecondary, 
+              borderButtonColor: ColorTokens.successContainerBorder,
             ),
             FinancingFormsTheme(
               iconColor: ColorTokens.accentAmber,

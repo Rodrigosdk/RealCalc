@@ -12,6 +12,7 @@ void main() {
     Color calculateForeground = Colors.white,
     Color actionBackground = const Color(0xFF1A222D),
     Color actionForeground = Colors.white70,
+    Color borderButtonColor = Colors.white70,
   }) {
     return MaterialApp(
       theme: ThemeData(
@@ -20,7 +21,8 @@ void main() {
             calculateButtonBackground: calculateBackground,
             calculateButtonForeground: calculateForeground,
             actionButtonBackground: actionBackground,
-            actionButtonForeground: actionForeground,
+            actionButtonForeground: actionForeground, 
+            borderButtonColor: borderButtonColor,
           ),
         ],
       ),
@@ -28,7 +30,6 @@ void main() {
         body: OptionsBottomForms(
           onCalculate: onCalculate,
           onClear: onClear,
-          onShare: onShare,
         ),
       ),
     );
@@ -40,27 +41,20 @@ void main() {
 
       expect(find.text('Calcular'), findsOneWidget);
       expect(find.text('Limpar'), findsOneWidget);
-      expect(find.text('Compartilhar'), findsOneWidget);
-
-      expect(find.byIcon(Icons.calculate_outlined), findsOneWidget);
-      expect(find.byIcon(Icons.delete_outline), findsOneWidget);
-      expect(find.byIcon(Icons.share_outlined), findsOneWidget);
     });
 
     testWidgets('Deve aplicar as cores corretas nos botões baseadas no design', (tester) async {
       await tester.pumpWidget(createSut());
 
       final buttons = tester.widgetList<ElevatedButton>(find.byType(ElevatedButton)).toList();
-      expect(buttons, hasLength(3));
+      expect(buttons, hasLength(2));
 
       final calculateColor = buttons[0].style?.backgroundColor?.resolve({});
       expect(calculateColor, const Color(0xFF1E94F6));
 
       final clearColor = buttons[1].style?.backgroundColor?.resolve({});
-      final shareColor = buttons[2].style?.backgroundColor?.resolve({});
       const darkColor = Color(0xFF1A222D);
       expect(clearColor, darkColor);
-      expect(shareColor, darkColor);
     });
 
     testWidgets('Deve disparar os respectivos callbacks ao clicar em cada botão', (tester) async {
@@ -80,12 +74,8 @@ void main() {
       await tester.tap(find.text('Limpar'));
       await tester.pump();
 
-      await tester.tap(find.text('Compartilhar'));
-      await tester.pump();
-
       expect(calculateClicks, 1);
       expect(clearClicks, 1);
-      expect(shareClicks, 1);
     });
   });
 }
