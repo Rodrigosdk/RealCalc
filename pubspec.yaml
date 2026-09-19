@@ -39,8 +39,6 @@ dependencies:
   flutter_modular: ^6.4.1
   equatable: ^2.1.0
   intl: ^0.20.3
-  shadcn_flutter: ^0.0.54
-  shadcn_flutter_material: ^0.0.54
   dio: ^5.11.1
   flutter_svg: ^2.3.0
 
