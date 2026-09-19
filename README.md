@@ -1,18 +1,31 @@
-# Real Calc
+# RealCalc
 
-Aplicativo Flutter para simular cenários financeiros de forma simples, visual e testável. O projeto reúne calculadoras de juros compostos, depósitos regulares e financiamento, além de exibir a evolução da taxa Selic a partir de dados do Banco Central do Brasil.
+Uma releitura moderna da **Calculadora do Cidadão**, o app oficial do Banco Central do Brasil para cálculos financeiros. O RealCalc parte da mesma lógica de cálculo (juros compostos, depósitos regulares, financiamento), mas repensa a experiência do zero — identidade visual própria, hierarquia clara entre ações, e uma solução pro problema que o app original nunca resolveu bem: em cada calculadora, qualquer um dos campos pode ser a incógnita, e a interface original não deixa isso óbvio.
 
-> Projeto em evolução: algumas rotas já estão previstas na navegação, mas ainda não possuem uma tela implementada.
+> Projeto pessoal e não-oficial. Sem qualquer vínculo com o Banco Central do Brasil — construído como estudo de produto, UX e arquitetura em Flutter.
+>
+> Em evolução: algumas rotas já estão previstas na navegação, mas ainda não possuem uma tela implementada.
+
+## O problema que o projeto resolve
+
+Num formulário de financiamento, por exemplo, o usuário pode preencher valor, prazo e taxa pra descobrir a prestação — ou preencher valor, prazo e prestação pra descobrir a taxa. **Qualquer um dos 4 campos pode ser o resultado**, dependendo de qual a pessoa deixa vazio. A Calculadora do Cidadão não sinaliza isso visualmente: todos os campos parecem iguais, e a pessoa só descobre qual foi calculado depois de já ter preenchido tudo.
+
+O RealCalc resolve isso com **estado visual por campo**, não só por tela:
+- **Vazio e é o único vazio** → destaque âmbar, sinalizando "essa é a incógnita".
+- **Calculado** → destaque verde, mostrando exatamente qual campo o app resolveu.
+- **2 ou mais campos vazios ao mesmo tempo** → destaque vermelho + aviso, porque não dá pra saber qual calcular.
+- **Preenchido normalmente** → neutro, sem competir visualmente com os outros dois estados.
+
+Essa lógica vive num Cubit dedicado por calculadora, reagindo em tempo real a cada mudança de texto — não é um estado fixo de tela, é recalculado a cada tecla.
 
 ## O que o projeto oferece
 
 - Cálculo de valor futuro, taxa, prazo e valor inicial em cenários de juros compostos.
 - Simulação de depósitos regulares com capitalização composta.
-- Fluxo de financiamento com validação dos parâmetros informados.
-- Consulta da série histórica da Selic dos últimos quatro anos.
-- Indicadores com taxa anual, variação e dados para sparkline.
-- Interface em Flutter com tema próprio e gerenciamento de estado por Cubit.
-- Testes unitários, de widgets e de módulos.
+- Fluxo de financiamento com os 4 estados de campo descritos acima.
+- Card de métrica com a taxa Selic atual, variação desde o último ajuste do Copom e uma sparkline de tendência — com estados de carregamento e offline (mostra o último valor salvo, ou um estado de "tentar novamente").
+- Interface com design system próprio: paleta de cores, tipografia e componentes centralizados via `ThemeExtension`, sem cor ou estilo hardcoded espalhado pelos widgets.
+- Testes unitários, de widgets e de módulos (incluindo a fiação de injeção de dependência do `flutter_modular`).
 
 ## Tecnologias
 
@@ -24,7 +37,7 @@ Aplicativo Flutter para simular cenários financeiros de forma simples, visual e
 | `Dio` | Cliente HTTP |
 | `equatable` | Comparação de estados e objetos |
 | `intl` | Formatação de valores e datas |
-| `shadcn_flutter` | Componentes visuais |
+| `google_fonts` | Tipografia (Manrope) |
 | `mocktail` e `bloc_test` | Testes |
 
 ## Visão rápida da arquitetura
@@ -69,12 +82,20 @@ lib/
 ├── core/                       # Base técnica, temas, rotas, erros e abstrações
 ├── modules/
 │   ├── home/                   # Tela inicial e indicadores
-│   ├── metrics/                # Consulta e transformação da Selic
+│   ├── metrics/                # Consulta e transformação da Selic (janela de ~90-120 dias)
 │   └── financial_calculators/  # Cálculos, cubits e telas financeiras
 ├── shared/                     # Modelos compartilhados, como resposta da API
 └── main.dart                   # Ponto de entrada
 test/                           # Testes organizados por módulo
 ```
+
+## Roadmap
+
+- [ ] Correção de valores por índice (IPCA, IGP-M, poupança)
+- [ ] Comparação SAC vs. Price
+- [ ] Simulação de amortização extra
+- [ ] Histórico de cálculos
+- [ ] Modo claro
 
 ## Contribuindo
 
