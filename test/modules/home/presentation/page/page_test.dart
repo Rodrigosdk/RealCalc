@@ -73,6 +73,7 @@ void main() {
             calculateButtonForeground: Colors.white,
             actionButtonBackground: ColorTokens.surface,
             actionButtonForeground: ColorTokens.textSecondary,
+            borderButtonColor: ColorTokens.successContainerBorder,
           ),
           TitleWidgetTheme(
             titleStyle: AppTextStyles.headlineMedium,
