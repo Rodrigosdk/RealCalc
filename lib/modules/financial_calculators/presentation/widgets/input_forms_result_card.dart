@@ -25,6 +25,12 @@ class InputFormsResultCard extends StatelessWidget {
     this.state = InputFieldState.neutral,
     this.onTap,
   });
+  bool get _isHighlightedAndEmptyText {
+    if (state == InputFieldState.highlighted && controller.text.isEmpty) {
+      return true;
+    }
+    return false;
+  }
 
   Color _accentColor(InputFormsResultCardTheme theme) {
     return switch (state) {
@@ -41,12 +47,21 @@ class InputFormsResultCard extends StatelessWidget {
     InputFieldState.neutral || InputFieldState.error => null,
   };
 
+  String get _effectiveHint {
+    if (_isHighlightedAndEmptyText) {
+      return 'toque para calcular';
+    }
+    return hint;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).extension<InputFormsResultCardTheme>()!;
     final bool isNeutral = state == InputFieldState.neutral;
     final Color accent = _accentColor(theme);
     final String? badgeText = _badgeText;
+
+    final bool isHintMessage = _isHighlightedAndEmptyText == true;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -113,7 +128,14 @@ class InputFormsResultCard extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
                   decoration: InputDecoration(
-                    hintText: hint,
+                    hintText: _effectiveHint,
+                    hintStyle: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: isHintMessage
+                          ? accent // cor de destaque quando é mensagem
+                          : theme.neutralLabelColor, // cor normal do hint
+                    ),
                     isDense: true,
                     contentPadding: EdgeInsets.zero,
                     filled: false,
