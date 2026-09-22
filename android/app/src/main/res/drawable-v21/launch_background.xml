@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Modify this file to customize your launch splash screen -->
-<layer-list xmlns:android="http://android.com">
-    <!-- Define a cor de fundo da tela (pega o padrão do sistema ou uma cor que você quiser) -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Define a cor de fundo da tela -->
     <item android:drawable="?android:colorBackground" />
 
     <!-- Este item centraliza a sua logo na tela -->
