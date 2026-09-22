@@ -112,8 +112,9 @@ class AppTheme {
         const OptionsBottomFormsTheme(
           calculateButtonBackground: ColorTokens.accentAmber,
           calculateButtonForeground: Colors.white,
-          actionButtonBackground: ColorTokens.surface,
+          actionButtonBackground: ColorTokens.background,
           actionButtonForeground: ColorTokens.textSecondary,
+          borderButtonColor: ColorTokens.successContainerBorder
         ),
         TitleWidgetTheme(
           titleStyle: AppTextStyles.headlineMedium.copyWith(

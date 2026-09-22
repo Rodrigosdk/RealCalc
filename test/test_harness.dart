@@ -35,12 +35,27 @@ class TestHarness {
               as FinancialCalculationTarget]!,
     );
 
-    when(()=> regularDepositsCubit.state).thenReturn(RegularDepositsInitial());
-    when(() => financingCubit.state).thenReturn(FinancingInitial());
-    when(() => futureValueCubit.state).thenReturn(FutureValueInitial());
-    when(
-      () => financingFormCubit.state,
-    ).thenReturn(FinancingFormState.initial());
+    // ADICIONE whenListen para todos os cubits que emitem estado
+    whenListen(
+      regularDepositsCubit,
+      const Stream<RegularDepositsState>.empty(),
+      initialState: RegularDepositsInitial(),
+    );
+    whenListen(
+      financingCubit,
+      const Stream<FinancingState>.empty(),
+      initialState: FinancingInitial(),
+    );
+    whenListen(
+      futureValueCubit,
+      const Stream<FutureValueState>.empty(),
+      initialState: FutureValueInitial(),
+    );
+    whenListen(
+      financingFormCubit,
+      const Stream<FinancingFormState>.empty(),
+      initialState: FinancingFormState.initial(),
+    );
 
     whenListen(
       selicCubit,
@@ -75,5 +90,6 @@ class TestHarness {
     selicCubit: selicCubit,
     greetingCubit: greetingCubit,
     financingFormCubit: financingFormCubit,
+    regularDepositsCubit: regularDepositsCubit,
   );
 }

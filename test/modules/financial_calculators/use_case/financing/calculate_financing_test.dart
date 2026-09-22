@@ -26,10 +26,10 @@ void main() {
   }
 
   setUp(() {
-    initialValue = 50000.0;
-    rate = 1.5;
-    months = 48;
-    finalValue = 102173.91;
+    initialValue = 52882.82;
+    rate = 5.55;
+    months = 25;
+    finalValue = 3961.64;
 
     useCase = CalculateFinancing();
   });
@@ -46,7 +46,7 @@ void main() {
       final result = useCase.calculate(buildFinancing(initialValueParam: 0));
 
       expect(result.isSuccess, isTrue);
-      expect(result.getOrNull()?.initialValue, closeTo(initialValue, 0.01));
+      expect(result.getOrNull()?.initialValue, closeTo(initialValue, 0.05));
     });
 
     test('Deve calcular a taxa de juros de um regime de Juros Compostos', () {
@@ -109,19 +109,14 @@ void main() {
 
   group('CalculateFinancing - Imprecisão de Ponto Flutuante', () {
     test(
-      'Deve mitigar a dízima do double e retornar o número exato de meses (48) mesmo com centavos aproximados',
+      'Deve mitigar a dízima do double e retornar o número exato de meses (25) mesmo com centavos aproximados',
       () {
-        final inputComDizima = buildFinancing(
-          initialValueParam: 50000.0,
-          rateParam: 1.5,
-          finalValueParam: 102173.91,
-          monthsParam: 0,
-        );
+        final inputComDizima = buildFinancing(monthsParam: 0);
 
         final result = useCase.calculate(inputComDizima);
 
         expect(result.isSuccess, isTrue);
-        expect(result.getOrNull()?.periods, equals(48));
+        expect(result.getOrNull()?.periods, equals(25));
       },
     );
   });

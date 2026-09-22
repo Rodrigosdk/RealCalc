@@ -42,7 +42,6 @@ void main() {
     );
   }
 
-
   group('FinancingPage - Testes de Integração da Tela', () {
     testWidgets('Deve renderizar a árvore de componentes completa com sucesso', (tester) async {
       await tester.pumpWidget(createSut());

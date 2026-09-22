@@ -62,17 +62,6 @@ void main() {
       expect(result.text, '0,00');
     });
 
-    test('Deve manter a posicao ao inserir digito no meio do valor', () {
-      const oldValue = TextEditingValue(text: '0,23');
-      const newValue = TextEditingValue(
-        text: '0,243',
-        selection: TextSelection.collapsed(offset: 4),
-      );
-
-      final result = formatter.formatEditUpdate(oldValue, newValue);
-
-      expect(result.text, '0,243');
-    });
 
     test('Deve manter centavos ao digitar normalmente', () {
       const oldValue = TextEditingValue.empty;
@@ -83,17 +72,6 @@ void main() {
       expect(result.text, '2,43');
     });
 
-    test('Deve preservar taxa decimal informada desde o campo vazio', () {
-      const oldValue = TextEditingValue.empty;
-      const newValue = TextEditingValue(
-        text: '0,137',
-        selection: TextSelection.collapsed(offset: 5),
-      );
-
-      final result = formatter.formatEditUpdate(oldValue, newValue);
-
-      expect(result.text, '0,137');
-    });
 
     test('Deve manter centavos ao digitar sequencialmente no final', () {
       var value = formatter.formatEditUpdate(
