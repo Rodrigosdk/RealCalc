@@ -1,4 +1,4 @@
-package br.com.rodrigosdk.real_calc
+package br.com.rodrigosdk.realcalc
 
 import io.flutter.embedding.android.FlutterActivity
 
