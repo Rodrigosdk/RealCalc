@@ -1,5 +1,15 @@
 # RealCalc
 
+<p align="center">
+  <img alt="RealCalc — Financiamento, aplicações e Selic em um só lugar" src="assets/readme/banner.png" width="100%"/>
+</p>
+
+<p align="center">
+  <a href="https://www.gnu.org/licenses/gpl-3.0"><img alt="License: GPL v3" src="https://img.shields.io/badge/License-GPLv3-blue.svg"/></a>
+  <a href="https://dart.dev"><img alt="Dart" src="https://img.shields.io/badge/Dart-%5E3.10.4-0175C2.svg?style=flat&logo=dart"/></a>
+  <a href="https://flutter.dev"><img alt="Flutter" src="https://img.shields.io/badge/Flutter-Multiplataforma-02569B.svg?style=flat&logo=flutter"/></a>
+</p>
+
 Uma releitura moderna da **Calculadora do Cidadão**, o app oficial do Banco Central do Brasil para cálculos financeiros. O RealCalc parte da mesma lógica de cálculo (juros compostos, depósitos regulares, financiamento), mas repensa a experiência do zero — identidade visual própria, hierarquia clara entre ações, e uma solução pro problema que o app original nunca resolveu bem: em cada calculadora, qualquer um dos campos pode ser a incógnita, e a interface original não deixa isso óbvio.
 
 > Projeto pessoal e não-oficial. Sem qualquer vínculo com o Banco Central do Brasil — construído como estudo de produto, UX e arquitetura em Flutter.
@@ -18,7 +28,7 @@ O RealCalc resolve isso com **estado visual por campo**, não só por tela:
 
 Essa lógica vive num Cubit dedicado por calculadora, reagindo em tempo real a cada mudança de texto — não é um estado fixo de tela, é recalculado a cada tecla.
 
-## O que o projeto oferece
+## O que o app oferece
 
 - Cálculo de valor futuro, taxa, prazo e valor inicial em cenários de juros compostos.
 - Simulação de depósitos regulares com capitalização composta.
@@ -26,6 +36,13 @@ Essa lógica vive num Cubit dedicado por calculadora, reagindo em tempo real a c
 - Card de métrica com a taxa Selic atual, variação desde o último ajuste do Copom e uma sparkline de tendência — com estados de carregamento e offline (mostra o último valor salvo, ou um estado de "tentar novamente").
 - Interface com design system próprio: paleta de cores, tipografia e componentes centralizados via `ThemeExtension`, sem cor ou estilo hardcoded espalhado pelos widgets.
 - Testes unitários, de widgets e de módulos (incluindo a fiação de injeção de dependência do `flutter_modular`).
+
+<p float="left" align="center">
+  <img alt="screenshot-1" width="24%" src="screenshots/screenshot-1.jpg"/>
+  <img alt="screenshot-2" width="24%" src="screenshots/screenshot-2.jpg"/>
+  <img alt="screenshot-3" width="24%" src="screenshots/screenshot-3.jpg"/>
+  <img alt="screenshot-4" width="24%" src="screenshots/screenshot-4.jpg"/>
+</p>
 
 ## Tecnologias
 
@@ -39,6 +56,8 @@ Essa lógica vive num Cubit dedicado por calculadora, reagindo em tempo real a c
 | `intl` | Formatação de valores e datas |
 | `google_fonts` | Tipografia (Manrope) |
 | `mocktail` e `bloc_test` | Testes |
+
+**API de terceiros:** [API do Banco Central do Brasil](https://dadosabertos.bcb.gov.br/), usada como fonte de dados da taxa Selic.
 
 ## Visão rápida da arquitetura
 
@@ -104,3 +123,38 @@ test/                           # Testes organizados por módulo
 3. Adicione ou atualize os testes do comportamento alterado.
 4. Execute `dart format`, `flutter analyze` e `flutter test`.
 5. Abra um pull request descrevendo o comportamento e os cenários validados.
+
+## Licença
+
+Este projeto está licenciado sob a **GNU General Public License v3.0**.
+
+```
+RealCalc — Financiamento, aplicações e Selic em um só lugar
+Copyright (C) 2026 Rodrigosdk
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+```
+
+O texto completo da licença está no arquivo [`LICENSE`](LICENSE) deste repositório.
+
+---
+
+## Checklist final antes de commitar
+
+- [ ] Banner salvo em `assets/readme/banner.png`
+- [ ] Prints salvos em `screenshots/screenshot-1.png` até `screenshot-4.png` (ou remover o bloco `<p float="left">` se ainda não tiver)
+- [ ] Texto da GPL v3 salvo em `LICENSE` (raiz do repo, sem extensão)
+- [ ] Substituir `[SEU NOME COMPLETO]` no bloco de licença pelo seu nome
+- [ ] Trocar os placeholders de **Contato** (LinkedIn, WhatsApp, e-mail)
+- [ ] Ajustar o ano do copyright se necessário
