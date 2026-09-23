@@ -147,14 +147,3 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ```
 
 O texto completo da licença está no arquivo [`LICENSE`](LICENSE) deste repositório.
-
----
-
-## Checklist final antes de commitar
-
-- [ ] Banner salvo em `assets/readme/banner.png`
-- [ ] Prints salvos em `screenshots/screenshot-1.png` até `screenshot-4.png` (ou remover o bloco `<p float="left">` se ainda não tiver)
-- [ ] Texto da GPL v3 salvo em `LICENSE` (raiz do repo, sem extensão)
-- [ ] Substituir `[SEU NOME COMPLETO]` no bloco de licença pelo seu nome
-- [ ] Trocar os placeholders de **Contato** (LinkedIn, WhatsApp, e-mail)
-- [ ] Ajustar o ano do copyright se necessário
