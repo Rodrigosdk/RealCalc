@@ -11,7 +11,7 @@ import 'package:real_calc/modules/financial_calculators/presentation/cubit/finan
 import 'package:real_calc/modules/financial_calculators/presentation/cubit/forms/financing_form_cubit.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/pages/financing_page.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/widgets/forms_view.dart';
-import 'package:real_calc/modules/financial_calculators/presentation/widgets/help_card.dart';
+import 'package:real_calc/core/widgets/help_card.dart';
 
 import '../../../../test_harness.dart';
 
