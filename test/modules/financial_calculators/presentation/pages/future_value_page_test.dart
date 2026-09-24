@@ -11,7 +11,7 @@ import 'package:real_calc/modules/financial_calculators/presentation/cubit/forms
 import 'package:real_calc/modules/financial_calculators/presentation/cubit/future_value/future_value_cubit.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/pages/future_value_page.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/widgets/forms_view.dart';
-import 'package:real_calc/modules/financial_calculators/presentation/widgets/help_card.dart';
+import 'package:real_calc/core/widgets/help_card.dart';
 
 import '../../../../test_harness.dart';
 

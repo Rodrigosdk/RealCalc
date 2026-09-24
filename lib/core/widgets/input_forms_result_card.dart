@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:real_calc/core/themes/extensions/input_forms_result_card_theme.dart';
 
-import '../../domain/enum/input_field_state.dart';
+import 'types/input_field_state.dart';
 
 class InputFormsResultCard extends StatelessWidget {
   final String label;

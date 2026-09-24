@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:real_calc/core/themes/extensions/financing_forms_theme.dart';
 import 'package:real_calc/core/themes/spacing.dart';
-import 'package:real_calc/modules/financial_calculators/domain/enum/input_field_state.dart';
+import 'package:real_calc/core/widgets/types/input_field_state.dart';
 import 'package:real_calc/core/widgets/options_bottom_forms.dart';
 import '../models/field_spec.dart';
-import 'input_forms_result_card.dart';
+import '../../../../core/widgets/input_forms_result_card.dart';
 
 class FormsView<T> extends StatelessWidget {
   final List<FieldSpec<T>> fieldSpecs;

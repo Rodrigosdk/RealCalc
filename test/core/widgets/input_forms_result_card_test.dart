@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:real_calc/core/themes/extensions/input_forms_result_card_theme.dart';
-import 'package:real_calc/modules/financial_calculators/domain/enum/input_field_state.dart';
-import 'package:real_calc/modules/financial_calculators/presentation/widgets/input_forms_result_card.dart';
+import 'package:real_calc/core/widgets/types/input_field_state.dart';
+import 'package:real_calc/core/widgets/input_forms_result_card.dart';
 
 void main() {
   final testTheme = InputFormsResultCardTheme(

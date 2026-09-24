@@ -1,7 +1,7 @@
 
 
 import '../../../domain/enum/financial_calculation_target.dart';
-import '../../../domain/enum/input_field_state.dart';
+import '../../../../../core/widgets/types/input_field_state.dart';
 
 class FinancingFormState {
   final FinancialCalculationTarget? calculatedField;
