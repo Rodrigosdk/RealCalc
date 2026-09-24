@@ -16,7 +16,7 @@ class AppRoutes {
   static const String financing = '/home/$financingSegment';
   static const String futureValue = '$financing/$futureValueSegment';
   static const String deposits = '$financing/$depositsSegment';
-  static const String correction = '/home/$correctionSegment';
+  static const String correction = '/$correctionSegment';
   static const String history = '/home/$historySegment';
   static const String profile = '/home/$profileSegment';
 }
