@@ -91,3 +91,15 @@ enum FutureValueValidationMessage implements ErrorMessages {
 
   const FutureValueValidationMessage(this.message);
 }
+
+enum ValueCorrectionValidationMessage implements ErrorMessages {
+  invalidPeriod("A data inicial não pode ser maior do que a data final. Por favor, corrija o intervalo selecionado."), 
+  invalidIndex("O período selecionado não possui dados disponíveis para o índice escolhido. Por favor, tente um intervalo diferente."), 
+  invalidPercentage("O percentual informado deve ser maior que zero. Por favor, insira um valor positivo"), 
+  invalidValue("O valor inserido deve ser maior que zero. Certifique-se de preencher o campo corretamente");
+  
+  @override
+  final String message;
+
+  const ValueCorrectionValidationMessage(this.message);
+}

@@ -1,0 +1,1 @@
+enum DateGranularity { month, day }
