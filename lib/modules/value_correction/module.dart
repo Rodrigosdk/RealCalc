@@ -2,14 +2,20 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:real_calc/core/module.dart';
 
 import '../../core/routes/app_routes.dart';
+import 'domain/repositories/i_calculate_value_correction.dart';
+import 'domain/validation/value_correction_validation.dart';
 import 'presentation/pages/value_correction_page.dart';
+import 'use_cases/calculate_value_correction.dart';
 
 class ValueCorrectionModule extends Module {
   @override
   List<Module> get imports => [CoreModule()];
 
   @override
-  void binds(Injector i) {}
+  void binds(Injector i) {
+    i.addLazySingleton<ValueCorrectionValidation>(ValueCorrectionValidation.new);
+    i.addLazySingleton<ICalculateValueCorrection>(CalculateValueCorrection.new);
+  }
 
   @override
   void routes(RouteManager r) {
