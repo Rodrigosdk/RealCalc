@@ -172,6 +172,44 @@ void main() {
       expect(result.getOrNull()!.factor, closeTo(2.1046, 1e-7));
     });
 
+    test('calcula fator para taxa de período usando encadeamento acumulado', () {
+      final result = CalculateValueCorrection(validation).call(
+        params: buildValueCorrection(
+          initial: DateTime(2024, 1, 1),
+          end: DateTime(2024, 3, 1),
+          originalValue: 1000,
+        ),
+        series: [
+          SeriesPoint(date: DateTime(2024, 1, 1), value: 1),
+          SeriesPoint(date: DateTime(2024, 2, 1), value: 2),
+          SeriesPoint(date: DateTime(2024, 3, 1), value: 3),
+        ],
+        type: SeriesKind.periodRate,
+      );
+
+      expect(result.isSuccess, isTrue);
+      expect(result.getOrNull()!.factor, closeTo(1.061106, 1e-9));
+      expect(result.getOrNull()!.adjustedValue, closeTo(1061.106, 1e-9));
+    });
+
+    test('calcula fator para taxa legal em juros simples', () {
+      final result = CalculateValueCorrection(validation).call(
+        params: buildValueCorrection(
+          initial: DateTime(2024, 11, 1),
+          end: DateTime(2024, 12, 1),
+          originalValue: 1000,
+        ),
+        series: [
+          SeriesPoint(date: DateTime(2024, 11, 1), value: 0.385874),
+        ],
+        type: SeriesKind.simpleMonthlyRate,
+      );
+
+      expect(result.isSuccess, isTrue);
+      expect(result.getOrNull()!.factor, closeTo(1.00385874, 1e-9));
+      expect(result.getOrNull()!.adjustedValue, closeTo(1003.85874, 1e-9));
+    });
+
     test('retorna erro quando não há pontos na série para o período informado', () {
       final result = CalculateValueCorrection(validation).call(
         params: buildValueCorrection(
