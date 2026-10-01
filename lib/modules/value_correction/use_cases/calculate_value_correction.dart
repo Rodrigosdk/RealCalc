@@ -52,15 +52,26 @@ class CalculateValueCorrection implements ICalculateValueCorrection {
 
     double factor = 1.0;
 
-    if (type == SeriesKind.monthlyVariation) {
-      for (final point in filteredSeries) {
-        factor *= (1 + (point.value / 100));
-      }
-    } else if (type == SeriesKind.dailyRate) {
-      final percentage = params.percentage / 100;
-      for (final point in filteredSeries) {
-        factor *= (1 + ((point.value / 100) * percentage));
-      }
+    switch (type) {
+      case SeriesKind.monthlyVariation:
+      case SeriesKind.periodRate:
+        for (final point in filteredSeries) {
+          factor *= (1 + (point.value / 100));
+        }
+        break;
+      case SeriesKind.dailyRate:
+        final percentage = params.percentage / 100;
+        for (final point in filteredSeries) {
+          factor *= (1 + ((point.value / 100) * percentage));
+        }
+        break;
+      case SeriesKind.simpleMonthlyRate:
+        double accumulatedRate = 0;
+        for (final point in filteredSeries) {
+          accumulatedRate += point.value / 100;
+        }
+        factor = 1 + accumulatedRate;
+        break;
     }
 
     final adjustedValue = params.originalValue != null ? params.originalValue! * factor : null;
