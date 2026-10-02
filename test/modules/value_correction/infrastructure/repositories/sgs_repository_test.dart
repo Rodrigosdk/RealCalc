@@ -1,7 +1,5 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:real_calc/core/adapter/network/dio/dio_network_adapter.dart';
 import 'package:real_calc/core/errors/messages.dart';
 import 'package:real_calc/core/seed_works/error.dart';
 import 'package:real_calc/core/seed_works/network.dart';
@@ -86,21 +84,124 @@ void main() {
       expect(result.getErrorOrNull(), ServerErrorMessages.connectionError);
     });
 
-    test('deve conectar de verdade com a API do Banco Central', () async {
-      final realRepository = SgsRepository(DioNetworkAdapter(Dio()));
+    test('deve dividir série diária em janelas de 10 anos sem duplicar a fronteira', () async {
+      when(() => network.get<List<dynamic>>(any())).thenAnswer((invocation) async {
+        final url = invocation.positionalArguments.first as String;
 
-      final result = await realRepository.getSeries(
-        index: CorrectionIndex.ipca,
-        start: DateTime(2024, 1, 1),
-        end: DateTime(2024, 2, 29),
+        if (url.contains('dataInicial=01/01/2014&dataFinal=01/01/2024')) {
+          return SuccessResult<ErrorMessages, List<dynamic>>([
+            {'data': '01/01/2014', 'valor': '1.40'},
+            {'data': '01/01/2024', 'valor': '2.40'},
+          ]);
+        }
+
+        if (url.contains('dataInicial=02/01/2024') && url.contains('2034')) {
+          return SuccessResult<ErrorMessages, List<dynamic>>([
+            {'data': '02/01/2024', 'valor': '3.40'},
+            {'data': '02/01/2034', 'valor': '4.40'},
+          ]);
+        }
+
+        if (url.contains('dataInicial=03/01/2034') && url.contains('2035')) {
+          return SuccessResult<ErrorMessages, List<dynamic>>([
+            {'data': '03/01/2034', 'valor': '5.40'},
+            {'data': '15/01/2035', 'valor': '6.40'},
+          ]);
+        }
+
+        return SuccessResult<ErrorMessages, List<dynamic>>([]);
+      });
+
+      final result = await repository.getSeries(
+        index: CorrectionIndex.selic,
+        start: DateTime(2014, 1, 1),
+        end: DateTime(2035, 1, 15),
       );
 
-      expect(result.isSuccess, isTrue, reason: 'A API do BCB deve responder com sucesso.');
-      final points = result.getOrNull();
-      expect(points, isNotNull);
-      expect(points, isNotEmpty);
-      expect(points!.any((point) => point.date.year == 2024), isTrue);
-      expect(points.first.value, isA<double>());
+      expect(result.isSuccess, isTrue);
+      expect(
+        result.getOrNull(),
+        [
+          SeriesPoint(date: DateTime(2014, 1, 1), value: 1.40),
+          SeriesPoint(date: DateTime(2024, 1, 1), value: 2.40),
+          SeriesPoint(date: DateTime(2024, 1, 2), value: 3.40),
+          SeriesPoint(date: DateTime(2034, 1, 2), value: 4.40),
+          SeriesPoint(date: DateTime(2034, 1, 3), value: 5.40),
+          SeriesPoint(date: DateTime(2035, 1, 15), value: 6.40),
+        ],
+      );
+      verify(() => network.get<List<dynamic>>(any())).called(3);
     });
+
+    test('deve reaproveitar resultado em cache para a mesma janela', () async {
+      when(() => network.get<List<dynamic>>(any())).thenAnswer(
+        (_) async => SuccessResult<ErrorMessages, List<dynamic>>([
+          {'data': '01/01/2014', 'valor': '1.00'},
+          {'data': '01/01/2024', 'valor': '2.00'},
+        ]),
+      );
+
+      final first = await repository.getSeries(
+        index: CorrectionIndex.selic,
+        start: DateTime(2014, 1, 1),
+        end: DateTime(2024, 1, 1),
+      );
+      final second = await repository.getSeries(
+        index: CorrectionIndex.selic,
+        start: DateTime(2014, 1, 1),
+        end: DateTime(2024, 1, 1),
+      );
+
+      expect(first.isSuccess, isTrue);
+      expect(second.isSuccess, isTrue);
+      verify(() => network.get<List<dynamic>>(any())).called(1);
+    });
+
+    test('deve retornar erro quando a série termina antes do mês final solicitado', () async {
+      when(() => network.get<List<dynamic>>(any())).thenAnswer(
+        (_) async => SuccessResult<ErrorMessages, List<dynamic>>([
+          {'data': '15/02/2025', 'valor': '1.10'},
+        ]),
+      );
+
+      final result = await repository.getSeries(
+        index: CorrectionIndex.selic,
+        start: DateTime(2025, 1, 1),
+        end: DateTime(2025, 3, 31),
+      );
+
+      expect(result.isError, isTrue);
+      expect(result.getErrorOrNull()!.message, contains('02/2025'));
+    });
+
+    test('deve falhar o conjunto quando uma janela falha', () async {
+      when(() => network.get<List<dynamic>>(any())).thenAnswer((invocation) async {
+        final url = invocation.positionalArguments.first as String;
+
+        if (url.contains('dataInicial=01/01/2014&dataFinal=01/01/2024')) {
+          return SuccessResult<ErrorMessages, List<dynamic>>([
+            {'data': '01/01/2014', 'valor': '1.20'},
+          ]);
+        }
+
+        if (url.contains('dataInicial=02/01/2024') && url.contains('2034')) {
+          return FailureResult<ErrorMessages, List<dynamic>>(
+            ServerErrorMessages.connectionError,
+          );
+        }
+
+        return SuccessResult<ErrorMessages, List<dynamic>>([]);
+      });
+
+      final result = await repository.getSeries(
+        index: CorrectionIndex.selic,
+        start: DateTime(2014, 1, 1),
+        end: DateTime(2035, 1, 15),
+      );
+
+      expect(result.isError, isTrue);
+      expect(result.getErrorOrNull(), ServerErrorMessages.connectionError);
+    });
+
   });
 }

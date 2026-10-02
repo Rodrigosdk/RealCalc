@@ -103,3 +103,17 @@ enum ValueCorrectionValidationMessage implements ErrorMessages {
 
   const ValueCorrectionValidationMessage(this.message);
 }
+
+class SeriesUnavailableError implements ErrorMessages {
+  const SeriesUnavailableError(this.lastAvailableMonth);
+
+  final DateTime lastAvailableMonth;
+
+  @override
+  String get message =>
+      'A série não possui dados para o período solicitado. O último mês disponível é ${_formatMonth(lastAvailableMonth)}.';
+
+  static String _formatMonth(DateTime date) {
+    return '${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+}
