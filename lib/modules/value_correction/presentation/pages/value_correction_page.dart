@@ -20,6 +20,7 @@ import '../cubit/value_correction/value_correction_cubit.dart';
 import '../cubit/value_correction/value_correction_state.dart';
 import '../../presentation/cubit/forms/value_correction_form_cubit.dart';
 import '../../presentation/cubit/forms/value_correction_form_state.dart';
+import '../widgets/correction_index_picker.dart';
 
 class ValueCorrectionPage extends StatelessWidget {
   const ValueCorrectionPage({super.key});
@@ -55,6 +56,23 @@ class ValueCorrectionPage extends StatelessWidget {
       context.read<ValueCorrectionCubit>().reset();
     }
 
+    void openIndexPicker() {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        useSafeArea: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) {
+          return CorrectionIndexPicker(
+            selectedIndex: formState.index,
+            onSelected: (index) {
+              formCubit.setIndex(index);
+            },
+          );
+        },
+      );
+    }
+
     return Form(
       autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Scaffold(
@@ -85,7 +103,7 @@ class ValueCorrectionPage extends StatelessWidget {
                   controller: indexController,
                   state: InputFieldState.neutral,
                   readOnly: true,
-                  onTap: () {},
+                  onTap: openIndexPicker,
                 ),
                 Row(
                   spacing: AppSpacing.sm,
