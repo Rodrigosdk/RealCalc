@@ -2,6 +2,7 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:real_calc/core/errors/failures.dart';
+import 'package:real_calc/core/errors/messages.dart';
 import 'package:real_calc/core/seed_works/error.dart';
 import 'package:real_calc/core/seed_works/result.dart';
 import 'package:real_calc/modules/value_correction/domain/entites/period.dart';
@@ -26,6 +27,7 @@ void main() {
   setUpAll(() {
     registerFallbackValue(ValueCorrectionFake());
     registerFallbackValue(SeriesKind.monthlyVariation);
+    registerFallbackValue(CorrectionIndex.ipca);
   });
 
   late ICorrectionSeriesRepository repository;
@@ -147,6 +149,68 @@ void main() {
           (s) => s.result.percentage,
           'percentage',
           80,
+        ),
+      ],
+    );
+
+    blocTest<ValueCorrectionCubit, ValueCorrectionState>(
+      'Deve emitir [Loading, Error] ao validar dados inválidos sem chamar o repositório',
+      build: () => cubit,
+      act: (cubit) => cubit.calculate(
+        index: CorrectionIndex.ipca,
+        initialDate: '02/2025',
+        finalDate: '01/2025',
+        percentage: '10',
+        value: '100',
+      ),
+      expect: () => [
+        isA<ValueCorrectionLoading>(),
+        isA<ValueCorrectionError>().having(
+          (state) => state.message,
+          'message',
+          contains('A data inicial não pode ser maior do que a data final'),
+        ),
+      ],
+      verify: (_) {
+        verifyNever(
+          () => repository.getSeries(
+            index: any(named: 'index'),
+            start: any(named: 'start'),
+            end: any(named: 'end'),
+          ),
+        );
+      },
+    );
+
+    blocTest<ValueCorrectionCubit, ValueCorrectionState>(
+      'Deve emitir [Loading, Error] quando a busca da série falhar por rede',
+      setUp: () {
+        when(
+          () => repository.getSeries(
+            index: CorrectionIndex.ipca,
+            start: any<DateTime>(named: 'start'),
+            end: any<DateTime>(named: 'end'),
+          ),
+        ).thenAnswer(
+          (_) async => FailureResult<ErrorMessages, List<SeriesPoint>>(
+            ServerErrorMessages.connectionError,
+          ),
+        );
+      },
+      build: () => cubit,
+      act: (cubit) => cubit.calculate(
+        index: CorrectionIndex.ipca,
+        initialDate: '01/2024',
+        finalDate: '12/2024',
+        percentage: '0',
+        value: '100',
+      ),
+      expect: () => [
+        isA<ValueCorrectionLoading>(),
+        isA<ValueCorrectionError>().having(
+          (state) => state.message,
+          'message',
+          'Erro de conexão com o servidor',
         ),
       ],
     );
