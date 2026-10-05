@@ -11,6 +11,10 @@ class ValueCorrectionFormCubit extends Cubit<ValueCorrectionFormState> {
   final percentage = TextEditingController();
   final value = TextEditingController();
 
+  ValueCorrectionField? _lastEditedDateField;
+  String _lastInitialText = '';
+  String _lastFinalText = '';
+
   ValueCorrectionFormCubit() : super(ValueCorrectionFormState.initial()) {
     for (final controller in _controllers) {
       controller.addListener(_onControllerChanged);
@@ -18,9 +22,15 @@ class ValueCorrectionFormCubit extends Cubit<ValueCorrectionFormState> {
     _refreshValidation();
   }
 
-  List<TextEditingController> get _controllers => [initialDate, finalDate, percentage, value];
+  List<TextEditingController> get _controllers => [
+    initialDate,
+    finalDate,
+    percentage,
+    value,
+  ];
 
-  TextEditingController controllerFor(ValueCorrectionField field) => switch (field) {
+  TextEditingController controllerFor(ValueCorrectionField field) =>
+      switch (field) {
         ValueCorrectionField.initialDate => initialDate,
         ValueCorrectionField.finalDate => finalDate,
         ValueCorrectionField.percentage => percentage,
@@ -30,7 +40,23 @@ class ValueCorrectionFormCubit extends Cubit<ValueCorrectionFormState> {
         ),
       };
 
-  void _onControllerChanged() => _refreshValidation();
+  void _onControllerChanged() {
+    _updateLastEditedDateField();
+    _refreshValidation();
+  }
+
+  void _updateLastEditedDateField() {
+    if (initialDate.text != _lastInitialText) {
+      _lastEditedDateField = ValueCorrectionField.initialDate;
+      _lastInitialText = initialDate.text;
+      return;
+    }
+
+    if (finalDate.text != _lastFinalText) {
+      _lastEditedDateField = ValueCorrectionField.finalDate;
+      _lastFinalText = finalDate.text;
+    }
+  }
 
   void _refreshValidation() {
     final index = state.index;
@@ -51,12 +77,45 @@ class ValueCorrectionFormCubit extends Cubit<ValueCorrectionFormState> {
     if (index == null) {
       errors[ValueCorrectionField.selectedIndex] = 'Selecione um índice';
     }
+
     if (hasInitialDate && !_isValidDate(initialDate.text, dateGranularity)) {
       errors[ValueCorrectionField.initialDate] = 'Data inicial inválida';
+    } else if (hasInitialDate && _isFutureDate(initialDate.text, dateGranularity)) {
+      errors[ValueCorrectionField.initialDate] =
+          'A data inicial não pode ser superior à data atual.';
     }
+
     if (hasFinalDate && !_isValidDate(finalDate.text, dateGranularity)) {
       errors[ValueCorrectionField.finalDate] = 'Data final inválida';
+    } else if (hasFinalDate && _isFutureDate(finalDate.text, dateGranularity)) {
+      errors[ValueCorrectionField.finalDate] =
+          'A data final não pode ser superior à data atual.';
     }
+
+    final hasValidInitialDate =
+        hasInitialDate && errors[ValueCorrectionField.initialDate] == null;
+    final hasValidFinalDate =
+        hasFinalDate && errors[ValueCorrectionField.finalDate] == null;
+
+    if (hasValidInitialDate && hasValidFinalDate) {
+      final initialDateValue = _parseDate(initialDate.text, dateGranularity)!;
+      final finalDateValue = _parseDate(finalDate.text, dateGranularity)!;
+
+      if (initialDateValue.isAfter(finalDateValue)) {
+        final targetField = _lastEditedDateField ?? ValueCorrectionField.finalDate;
+
+        if (targetField == ValueCorrectionField.finalDate) {
+          errors[ValueCorrectionField.finalDate] =
+              'A data final deve ser posterior ou igual à data inicial.';
+          errors[ValueCorrectionField.initialDate] = null;
+        } else {
+          errors[ValueCorrectionField.initialDate] =
+              'A data inicial deve ser anterior ou igual à data final.';
+          errors[ValueCorrectionField.finalDate] = null;
+        }
+      }
+    }
+
     if (showsPercentage && !hasPercentage) {
       errors[ValueCorrectionField.percentage] = 'Informe o percentual';
     }
@@ -66,17 +125,27 @@ class ValueCorrectionFormCubit extends Cubit<ValueCorrectionFormState> {
         index: index,
         dateGranularity: dateGranularity,
         showsPercentage: showsPercentage,
-        canCalculate: index != null &&
+        canCalculate:
+            index != null &&
             hasInitialDate &&
             hasFinalDate &&
-            (!showsPercentage || hasPercentage),
-        showsCurrencyWarning: _isCurrencyWarning(initialDate.text, dateGranularity),
+            errors[ValueCorrectionField.initialDate] == null &&
+            errors[ValueCorrectionField.finalDate] == null &&
+            (!showsPercentage ||
+                (hasPercentage &&
+                    errors[ValueCorrectionField.percentage] == null)),
+        showsCurrencyWarning: _isCurrencyWarning(
+          initialDate.text,
+          dateGranularity,
+        ),
         fieldErrors: errors,
       ),
     );
   }
 
   void setIndex(CorrectionIndex newIndex) {
+    _resetDateTracking();
+
     if (newIndex.granularity == DateGranularity.day) {
       _normalizeToDayFormat(initialDate);
       _normalizeToDayFormat(finalDate);
@@ -97,7 +166,10 @@ class ValueCorrectionFormCubit extends Cubit<ValueCorrectionFormState> {
         dateGranularity: newIndex.granularity,
         showsPercentage: newIndex == CorrectionIndex.cdi,
         canCalculate: false,
-        showsCurrencyWarning: _isCurrencyWarning(initialDate.text, newIndex.granularity),
+        showsCurrencyWarning: _isCurrencyWarning(
+          initialDate.text,
+          newIndex.granularity,
+        ),
       ),
     );
     _refreshValidation();
@@ -134,6 +206,15 @@ class ValueCorrectionFormCubit extends Cubit<ValueCorrectionFormState> {
     return date.isBefore(DateTime(1994, 7, 1));
   }
 
+  bool _isFutureDate(String value, DateGranularity granularity) {
+    final date = _parseDate(value, granularity);
+    if (date == null) return false;
+
+    final today = DateTime.now();
+    final todayAtMidnight = DateTime(today.year, today.month, today.day);
+    return date.isAfter(todayAtMidnight);
+  }
+
   bool _isValidDate(String value, DateGranularity granularity) {
     return _parseDate(value, granularity) != null;
   }
@@ -156,11 +237,22 @@ class ValueCorrectionFormCubit extends Cubit<ValueCorrectionFormState> {
     final month = int.tryParse(parts[1]);
     final year = int.tryParse(parts[2]);
     if (day == null || month == null || year == null) return null;
-    if (day < 1 || day > 31 || month < 1 || month > 12) return null;
-    return DateTime(year, month, day);
+    if (day < 1 || month < 1 || month > 12) return null;
+    final parsed = DateTime(year, month, day);
+    if (parsed.year != year || parsed.month != month || parsed.day != day) {
+      return null;
+    }
+    return parsed;
+  }
+
+  void _resetDateTracking() {
+    _lastEditedDateField = null;
+    _lastInitialText = '';
+    _lastFinalText = '';
   }
 
   void clear() {
+    _resetDateTracking();
     for (final controller in _controllers) {
       controller.clear();
     }

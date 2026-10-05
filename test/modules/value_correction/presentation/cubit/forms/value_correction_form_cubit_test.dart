@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:real_calc/modules/value_correction/domain/enum/correction_index.dart';
 import 'package:real_calc/modules/value_correction/domain/enum/date_granularity.dart';
 import 'package:real_calc/modules/value_correction/presentation/cubit/forms/value_correction_form_cubit.dart';
+import 'package:real_calc/modules/value_correction/presentation/cubit/forms/value_correction_form_state.dart';
 
 void main() {
   late ValueCorrectionFormCubit cubit;
@@ -39,6 +40,56 @@ void main() {
     expect(cubit.state.showsCurrencyWarning, isFalse);
   });
 
+  test('data inicial e final não podem ser maiores que a data atual', () {
+    cubit.setIndex(CorrectionIndex.ipca);
+
+    final nextMonth = DateTime.now().add(const Duration(days: 32));
+    final nextMonthText = '${nextMonth.month.toString().padLeft(2, '0')}/${nextMonth.year}';
+
+    cubit.initialDate.text = nextMonthText;
+    cubit.finalDate.text = nextMonthText;
+
+    expect(
+      cubit.state.fieldErrors[ValueCorrectionField.initialDate],
+      'A data inicial não pode ser superior à data atual.',
+    );
+    expect(
+      cubit.state.fieldErrors[ValueCorrectionField.finalDate],
+      'A data final não pode ser superior à data atual.',
+    );
+  });
+
+  test('a mensagem fica no campo que foi editado por último quando a ordem das datas fica inválida', () {
+    cubit.setIndex(CorrectionIndex.ipca);
+    cubit.initialDate.text = '12/2025';
+    cubit.finalDate.text = '01/2025';
+
+    expect(
+      cubit.state.fieldErrors[ValueCorrectionField.initialDate],
+      isNull,
+    );
+    expect(
+      cubit.state.fieldErrors[ValueCorrectionField.finalDate],
+      'A data final deve ser posterior ou igual à data inicial.',
+    );
+  });
+
+  test('a mensagem de ordem inválida some quando o campo corrigido fica válido novamente', () {
+    cubit.setIndex(CorrectionIndex.ipca);
+    cubit.initialDate.text = '12/2025';
+    cubit.finalDate.text = '01/2025';
+
+    expect(
+      cubit.state.fieldErrors[ValueCorrectionField.finalDate],
+      'A data final deve ser posterior ou igual à data inicial.',
+    );
+
+    cubit.finalDate.text = '12/2025';
+
+    expect(cubit.state.fieldErrors[ValueCorrectionField.initialDate], isNull);
+    expect(cubit.state.fieldErrors[ValueCorrectionField.finalDate], isNull);
+  });
+
   test('clear limpa tudo', () {
     cubit.setIndex(CorrectionIndex.cdi);
     cubit.initialDate.text = '01/01/2024';
@@ -54,5 +105,16 @@ void main() {
     expect(cubit.percentage.text, isEmpty);
     expect(cubit.value.text, isEmpty);
     expect(cubit.state.canCalculate, isFalse);
+  });
+
+  test('apagar uma data inválida limpa a mensagem de erro', () {
+    cubit.setIndex(CorrectionIndex.ipca);
+    cubit.initialDate.text = '99/2024';
+
+    expect(cubit.state.fieldErrors[ValueCorrectionField.initialDate], isNotNull);
+
+    cubit.initialDate.clear();
+
+    expect(cubit.state.fieldErrors[ValueCorrectionField.initialDate], isNull);
   });
 }
