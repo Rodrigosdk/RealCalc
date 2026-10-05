@@ -6,6 +6,7 @@ import 'package:real_calc/core/themes/extensions/options_bottom_forms_theme.dart
 import 'color_tokens.dart';
 import 'extensions/financing_forms_theme.dart';
 import 'extensions/home_page_theme.dart';
+import 'extensions/index_picker_theme.dart';
 import 'extensions/input_forms_result_card_theme.dart';
 import 'extensions/metric_card_theme.dart';
 import 'extensions/page_header_theme.dart';
@@ -143,7 +144,27 @@ class AppTheme {
           errorColor: ColorTokens.error,
           badgeStyle: AppTextStyles.stateBadge,
         ),
-
+        IndexPickerTheme(
+          backgroundColor: ColorTokens.surface,
+          surfaceColor: ColorTokens.background,
+          dividerColor: ColorTokens.border,
+          selectedColor: ColorTokens.accentAmber.withValues(alpha: 0.12),
+          selectedBorderColor: ColorTokens.accentAmber,
+          titleColor: ColorTokens.textPrimary,
+          subtitleColor: ColorTokens.textSecondary,
+          checkColor: ColorTokens.accentAmber,
+          sectionTitleStyle: AppTextStyles.labelLarge.copyWith(
+            color: ColorTokens.textSecondary,
+            letterSpacing: 1.2,
+          ),
+          itemTitleStyle: AppTextStyles.bodyLarge.copyWith(
+            color: ColorTokens.textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+          itemSubtitleStyle: AppTextStyles.bodyMedium.copyWith(
+            color: ColorTokens.textSecondary,
+          ),
+        ),
         HomePageTheme(
           scaffoldBackgroundColor: ColorTokens.background,
           cardColor: ColorTokens.background,
