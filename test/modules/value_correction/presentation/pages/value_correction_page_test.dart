@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,7 +13,6 @@ import 'package:real_calc/modules/value_correction/domain/enum/correction_index.
 import 'package:real_calc/modules/value_correction/domain/enum/series_kind.dart';
 import 'package:real_calc/modules/value_correction/domain/repositories/i_correction_series_repository.dart';
 import 'package:real_calc/modules/value_correction/presentation/cubit/value_correction/value_correction_cubit.dart';
-import 'package:real_calc/modules/value_correction/presentation/cubit/value_correction/value_correction_state.dart';
 import 'package:real_calc/modules/value_correction/presentation/cubit/forms/value_correction_form_cubit.dart';
 import 'package:real_calc/modules/value_correction/presentation/pages/value_correction_page.dart';
 import 'package:real_calc/modules/value_correction/use_cases/i_calculate_value_correction.dart';
