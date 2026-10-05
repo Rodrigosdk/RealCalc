@@ -19,25 +19,11 @@ class MonthYearInputFormatter extends TextInputFormatter {
       return const TextEditingValue(text: '');
     }
 
-    var monthText = digits;
-    var yearText = '';
+    String monthText = digits;
+    String yearText = '';
 
-    if (digits.length >= 2) {
-      final month = int.tryParse(digits.substring(0, 2)) ?? 0;
-      if (month == 0 || month > 12) {
-        monthText = digits.substring(0, 1);
-        if (digits.length > 2) {
-          yearText = digits.substring(2);
-        }
-      } else {
-        monthText = digits.substring(0, 2);
-        if (digits.length > 2) {
-          yearText = digits.substring(2);
-        }
-      }
-    }
-
-    if (monthText.length == 2 && yearText.isEmpty && digits.length > 2) {
+    if (digits.length > 2) {
+      monthText = digits.substring(0, 2);
       yearText = digits.substring(2);
     }
 

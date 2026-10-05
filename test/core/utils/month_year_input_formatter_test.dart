@@ -35,12 +35,21 @@ void main() {
     expect(value.text, '');
   });
 
-  test('deve respeitar limite do mês', () {
+  test('não bloqueia a digitação intermediária de mês e ano para valores inexistentes', () {
     final value = formatter.formatEditUpdate(
       TextEditingValue.empty,
       const TextEditingValue(text: '13'),
     );
 
-    expect(value.text, '1');
+    expect(value.text, '13');
+  });
+
+  test('mantém a entrada completa mesmo para um mês inválido em andamento', () {
+    final value = formatter.formatEditUpdate(
+      TextEditingValue.empty,
+      const TextEditingValue(text: '22/2222'),
+    );
+
+    expect(value.text, '22/2222');
   });
 }

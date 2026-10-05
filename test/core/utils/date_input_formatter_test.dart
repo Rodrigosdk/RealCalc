@@ -36,12 +36,12 @@ void main() {
     expect(value.text, '');
   });
 
-  test('deve bloquear dia inválido', () {
+  test('não bloqueia a digitação intermediária de um dia inexistente', () {
     final value = formatter.formatEditUpdate(
       TextEditingValue.empty,
       const TextEditingValue(text: '32'),
     );
 
-    expect(value.text, '3');
+    expect(value.text, '32');
   });
 }
