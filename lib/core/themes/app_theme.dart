@@ -11,6 +11,7 @@ import 'extensions/input_forms_result_card_theme.dart';
 import 'extensions/metric_card_theme.dart';
 import 'extensions/page_header_theme.dart';
 import 'extensions/title_widget_theme.dart';
+import 'extensions/value_correction_result_theme.dart';
 import 'text_styles.dart';
 
 class AppTheme {
@@ -229,6 +230,44 @@ class AppTheme {
           iconColor: ColorTokens.textSecondary,
           titleStyle: AppTextStyles.headlineMedium.copyWith(
             color: ColorTokens.textPrimary,
+          ),
+        ),
+        ValueCorrectionResultTheme(
+          cardBackgroundColor: ColorTokens.background,
+          cardBorderColor: ColorTokens.border,
+          spotlightBackground: ColorTokens.successContainerBg,
+          spotlightBorderColor: ColorTokens.successContainerBorder,
+          variationPositiveColor: ColorTokens.success,
+          shareButtonColor: ColorTokens.accentAmber,
+          editButtonColor: ColorTokens.textPrimary,
+          titleStyle: AppTextStyles.headlineMedium.copyWith(
+            color: ColorTokens.textPrimary,
+          ),
+          subtitleStyle: AppTextStyles.bodyMedium.copyWith(
+            color: ColorTokens.textSecondary,
+          ),
+          spotlightLabelStyle: AppTextStyles.labelLarge.copyWith(
+            color: ColorTokens.textPrimary,
+          ),
+          spotlightValueStyle: AppTextStyles.headlineLarge.copyWith(
+            color: ColorTokens.textPrimary,
+            fontSize: 32,
+            fontWeight: FontWeight.w700,
+          ),
+          spotlightVariationStyle: AppTextStyles.stateBadge.copyWith(
+            color: ColorTokens.success,
+            fontWeight: FontWeight.w600,
+          ),
+          detailLabelStyle: AppTextStyles.bodyMedium.copyWith(
+            color: ColorTokens.textSecondary,
+          ),
+          detailValueStyle: AppTextStyles.bodyLarge.copyWith(
+            color: ColorTokens.textPrimary,
+            fontWeight: FontWeight.w500,
+          ),
+          linkStyle: AppTextStyles.bodyMedium.copyWith(
+            color: ColorTokens.textPrimary,
+            decoration: TextDecoration.underline,
           ),
         ),
       ],
