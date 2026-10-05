@@ -5,11 +5,13 @@ import 'package:real_calc/core/themes/spacing.dart';
 class OptionsBottomForms extends StatelessWidget {
   final VoidCallback? onCalculate;
   final VoidCallback? onClear;
+  final String calculateLabel;
 
   const OptionsBottomForms({
     super.key,
     this.onCalculate,
     this.onClear,
+    this.calculateLabel = 'Calcular',
   });
 
   @override
@@ -36,8 +38,13 @@ class OptionsBottomForms extends StatelessWidget {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child:  Text('Calcular',style: theme.textTheme.labelLarge
-                    ?.copyWith(fontWeight: FontWeight.w600, color: Colors.black),),
+                child: Text(
+                  calculateLabel,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
               ),
             ),
           ),
@@ -49,17 +56,18 @@ class OptionsBottomForms extends StatelessWidget {
               backgroundColor: optionsTheme.actionButtonBackground,
               foregroundColor: optionsTheme.actionButtonForeground,
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-              textStyle: theme.textTheme.labelLarge
-                  ?.copyWith(fontWeight: FontWeight.w500),
+              textStyle: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: optionsTheme.borderButtonColor)
+                side: BorderSide(color: optionsTheme.borderButtonColor),
               ),
             ),
-           child: Padding(
-             padding: const EdgeInsets.all(8.0),
-             child: const Text('Limpar'),
-           ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: const Text('Limpar'),
+            ),
           ),
         ),
       ],

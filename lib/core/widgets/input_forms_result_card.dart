@@ -13,6 +13,8 @@ class InputFormsResultCard extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final InputFieldState state;
   final VoidCallback? onTap;
+  final bool readOnly;
+  final String? trailingBadge;
 
   const InputFormsResultCard({
     super.key,
@@ -24,6 +26,8 @@ class InputFormsResultCard extends StatelessWidget {
     this.inputFormatters,
     this.state = InputFieldState.neutral,
     this.onTap,
+    this.readOnly = false,
+    this.trailingBadge,
   });
   bool get _isHighlightedAndEmptyText {
     if (state == InputFieldState.highlighted && controller.text.isEmpty) {
@@ -47,6 +51,8 @@ class InputFormsResultCard extends StatelessWidget {
     InputFieldState.neutral || InputFieldState.error => null,
   };
 
+  String? get _resolvedBadgeText => trailingBadge ?? _badgeText;
+
   String get _effectiveHint {
     if (_isHighlightedAndEmptyText) {
       return 'toque para calcular';
@@ -59,7 +65,8 @@ class InputFormsResultCard extends StatelessWidget {
     final theme = Theme.of(context).extension<InputFormsResultCardTheme>()!;
     final bool isNeutral = state == InputFieldState.neutral;
     final Color accent = _accentColor(theme);
-    final String? badgeText = _badgeText;
+    final String? badgeText = _resolvedBadgeText;
+    final String? errorText = validator?.call(controller.text);
 
     final bool isHintMessage = _isHighlightedAndEmptyText == true;
 
@@ -117,12 +124,15 @@ class InputFormsResultCard extends StatelessWidget {
                 child: TextFormField(
                   controller: controller,
                   onTap: onTap,
+                  readOnly: readOnly,
                   validator: validator,
                   inputFormatters: inputFormatters,
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
                   textInputAction: TextInputAction.done,
+                  enableInteractiveSelection: !readOnly,
+                  showCursor: !readOnly,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
@@ -135,6 +145,10 @@ class InputFormsResultCard extends StatelessWidget {
                       color: isHintMessage
                           ? accent // cor de destaque quando é mensagem
                           : theme.neutralLabelColor, // cor normal do hint
+                    ),
+                    errorText: errorText,
+                    errorStyle: theme.badgeStyle.copyWith(
+                      color: theme.errorColor,
                     ),
                     isDense: true,
                     contentPadding: EdgeInsets.zero,
