@@ -4,15 +4,18 @@ import '../../../domain/entites/period.dart';
 import '../../../domain/entites/value_correction.dart';
 import '../../../domain/enum/correction_index.dart';
 import '../../../domain/repositories/i_correction_series_repository.dart';
+import '../../../domain/validation/value_correction_validation.dart';
 import '../../../use_cases/i_calculate_value_correction.dart';
 import 'value_correction_state.dart';
 
 class ValueCorrectionCubit extends Cubit<ValueCorrectionState> {
   final ICorrectionSeriesRepository _seriesRepository;
   final ICalculateValueCorrection _calculateValueCorrection;
+  final ValueCorrectionValidation _validation;
 
   ValueCorrectionCubit(this._seriesRepository, this._calculateValueCorrection)
-    : super(ValueCorrectionInitial());
+    : _validation = ValueCorrectionValidation(),
+      super(ValueCorrectionInitial());
 
   Future<void> calculate({
     required CorrectionIndex index,
@@ -21,26 +24,38 @@ class ValueCorrectionCubit extends Cubit<ValueCorrectionState> {
     required String percentage,
     required String value,
   }) async {
+    emit(ValueCorrectionLoading());
+
     final start = _parseDate(initialDate, index);
     final end = _parseDate(finalDate, index);
-    final parsedPercentage = _resolvePercentage(index, percentage);
-    final originalValue = _parseNumber(value);
-
     if (start == null || end == null) {
       emit(const ValueCorrectionError('Informe um período válido.'));
       return;
     }
 
-    if (start.isAfter(end)) {
+    final parsedPercentage = _resolvePercentage(index, percentage);
+    final originalValue = _parseNumber(value);
+    final params = ValueCorrection(
+      index: index.sgsCode,
+      period: Period(initial: start, end: end),
+      percentage: parsedPercentage,
+      originalValue: originalValue,
+      factor: 1,
+      adjustedValue: originalValue,
+      variation: 0,
+    );
+
+    final validationResult = _validation.validate(params);
+    final validationFailure = validationResult.getErrorOrNull();
+    if (validationFailure != null) {
       emit(
-        const ValueCorrectionError(
-          'A data inicial deve ser anterior à data final.',
+        ValueCorrectionError(
+          validationFailure.message.first.message,
         ),
       );
       return;
     }
 
-    emit(ValueCorrectionLoading());
     final seriesResult = await _seriesRepository.getSeries(
       index: index,
       start: start,
@@ -53,16 +68,6 @@ class ValueCorrectionCubit extends Cubit<ValueCorrectionState> {
       return;
     }
 
-    final params = ValueCorrection(
-      index: index.sgsCode,
-      period: Period(initial: start, end: end),
-      percentage: parsedPercentage,
-      originalValue: originalValue,
-      factor: 1,
-      adjustedValue: originalValue,
-      variation: 0,
-    );
-
     final result = _calculateValueCorrection.call(
       params: params,
       series: seriesResult.getOrNull() ?? const [],
@@ -72,7 +77,7 @@ class ValueCorrectionCubit extends Cubit<ValueCorrectionState> {
     result.fold(
       (failure) => emit(
         ValueCorrectionError(
-          failure.message.map((error) => error.message).join(', '),
+          failure.message.first.message,
         ),
       ),
       (value) => emit(ValueCorrectionCalculated(value)),
