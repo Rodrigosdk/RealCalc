@@ -168,9 +168,10 @@ class ValueCorrectionPage extends StatelessWidget {
                 if (calculationState is ValueCorrectionLoading)
                   const LinearProgressIndicator(),
                 if (calculationState is ValueCorrectionError)
-                  Text(
-                    calculationState.message,
-                    style: formsTheme.errorTextStyle,
+                  _ErrorBanner(
+                    message: calculationState.message,
+                    formsTheme: formsTheme,
+                    onRetry: formState.canCalculate ? calculate : null,
                   ),
                 OptionsBottomForms(
                   onCalculate: formState.canCalculate ? calculate : null,
@@ -212,6 +213,62 @@ class _CorrectionResultCard extends StatelessWidget {
               Text('Valor corrigido: ${currencyFormat.format(result.adjustedValue)}'),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ErrorBanner extends StatelessWidget {
+  final String message;
+  final FinancingFormsTheme formsTheme;
+  final VoidCallback? onRetry;
+
+  const _ErrorBanner({
+    required this.message,
+    required this.formsTheme,
+    this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: formsTheme.errorContainerPadding,
+      decoration: BoxDecoration(
+        color: formsTheme.errorBackgroundColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: formsTheme.errorBorderColor),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.warning_amber_rounded,
+            size: 18,
+            color: formsTheme.errorBorderColor,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(message, style: formsTheme.errorTextStyle),
+                if (onRetry != null) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  TextButton(
+                    onPressed: onRetry,
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: const Text('Tentar novamente'),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
