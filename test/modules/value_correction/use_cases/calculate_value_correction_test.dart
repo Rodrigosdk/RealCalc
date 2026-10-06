@@ -4,6 +4,7 @@ import 'package:real_calc/core/errors/messages.dart';
 import 'package:real_calc/modules/value_correction/domain/entites/period.dart';
 import 'package:real_calc/modules/value_correction/domain/entites/series_point.dart';
 import 'package:real_calc/modules/value_correction/domain/entites/value_correction.dart';
+import 'package:real_calc/modules/value_correction/domain/enum/correction_index.dart';
 import 'package:real_calc/modules/value_correction/domain/enum/series_kind.dart';
 import 'package:real_calc/modules/value_correction/domain/validation/value_correction_validation.dart';
 import 'package:real_calc/modules/value_correction/use_cases/calculate_value_correction.dart';
@@ -16,13 +17,14 @@ void main() {
   });
 
   ValueCorrection buildValueCorrection({
+    int index = 1,
     DateTime? initial,
     DateTime? end,
     double percentage = 100,
     double? originalValue,
   }) {
     return ValueCorrection(
-      index: 1,
+      index: index,
       period: Period(
         initial: initial ?? DateTime(2024, 1, 1),
         end: end ?? DateTime(2024, 2, 1),
@@ -245,6 +247,57 @@ void main() {
       },
     );
 
+    test(
+      'TR acumula períodos consecutivos sem multiplicar taxas sobrepostas',
+      () {
+        final start = DateTime(2025, 10, 1);
+        final end = DateTime(2025, 12, 31);
+        final result = CalculateValueCorrection(validation).call(
+          params: buildValueCorrection(
+            index: CorrectionIndex.tr.sgsCode,
+            initial: start,
+            end: end,
+          ),
+          series: [
+            SeriesPoint(
+              date: DateTime(2025, 10, 1),
+              periodEnd: DateTime(2025, 10, 31),
+              value: 0.1738,
+            ),
+            SeriesPoint(
+              date: DateTime(2025, 10, 1),
+              periodEnd: DateTime(2025, 11, 1),
+              value: 0.1758,
+            ),
+            SeriesPoint(
+              date: DateTime(2025, 11, 1),
+              periodEnd: DateTime(2025, 12, 1),
+              value: 0.1634,
+            ),
+            SeriesPoint(
+              date: DateTime(2025, 12, 1),
+              periodEnd: DateTime(2025, 12, 31),
+              value: 0.1723,
+            ),
+            SeriesPoint(
+              date: DateTime(2025, 12, 1),
+              periodEnd: DateTime(2026, 1, 1),
+              value: 0.1742,
+            ),
+            SeriesPoint(
+              date: DateTime(2025, 12, 31),
+              periodEnd: DateTime(2026, 1, 31),
+              value: 0.1738,
+            ),
+          ],
+          type: SeriesKind.periodRate,
+        );
+
+        expect(result.isSuccess, isTrue);
+        expect(result.getOrNull()!.factor, closeTo(1.00511520, 4e-6));
+      },
+    );
+
     test('calcula fator para taxa legal em juros simples', () {
       final result = CalculateValueCorrection(validation).call(
         params: buildValueCorrection(
@@ -259,6 +312,78 @@ void main() {
       expect(result.isSuccess, isTrue);
       expect(result.getOrNull()!.factor, closeTo(1.00385874, 1e-9));
       expect(result.getOrNull()!.adjustedValue, closeTo(1003.85874, 1e-9));
+    });
+
+    test('Taxa Legal acumula mensalmente os dados SGS 29543', () {
+      final result = CalculateValueCorrection(validation).call(
+        params: buildValueCorrection(
+          index: CorrectionIndex.taxaLegal.sgsCode,
+          initial: DateTime(2025, 10, 1),
+          end: DateTime(2026, 1, 1),
+        ),
+        series: [
+          SeriesPoint(date: DateTime(2025, 10, 1), value: 0.736394),
+          SeriesPoint(date: DateTime(2025, 11, 1), value: 1.093764),
+          SeriesPoint(date: DateTime(2025, 12, 1), value: 0.851001),
+        ],
+        type: SeriesKind.simpleMonthlyRate,
+      );
+
+      expect(result.isSuccess, isTrue);
+      expect(result.getOrNull()!.factor, closeTo(1.02681159, 1e-12));
+    });
+
+    test('Taxa Legal aplica pro rata die em meses parciais', () {
+      final result = CalculateValueCorrection(validation).call(
+        params: buildValueCorrection(
+          index: CorrectionIndex.taxaLegal.sgsCode,
+          initial: DateTime(2025, 10, 1),
+          end: DateTime(2025, 12, 31),
+        ),
+        series: [
+          SeriesPoint(date: DateTime(2025, 10, 1), value: 0.736394),
+          SeriesPoint(date: DateTime(2025, 11, 1), value: 1.093764),
+          SeriesPoint(date: DateTime(2025, 12, 1), value: 0.851001),
+        ],
+        type: SeriesKind.simpleMonthlyRate,
+      );
+
+      expect(result.isSuccess, isTrue);
+      expect(result.getOrNull()!.factor, closeTo(1.02653707, 1e-12));
+    });
+
+    test('Taxa Legal reproduz 10,927298% de 30/08/2024 a 31/12/2025', () {
+      final result = CalculateValueCorrection(validation).call(
+        params: buildValueCorrection(
+          index: CorrectionIndex.taxaLegal.sgsCode,
+          initial: DateTime(2024, 8, 30),
+          end: DateTime(2025, 12, 31),
+        ),
+        series: [
+          SeriesPoint(date: DateTime(2024, 8, 1), value: 0.605306),
+          SeriesPoint(date: DateTime(2024, 9, 1), value: 0.676227),
+          SeriesPoint(date: DateTime(2024, 10, 1), value: 0.704241),
+          SeriesPoint(date: DateTime(2024, 11, 1), value: 0.385874),
+          SeriesPoint(date: DateTime(2024, 12, 1), value: 0.171924),
+          SeriesPoint(date: DateTime(2025, 1, 1), value: 0.589427),
+          SeriesPoint(date: DateTime(2025, 2, 1), value: 0.902209),
+          SeriesPoint(date: DateTime(2025, 3, 1), value: 0),
+          SeriesPoint(date: DateTime(2025, 4, 1), value: 0.321969),
+          SeriesPoint(date: DateTime(2025, 5, 1), value: 0.6232),
+          SeriesPoint(date: DateTime(2025, 6, 1), value: 0.775982),
+          SeriesPoint(date: DateTime(2025, 7, 1), value: 0.83488),
+          SeriesPoint(date: DateTime(2025, 8, 1), value: 0.942622),
+          SeriesPoint(date: DateTime(2025, 9, 1), value: 1.305984),
+          SeriesPoint(date: DateTime(2025, 10, 1), value: 0.736394),
+          SeriesPoint(date: DateTime(2025, 11, 1), value: 1.093764),
+          SeriesPoint(date: DateTime(2025, 12, 1), value: 0.851001),
+        ],
+        type: SeriesKind.simpleMonthlyRate,
+      );
+
+      expect(result.isSuccess, isTrue);
+      expect(result.getOrNull()!.variation, closeTo(10.927298, 1e-6));
+      expect(result.getOrNull()!.factor, closeTo(1.10927298, 1e-8));
     });
 
     test(
