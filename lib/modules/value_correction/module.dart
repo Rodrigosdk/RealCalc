@@ -12,6 +12,16 @@ import 'domain/validation/value_correction_validation.dart';
 import 'infrastructure/repositories/sgs_repository.dart';
 import 'infrastructure/services/share_plus_value_correction_sharer.dart';
 import 'presentation/cubit/value_correction/value_correction_cubit.dart';
+import 'presentation/cubit/value_correction/request_parsing/i_value_correction_request_parser.dart';
+import 'presentation/cubit/value_correction/request_parsing/value_correction_request_parser.dart';
+import 'presentation/cubit/value_correction/request_validation/i_value_correction_request_validator.dart';
+import 'presentation/cubit/value_correction/request_validation/value_correction_request_validator.dart';
+import 'presentation/cubit/forms/date_formatting/correction_form_input_formatter.dart';
+import 'presentation/cubit/forms/date_formatting/i_correction_form_input_formatter.dart';
+import 'presentation/cubit/forms/date_parsing/correction_form_date_parser.dart';
+import 'presentation/cubit/forms/date_parsing/i_correction_form_date_parser.dart';
+import 'presentation/cubit/forms/validation/correction_form_validator.dart';
+import 'presentation/cubit/forms/validation/i_correction_form_validator.dart';
 import 'presentation/cubit/forms/value_correction_form_cubit.dart';
 import 'presentation/pages/value_correction_page.dart';
 import 'presentation/pages/value_correction_result_page.dart';
@@ -44,6 +54,17 @@ class ValueCorrectionModule extends Module {
     );
     i.addLazySingleton<ICorrectionIndexSeriesSelector>(
       CorrectionIndexSeriesSelector.new,
+    );
+    i.addLazySingleton<ICorrectionFormDateParser>(CorrectionFormDateParser.new);
+    i.addLazySingleton<ICorrectionFormInputFormatter>(
+      CorrectionFormInputFormatter.new,
+    );
+    i.addLazySingleton<ICorrectionFormValidator>(CorrectionFormValidator.new);
+    i.addLazySingleton<IValueCorrectionRequestParser>(
+      ValueCorrectionRequestParser.new,
+    );
+    i.addLazySingleton<IValueCorrectionRequestValidator>(
+      ValueCorrectionRequestValidator.new,
     );
     i.addLazySingleton<ICorrectionDataPreparer>(CorrectionDataPreparer.new);
     i.addLazySingleton<ICorrectionSeriesRepository>(SgsRepository.new);
