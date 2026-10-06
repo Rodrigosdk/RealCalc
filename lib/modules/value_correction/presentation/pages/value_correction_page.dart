@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_modular/flutter_modular.dart' as modular;
 
 import '../../../../core/themes/spacing.dart';
 import '../../../../core/utils/date_input_formatter.dart';
@@ -13,36 +14,25 @@ import '../../../../core/widgets/title_widget.dart';
 import '../../../../core/widgets/types/input_field_state.dart';
 import '../../../../core/widgets/error_banner.dart';
 import '../../../../core/widgets/warning_banner.dart';
+import '../../../../core/routes/app_routes.dart';
 import '../../domain/enum/correction_index.dart';
 import '../../domain/enum/date_granularity.dart';
-import '../../domain/services/value_correction_sharer.dart';
-import '../utils/value_correction_share_text.dart';
 import '../cubit/value_correction/value_correction_cubit.dart';
 import '../cubit/value_correction/value_correction_state.dart';
 import '../../presentation/cubit/forms/value_correction_form_cubit.dart';
 import '../../presentation/cubit/forms/value_correction_form_state.dart';
 import '../widgets/correction_index_picker.dart';
-import 'value_correction_result_page.dart';
 
 class ValueCorrectionPage extends StatelessWidget {
-  final ValueCorrectionSharer sharer;
-
-  const ValueCorrectionPage({super.key, required this.sharer});
+  const ValueCorrectionPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final formCubit = context.watch<ValueCorrectionFormCubit>();
+    final formCubit = WatchContext(context).watch<ValueCorrectionFormCubit>();
     final formState = formCubit.state;
-    final calculationState = context.watch<ValueCorrectionCubit>().state;
-    if (calculationState is ValueCorrectionCalculated) {
-      return ValueCorrectionResultPage(
-        result: calculationState.result,
-        onEdit: () {
-          context.read<ValueCorrectionCubit>().reset();
-        },
-        onShare: () => sharer.share(buildShareText(calculationState.result)),
-      );
-    }
+    final calculationState = WatchContext(
+      context,
+    ).watch<ValueCorrectionCubit>().state;
 
     final dateInputFormatter =
         formState.dateGranularity == DateGranularity.month
@@ -53,7 +43,7 @@ class ValueCorrectionPage extends StatelessWidget {
     );
 
     void runCalculation(CorrectionIndex index) {
-      context.read<ValueCorrectionCubit>().calculate(
+      ReadContext(context).read<ValueCorrectionCubit>().calculate(
         index: index,
         initialDate: formCubit.initialDate.text,
         finalDate: formCubit.finalDate.text,
@@ -77,7 +67,7 @@ class ValueCorrectionPage extends StatelessWidget {
 
     void clear() {
       formCubit.clear();
-      context.read<ValueCorrectionCubit>().reset();
+      ReadContext(context).read<ValueCorrectionCubit>().reset();
     }
 
     void openIndexPicker() {
@@ -97,122 +87,133 @@ class ValueCorrectionPage extends StatelessWidget {
       );
     }
 
-    return Form(
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      child: Scaffold(
-        appBar: const PageHeader(title: 'Correção de Valores'),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md + 4,
-              vertical: AppSpacing.md + 4,
-            ),
-            child: Column(
-              spacing: AppSpacing.md,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const TitleWidget(
-                  title: 'Correção de Valores',
-                  subtitle:
-                      'Atualize um valor por índices de inflação, juros ou poupança.',
-                ),
-                const HelpCard(
-                  message:
-                      'Escolha o índice e o período. Sem informar o valor, mostraremos só o fator de correção.',
-                ),
-                InputFormsResultCard(
-                  label: 'Índice de correção',
-                  hint: formState.index?.label ?? CorrectionIndex.ipca.label,
-                  icon: Icons.trending_up,
-                  controller: indexController,
-                  state: InputFieldState.neutral,
-                  readOnly: true,
-                  onTap: openIndexPicker,
-                ),
-                Row(
-                  spacing: AppSpacing.sm,
-                  children: [
-                    Expanded(
-                      child: InputFormsResultCard(
-                        label: 'Data inicial',
-                        hint: '01/2023',
-                        icon: Icons.calendar_today,
-                        controller: formCubit.initialDate,
-                        inputFormatters: [dateInputFormatter],
-                        state:
-                            formState.fieldErrors[ValueCorrectionField
-                                    .initialDate] !=
-                                null
-                            ? InputFieldState.error
-                            : InputFieldState.neutral,
-                        validator: (_) => formState
-                            .fieldErrors[ValueCorrectionField.initialDate],
-                      ),
-                    ),
-                    Expanded(
-                      child: InputFormsResultCard(
-                        label: 'Data final',
-                        hint: '12/2025',
-                        icon: Icons.calendar_today,
-                        controller: formCubit.finalDate,
-                        inputFormatters: [dateInputFormatter],
-                        state:
-                            formState.fieldErrors[ValueCorrectionField
-                                    .finalDate] !=
-                                null
-                            ? InputFieldState.error
-                            : InputFieldState.neutral,
-                        validator: (_) => formState
-                            .fieldErrors[ValueCorrectionField.finalDate],
-                      ),
-                    ),
-                  ],
-                ),
-                if (formState.warningBannerMessage.isNotEmpty)
-                  WarningBanner(message: formState.warningBannerMessage),
-                if (formState.showsPercentage)
+    return BlocListener<ValueCorrectionCubit, ValueCorrectionState>(
+      listener: (context, state) {
+        if (state is ValueCorrectionCalculated) {
+          modular.Modular.to.pushNamed(
+            AppRoutes.correctionResult,
+            arguments: state.result,
+          );
+        }
+      },
+      child: Form(
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        child: Scaffold(
+          appBar: const PageHeader(title: 'Correção de Valores'),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md + 4,
+                vertical: AppSpacing.md + 4,
+              ),
+              child: Column(
+                spacing: AppSpacing.md,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const TitleWidget(
+                    title: 'Correção de Valores',
+                    subtitle:
+                        'Atualize um valor por índices de inflação, juros ou poupança.',
+                  ),
+                  const HelpCard(
+                    message:
+                        'Escolha o índice e o período. Sem informar o valor, mostraremos só o fator de correção.',
+                  ),
                   InputFormsResultCard(
-                    label: 'Percentual',
-                    hint: '0,00',
-                    icon: Icons.percent,
-                    controller: formCubit.percentage,
+                    label: 'Índice de correção',
+                    hint: formState.index?.label ?? CorrectionIndex.ipca.label,
+                    icon: Icons.trending_up,
+                    controller: indexController,
+                    state: InputFieldState.neutral,
+                    readOnly: true,
+                    onTap: openIndexPicker,
+                  ),
+                  Row(
+                    spacing: AppSpacing.sm,
+                    children: [
+                      Expanded(
+                        child: InputFormsResultCard(
+                          label: 'Data inicial',
+                          hint: '01/2023',
+                          icon: Icons.calendar_today,
+                          controller: formCubit.initialDate,
+                          inputFormatters: [dateInputFormatter],
+                          state:
+                              formState.fieldErrors[ValueCorrectionField
+                                      .initialDate] !=
+                                  null
+                              ? InputFieldState.error
+                              : InputFieldState.neutral,
+                          validator: (_) => formState
+                              .fieldErrors[ValueCorrectionField.initialDate],
+                        ),
+                      ),
+                      Expanded(
+                        child: InputFormsResultCard(
+                          label: 'Data final',
+                          hint: '12/2025',
+                          icon: Icons.calendar_today,
+                          controller: formCubit.finalDate,
+                          inputFormatters: [dateInputFormatter],
+                          state:
+                              formState.fieldErrors[ValueCorrectionField
+                                      .finalDate] !=
+                                  null
+                              ? InputFieldState.error
+                              : InputFieldState.neutral,
+                          validator: (_) => formState
+                              .fieldErrors[ValueCorrectionField.finalDate],
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (formState.warningBannerMessage.isNotEmpty)
+                    WarningBanner(message: formState.warningBannerMessage),
+                  if (formState.showsPercentage)
+                    InputFormsResultCard(
+                      label: 'Percentual',
+                      hint: '0,00',
+                      icon: Icons.percent,
+                      controller: formCubit.percentage,
+                      inputFormatters: [DecimalInputFormatter()],
+                      state:
+                          formState.fieldErrors[ValueCorrectionField
+                                  .percentage] !=
+                              null
+                          ? InputFieldState.error
+                          : InputFieldState.neutral,
+                      validator: (_) => formState
+                          .fieldErrors[ValueCorrectionField.percentage],
+                    ),
+                  InputFormsResultCard(
+                    label: 'Valor a ser corrigido (R\$)',
+                    hint: '5.000,00',
+                    icon: Icons.attach_money,
+                    controller: formCubit.value,
                     inputFormatters: [DecimalInputFormatter()],
                     state:
-                        formState.fieldErrors[ValueCorrectionField
-                                .percentage] !=
+                        formState.fieldErrors[ValueCorrectionField.value] !=
                             null
                         ? InputFieldState.error
                         : InputFieldState.neutral,
+                    trailingBadge: 'opcional',
                     validator: (_) =>
-                        formState.fieldErrors[ValueCorrectionField.percentage],
+                        formState.fieldErrors[ValueCorrectionField.value],
                   ),
-                InputFormsResultCard(
-                  label: 'Valor a ser corrigido (R\$)',
-                  hint: '5.000,00',
-                  icon: Icons.attach_money,
-                  controller: formCubit.value,
-                  inputFormatters: [DecimalInputFormatter()],
-                  state:
-                      formState.fieldErrors[ValueCorrectionField.value] != null
-                      ? InputFieldState.error
-                      : InputFieldState.neutral,
-                  trailingBadge: 'opcional',
-                  validator: (_) =>
-                      formState.fieldErrors[ValueCorrectionField.value],
-                ),
-                if (calculationState is ValueCorrectionLoading)
-                  const LinearProgressIndicator(),
-                if (calculationState is ValueCorrectionError)
-                  ErrorBanner(
-                    message: calculationState.message,
-                    onRetry: retryCalculation,
+                  if (calculationState is ValueCorrectionLoading)
+                    const LinearProgressIndicator(),
+                  if (calculationState is ValueCorrectionError)
+                    ErrorBanner(
+                      message: calculationState.message,
+                      onRetry: retryCalculation,
+                    ),
+                  OptionsBottomForms(
+                    onCalculate: formState.canCalculate ? calculate : null,
+                    onClear: clear,
+                    calculateLabel: 'Corrigir valor',
                   ),
-                OptionsBottomForms(
-                  onCalculate: formState.canCalculate ? calculate : null,
-                  onClear: clear,
-                  calculateLabel: 'Corrigir valor',
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:intl/intl.dart';
 import 'package:real_calc/core/themes/extensions/value_correction_result_theme.dart';
 import 'package:real_calc/core/themes/spacing.dart';
@@ -6,30 +7,35 @@ import 'package:real_calc/core/widgets/options_bottom_forms.dart';
 import 'package:real_calc/core/widgets/page_header.dart';
 import 'package:real_calc/modules/value_correction/domain/entites/value_correction.dart';
 import 'package:real_calc/modules/value_correction/domain/enum/correction_index.dart';
+import 'package:real_calc/modules/value_correction/presentation/utils/value_correction_share_text.dart';
+
+import '../../domain/services/value_correction_sharer.dart';
 
 class ValueCorrectionResultPage extends StatelessWidget {
   final ValueCorrection result;
-  final VoidCallback onEdit;
-  final VoidCallback? onShare;
 
   const ValueCorrectionResultPage({
     super.key,
     required this.result,
-    required this.onEdit,
-    this.onShare,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).extension<ValueCorrectionResultTheme>()!;
-    final currencyFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
+    final currencyFormat = NumberFormat.currency(
+      locale: 'pt_BR',
+      symbol: 'R\$',
+    );
     final factorFormat = NumberFormat('#,##0.0000000', 'pt_BR');
     final decimalFormat = NumberFormat('#,##0.00', 'pt_BR');
     final index = _indexFor(result.index);
-    final consideredMonths = _monthsBetween(result.period.initial, result.period.end);
+    final consideredMonths = _monthsBetween(
+      result.period.initial,
+      result.period.end,
+    );
 
     return Scaffold(
-      appBar: PageHeader(title: 'Correção de Valores', onBack: onEdit),
+      appBar: PageHeader(title: 'Correção de Valores'),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(
@@ -61,14 +67,10 @@ class ValueCorrectionResultPage extends StatelessWidget {
                       runSpacing: 8,
                       children: [
                         Text(valueLabel, style: theme.spotlightLabelStyle),
-                        if (hasAdjustedValue)
-                          _SpotlightBadge(theme: theme),
+                        if (hasAdjustedValue) _SpotlightBadge(theme: theme),
                       ],
                     ),
-                    Text(
-                      displayedValue,
-                      style: theme.spotlightValueStyle,
-                    ),
+                    Text(displayedValue, style: theme.spotlightValueStyle),
                     Text(
                       supportingMessage(decimalFormat),
                       style: theme.spotlightVariationStyle.copyWith(
@@ -86,14 +88,23 @@ class ValueCorrectionResultPage extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    ..._detailRows(currencyFormat, factorFormat, index, consideredMonths, theme),
+                    ..._detailRows(
+                      currencyFormat,
+                      factorFormat,
+                      index,
+                      consideredMonths,
+                      theme,
+                    ),
                   ],
                 ),
               ),
               OptionsBottomForms(
-                onCalculate: onShare ?? () {},
-                onClear: onEdit,
+                onCalculate: () => Modular.get<ValueCorrectionSharer>().share(
+                  buildShareText(result),
+                ),
+                onClear: () => Modular.to.pop(),
                 calculateLabel: 'Compartilhar',
+                clearLabel: 'Editar Dados',
               ),
             ],
           ),
@@ -104,10 +115,14 @@ class ValueCorrectionResultPage extends StatelessWidget {
 
   bool get hasAdjustedValue => result.adjustedValue != null;
 
-  String get valueLabel => hasAdjustedValue ? 'Valor corrigido' : 'Fator de correção';
+  String get valueLabel =>
+      hasAdjustedValue ? 'Valor corrigido' : 'Fator de correção';
 
   String get displayedValue {
-    final currencyFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
+    final currencyFormat = NumberFormat.currency(
+      locale: 'pt_BR',
+      symbol: 'R\$',
+    );
     final factorFormat = NumberFormat('#,##0.0000000', 'pt_BR');
 
     if (hasAdjustedValue) {
@@ -154,11 +169,7 @@ class ValueCorrectionResultPage extends StatelessWidget {
         value: '$consideredMonths',
         theme: theme,
       ),
-      _DetailRow(
-        label: 'Índice',
-        value: index.label,
-        theme: theme,
-      ),
+      _DetailRow(label: 'Índice', value: index.label, theme: theme),
     ]);
 
     return rows;
@@ -179,26 +190,19 @@ class ValueCorrectionResultPage extends StatelessWidget {
 class _SpotlightBadge extends StatelessWidget {
   final ValueCorrectionResultTheme theme;
 
-  const _SpotlightBadge({
-    required this.theme,
-  });
+  const _SpotlightBadge({required this.theme});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: theme.spotlightBackground,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         'calculado',
-        style: theme.spotlightVariationStyle.copyWith(
-          fontSize: 10,
-        ),
+        style: theme.spotlightVariationStyle.copyWith(fontSize: 10),
       ),
     );
   }

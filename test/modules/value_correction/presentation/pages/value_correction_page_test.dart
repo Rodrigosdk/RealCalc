@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:real_calc/core/errors/failures.dart';
 import 'package:real_calc/core/errors/messages.dart';
+import 'package:real_calc/core/routes/app_routes.dart';
 import 'package:real_calc/core/seed_works/error.dart';
 import 'package:real_calc/core/seed_works/result.dart';
 import 'package:real_calc/core/themes/app_theme.dart';
@@ -14,7 +16,6 @@ import 'package:real_calc/modules/value_correction/domain/entites/value_correcti
 import 'package:real_calc/modules/value_correction/domain/enum/correction_index.dart';
 import 'package:real_calc/modules/value_correction/domain/enum/series_kind.dart';
 import 'package:real_calc/modules/value_correction/domain/repositories/i_correction_series_repository.dart';
-import 'package:real_calc/modules/value_correction/domain/services/value_correction_sharer.dart';
 import 'package:real_calc/modules/value_correction/presentation/cubit/value_correction/value_correction_cubit.dart';
 import 'package:real_calc/modules/value_correction/presentation/cubit/forms/value_correction_form_cubit.dart';
 import 'package:real_calc/modules/value_correction/presentation/pages/value_correction_page.dart';
@@ -27,7 +28,7 @@ class MockCorrectionSeriesRepository extends Mock
 class MockCalculateValueCorrection extends Mock
     implements ICalculateValueCorrection {}
 
-class MockValueCorrectionSharer extends Mock implements ValueCorrectionSharer {}
+class MockNavigator extends Mock implements IModularNavigator {}
 
 class ValueCorrectionFake extends Fake implements ValueCorrection {}
 
@@ -42,7 +43,7 @@ void main() {
   group('ValueCorrectionPage', () {
     late MockCorrectionSeriesRepository seriesRepository;
     late MockCalculateValueCorrection calculateValueCorrection;
-    late MockValueCorrectionSharer sharer;
+    late MockNavigator navigator;
 
     Widget buildSut() {
       return BlocProvider(
@@ -55,7 +56,7 @@ void main() {
               seriesRepository,
               calculateValueCorrection,
             ),
-            child: ValueCorrectionPage(sharer: sharer),
+            child: const ValueCorrectionPage(),
           ),
         ),
       );
@@ -64,8 +65,11 @@ void main() {
     setUp(() {
       seriesRepository = MockCorrectionSeriesRepository();
       calculateValueCorrection = MockCalculateValueCorrection();
-      sharer = MockValueCorrectionSharer();
-      when(() => sharer.share(any())).thenAnswer((_) async {});
+      navigator = MockNavigator();
+      Modular.navigatorDelegate = navigator;
+      when(
+        () => navigator.pushNamed(any(), arguments: any(named: 'arguments')),
+      ).thenAnswer((_) async => null);
     });
 
     testWidgets('renderiza a árvore do formulário e os botões da correção', (
@@ -176,7 +180,7 @@ void main() {
             ],
             child: MaterialApp(
               theme: AppTheme.darkTheme,
-              home: ValueCorrectionPage(sharer: sharer),
+              home: const ValueCorrectionPage(),
             ),
           ),
         );
@@ -211,20 +215,16 @@ void main() {
           ),
         ).called(1);
 
-        await tester.tap(find.text('Compartilhar'));
-        await tester.pump();
-
-        verify(
-          () => sharer.share(
-            'RealCalc · Correção de Valores\n'
-            'Índice: IPCA (IBGE)\n'
-            'Período: 01/2024 a 12/2024\n'
-            'Valor original: R\$ 100,00\n'
-            'Fator de correção: 1,0150000\n'
-            'Valor corrigido: R\$ 101,50 (+1,50%)\n\n'
-            'Simulação feita no RealCalc, sem valor oficial.',
-          ),
-        ).called(1);
+        final result =
+            verify(
+                  () => navigator.pushNamed(
+                    AppRoutes.correctionResult,
+                    arguments: captureAny(named: 'arguments'),
+                  ),
+                ).captured.single
+                as ValueCorrection;
+        expect(result.index, CorrectionIndex.ipca.sgsCode);
+        expect(result.adjustedValue, 101.5);
       },
     );
 
@@ -288,7 +288,7 @@ void main() {
           ],
           child: MaterialApp(
             theme: AppTheme.darkTheme,
-            home: ValueCorrectionPage(sharer: sharer),
+            home: const ValueCorrectionPage(),
           ),
         ),
       );
@@ -309,7 +309,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(requestCount, 2);
-      expect(find.text('Valor corrigido'), findsOneWidget);
+      verify(
+        () => navigator.pushNamed(
+          AppRoutes.correctionResult,
+          arguments: any(named: 'arguments'),
+        ),
+      ).called(1);
     });
 
     ValueCorrection buildResult({
@@ -342,11 +347,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.darkTheme,
-          home: ValueCorrectionResultPage(
-            result: result,
-            onEdit: () {},
-            onShare: () {},
-          ),
+          home: ValueCorrectionResultPage(result: result),
         ),
       );
 
@@ -367,11 +368,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.darkTheme,
-          home: ValueCorrectionResultPage(
-            result: result,
-            onEdit: () {},
-            onShare: () {},
-          ),
+          home: ValueCorrectionResultPage(result: result),
         ),
       );
 
@@ -381,26 +378,17 @@ void main() {
       expect(find.textContaining('IPCA'), findsNWidgets(2));
     });
 
-    testWidgets('aciona o callback de edição ao tocar no botão secundário', (
-      tester,
-    ) async {
-      var edited = false;
+    testWidgets('exibe ação para editar os dados do cálculo', (tester) async {
       final result = buildResult();
 
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.darkTheme,
-          home: ValueCorrectionResultPage(
-            result: result,
-            onEdit: () => edited = true,
-            onShare: () {},
-          ),
+          home: ValueCorrectionResultPage(result: result),
         ),
       );
 
-      await tester.tap(find.text('Limpar'));
-      await tester.pump();
-      expect(edited, isTrue);
+      expect(find.text('Editar Dados'), findsOneWidget);
     });
 
     testWidgets('não extrapola o layout em largura de 360px', (tester) async {
@@ -423,11 +411,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.darkTheme,
-          home: ValueCorrectionResultPage(
-            result: result,
-            onEdit: () {},
-            onShare: () {},
-          ),
+          home: ValueCorrectionResultPage(result: result),
         ),
       );
 
