@@ -1,17 +1,19 @@
 import 'package:real_calc/core/seed_works/result.dart';
 
 import '../../../core/errors/failures.dart';
-import '../../../core/errors/messages.dart';
+import '../domain/entites/correction_calculation_data.dart';
 import '../domain/entites/series_point.dart';
 import '../domain/entites/value_correction.dart';
 import '../domain/enum/series_kind.dart';
-import '../domain/validation/value_correction_validation.dart';
+import 'correction/data_preparation/i_correction_data_preparer.dart';
+import 'correction/rate_calculation/i_correction_rate_calculator.dart';
 import 'i_calculate_value_correction.dart';
 
 class CalculateValueCorrection implements ICalculateValueCorrection {
-  final ValueCorrectionValidation _validation;
+  final ICorrectionDataPreparer _dataPreparer;
+  final ICorrectionRateCalculator _rateCalculator;
 
-  CalculateValueCorrection(this._validation);
+  CalculateValueCorrection(this._dataPreparer, this._rateCalculator);
 
   @override
   Result<Failure, ValueCorrection> call({
@@ -19,63 +21,23 @@ class CalculateValueCorrection implements ICalculateValueCorrection {
     required List<SeriesPoint> series,
     required SeriesKind type,
   }) {
-    final validationResult = _validation.validate(params);
-    if (validationResult.getErrorOrNull() != null) {
-      return FailureResult(validationResult.getErrorOrNull()!);
-    }
-
-    final start = DateTime(
-      params.period.initial.year,
-      params.period.initial.month,
-      params.period.initial.day,
-    );
-    final end = DateTime(
-      params.period.end.year,
-      params.period.end.month,
-      params.period.end.day,
+    final preparationResult = _dataPreparer.prepare(
+      params: params,
+      series: series,
+      type: type,
     );
 
-    final filteredSeries = series.where((point) {
-      final pointDate = DateTime(
-        point.date.year,
-        point.date.month,
-        point.date.day,
-      );
-      return !pointDate.isBefore(start) && !pointDate.isAfter(end);
-    }).toList();
-
-    if (filteredSeries.isEmpty) {
-      return FailureResult(
-        ValidationFailure(message: [ValueCorrectionValidationMessage.invalidPeriod]),
-      );
+    final preparationFailure = preparationResult.getErrorOrNull();
+    if (preparationFailure != null) {
+      return FailureResult(preparationFailure);
     }
+    final calculationData = preparationResult.getOrNull()!;
 
-    double factor = 1.0;
-
-    switch (type) {
-      case SeriesKind.monthlyVariation:
-      case SeriesKind.periodRate:
-        for (final point in filteredSeries) {
-          factor *= (1 + (point.value / 100));
-        }
-        break;
-      case SeriesKind.dailyRate:
-        final percentage = params.percentage / 100;
-        for (final point in filteredSeries) {
-          factor *= (1 + ((point.value / 100) * percentage));
-        }
-        break;
-      case SeriesKind.simpleMonthlyRate:
-        double accumulatedRate = 0;
-        for (final point in filteredSeries) {
-          accumulatedRate += point.value / 100;
-        }
-        factor = 1 + accumulatedRate;
-        break;
-    }
-
-    final adjustedValue = params.originalValue != null ? params.originalValue! * factor : null;
-    final variation = (factor - 1) * 100;
+    final factor = _calculateFactor(
+      type: type,
+      percentage: params.percentage,
+      calculationData: calculationData,
+    );
 
     return SuccessResult(
       ValueCorrection(
@@ -84,9 +46,38 @@ class CalculateValueCorrection implements ICalculateValueCorrection {
         percentage: params.percentage,
         originalValue: params.originalValue,
         factor: factor,
-        adjustedValue: adjustedValue,
-        variation: variation,
+        adjustedValue: _calculateAdjustedValue(params.originalValue, factor),
+        variation: _calculateVariation(factor),
       ),
     );
   }
+
+  double _calculateFactor({
+    required SeriesKind type,
+    required double percentage,
+    required CorrectionCalculationData calculationData,
+  }) {
+    return switch (type) {
+      SeriesKind.monthlyVariation => _rateCalculator.calculateMonthlyVariation(
+        calculationData.filteredSeries,
+      ),
+      SeriesKind.periodRate => _rateCalculator.calculatePeriodRate(
+        calculationData.calculationSeries,
+      ),
+      SeriesKind.dailyRate => _rateCalculator.calculateDailyRate(
+        calculationData.filteredSeries,
+        percentage,
+      ),
+      SeriesKind.simpleMonthlyRate =>
+        _rateCalculator.calculateSimpleMonthlyRate(
+          calculationData.filteredSeries,
+          taxaLegalAccumulatedRate: calculationData.taxaLegalAccumulatedRate,
+        ),
+    };
+  }
+
+  double? _calculateAdjustedValue(double? originalValue, double factor) =>
+      originalValue == null ? null : originalValue * factor;
+
+  double _calculateVariation(double factor) => (factor - 1) * 100;
 }

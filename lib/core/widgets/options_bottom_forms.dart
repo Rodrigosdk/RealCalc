@@ -6,12 +6,14 @@ class OptionsBottomForms extends StatelessWidget {
   final VoidCallback? onCalculate;
   final VoidCallback? onClear;
   final String calculateLabel;
+  final String clearLabel;
 
   const OptionsBottomForms({
     super.key,
     this.onCalculate,
     this.onClear,
     this.calculateLabel = 'Calcular',
+    this.clearLabel = 'Limpar',
   });
 
   @override
@@ -66,7 +68,7 @@ class OptionsBottomForms extends StatelessWidget {
             ),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: const Text('Limpar'),
+              child: Text(clearLabel),
             ),
           ),
         ),

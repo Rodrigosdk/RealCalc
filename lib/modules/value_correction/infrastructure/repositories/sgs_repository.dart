@@ -6,11 +6,12 @@ import 'package:real_calc/shared/network/response/sgs_response_network.dart';
 
 import '../../domain/entites/series_point.dart';
 import '../../domain/enum/correction_index.dart';
-import '../../domain/enum/date_granularity.dart';
+import '../../domain/enum/series_kind.dart';
 import '../../domain/repositories/i_correction_series_repository.dart';
 
 class SgsRepository implements ICorrectionSeriesRepository {
-  static const String _endpoint = 'https://api.bcb.gov.br/dados/serie/bcdata.sgs';
+  static const String _endpoint =
+      'https://api.bcb.gov.br/dados/serie/bcdata.sgs';
   static const int _dailySeriesWindowLimitYears = 10;
 
   final Network _network;
@@ -22,11 +23,7 @@ class SgsRepository implements ICorrectionSeriesRepository {
   Future<Result<ErrorMessages, List<SeriesPoint>>> correctionSeries() async {
     final now = DateTime.now();
     final start = DateTime(now.year - 1, now.month, now.day);
-    return getSeries(
-      index: CorrectionIndex.ipca,
-      start: start,
-      end: now,
-    );
+    return getSeries(index: CorrectionIndex.ipca, start: start, end: now);
   }
 
   @override
@@ -43,25 +40,38 @@ class SgsRepository implements ICorrectionSeriesRepository {
         ? await _getSeriesInDailyWindows(index: index, start: start, end: end)
         : await _getSeriesSingleWindow(index: index, start: start, end: end);
 
-    if (result.isSuccess && index.granularity == DateGranularity.day) {
+    if (result.isSuccess && index.kind == SeriesKind.dailyRate) {
       final points = result.getOrNull() ?? const <SeriesPoint>[];
       final validationError = _validateLastAvailableMonth(points, end);
       if (validationError != null) {
-        final failure = FailureResult<ErrorMessages, List<SeriesPoint>>(validationError);
-        _cache[cacheKey] = failure;
+        final failure = FailureResult<ErrorMessages, List<SeriesPoint>>(
+          validationError,
+        );
         return failure;
       }
     }
 
-    _cache[cacheKey] = result;
+    if (result.isSuccess) {
+      _cache[cacheKey] = result;
+    }
     return result;
   }
 
-  bool _shouldSplitDailySeries(CorrectionIndex index, DateTime start, DateTime end) {
+  bool _shouldSplitDailySeries(
+    CorrectionIndex index,
+    DateTime start,
+    DateTime end,
+  ) {
     final endDate = end.isAfter(start) ? end : start;
     final windowStart = DateTime(start.year, start.month, start.day);
-    final windowEnd = DateTime(windowStart.year + _dailySeriesWindowLimitYears, windowStart.month, windowStart.day);
-    return index.granularity == DateGranularity.day && endDate.isAfter(windowStart.add(const Duration(days: 3652))) && endDate.isAfter(windowEnd);
+    final windowEnd = DateTime(
+      windowStart.year + _dailySeriesWindowLimitYears,
+      windowStart.month,
+      windowStart.day,
+    );
+    return index.kind == SeriesKind.dailyRate &&
+        endDate.isAfter(windowStart.add(const Duration(days: 3652))) &&
+        endDate.isAfter(windowEnd);
   }
 
   Future<Result<ErrorMessages, List<SeriesPoint>>> _getSeriesSingleWindow({
@@ -69,7 +79,9 @@ class SgsRepository implements ICorrectionSeriesRepository {
     required DateTime start,
     required DateTime end,
   }) async {
-    final response = await _network.get<List<dynamic>>(_buildUrl(index, start, end));
+    final response = await _network.get<List<dynamic>>(
+      _buildUrl(index, start, end),
+    );
 
     return response.fold(
       (error) => FailureResult<ErrorMessages, List<SeriesPoint>>(error),
@@ -91,20 +103,25 @@ class SgsRepository implements ICorrectionSeriesRepository {
     while (!cursor.isAfter(end)) {
       final windowEnd = _nextWindowEnd(cursor, end);
       final windowKey = _cacheKey(index, cursor, windowEnd);
-      final windowResult = _cache[windowKey] ?? await _getSeriesSingleWindow(
-        index: index,
-        start: cursor,
-        end: windowEnd,
-      );
-      _cache[windowKey] = windowResult;
-
+      final windowResult =
+          _cache[windowKey] ??
+          await _getSeriesSingleWindow(
+            index: index,
+            start: cursor,
+            end: windowEnd,
+          );
       if (windowResult.isError) {
         return windowResult;
       }
+      _cache[windowKey] = windowResult;
 
       final points = windowResult.getOrNull() ?? const <SeriesPoint>[];
       for (final point in points) {
-        if (mergedPoints.any((candidate) => _sameDate(candidate.date, point.date))) {
+        if (mergedPoints.any(
+          (candidate) =>
+              _sameDate(candidate.date, point.date) &&
+              candidate.periodEnd == point.periodEnd,
+        )) {
           continue;
         }
         mergedPoints.add(point);
@@ -116,7 +133,7 @@ class SgsRepository implements ICorrectionSeriesRepository {
 
     mergedPoints.sort((a, b) => a.date.compareTo(b.date));
 
-    if (index.granularity == DateGranularity.day) {
+    if (index.kind == SeriesKind.dailyRate) {
       final validationError = _validateLastAvailableMonth(mergedPoints, end);
       if (validationError != null) {
         return FailureResult<ErrorMessages, List<SeriesPoint>>(validationError);
@@ -149,17 +166,31 @@ class SgsRepository implements ICorrectionSeriesRepository {
       final date = _parseDate(parsedDate);
       if (date == null) continue;
 
-      points.add(SeriesPoint(date: date, value: parsedValue));
+      final rawPeriodEnd = item['dataFim'];
+      final periodEnd = rawPeriodEnd is String
+          ? _parseDate(rawPeriodEnd)
+          : null;
+
+      points.add(
+        SeriesPoint(date: date, value: parsedValue, periodEnd: periodEnd),
+      );
     }
 
     points.sort((a, b) => a.date.compareTo(b.date));
     return points;
   }
 
-  ErrorMessages? _validateLastAvailableMonth(List<SeriesPoint> points, DateTime end) {
+  ErrorMessages? _validateLastAvailableMonth(
+    List<SeriesPoint> points,
+    DateTime end,
+  ) {
     if (points.isEmpty) return null;
 
-    final lastPointMonth = DateTime(points.last.date.year, points.last.date.month, 1);
+    final lastPointMonth = DateTime(
+      points.last.date.year,
+      points.last.date.month,
+      1,
+    );
     final requestedMonth = DateTime(end.year, end.month, 1);
 
     if (lastPointMonth.isBefore(requestedMonth)) {
@@ -184,7 +215,9 @@ class SgsRepository implements ICorrectionSeriesRepository {
   }
 
   bool _sameDate(DateTime left, DateTime right) {
-    return left.year == right.year && left.month == right.month && left.day == right.day;
+    return left.year == right.year &&
+        left.month == right.month &&
+        left.day == right.day;
   }
 
   String _cacheKey(CorrectionIndex index, DateTime start, DateTime end) {
