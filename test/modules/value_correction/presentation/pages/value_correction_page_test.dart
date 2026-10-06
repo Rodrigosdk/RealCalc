@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:real_calc/core/errors/failures.dart';
+import 'package:real_calc/core/errors/messages.dart';
 import 'package:real_calc/core/seed_works/error.dart';
 import 'package:real_calc/core/seed_works/result.dart';
 import 'package:real_calc/core/themes/app_theme.dart';
@@ -13,6 +14,7 @@ import 'package:real_calc/modules/value_correction/domain/entites/value_correcti
 import 'package:real_calc/modules/value_correction/domain/enum/correction_index.dart';
 import 'package:real_calc/modules/value_correction/domain/enum/series_kind.dart';
 import 'package:real_calc/modules/value_correction/domain/repositories/i_correction_series_repository.dart';
+import 'package:real_calc/modules/value_correction/domain/services/value_correction_sharer.dart';
 import 'package:real_calc/modules/value_correction/presentation/cubit/value_correction/value_correction_cubit.dart';
 import 'package:real_calc/modules/value_correction/presentation/cubit/forms/value_correction_form_cubit.dart';
 import 'package:real_calc/modules/value_correction/presentation/pages/value_correction_page.dart';
@@ -24,6 +26,8 @@ class MockCorrectionSeriesRepository extends Mock
 
 class MockCalculateValueCorrection extends Mock
     implements ICalculateValueCorrection {}
+
+class MockValueCorrectionSharer extends Mock implements ValueCorrectionSharer {}
 
 class ValueCorrectionFake extends Fake implements ValueCorrection {}
 
@@ -38,10 +42,12 @@ void main() {
   group('ValueCorrectionPage', () {
     late MockCorrectionSeriesRepository seriesRepository;
     late MockCalculateValueCorrection calculateValueCorrection;
+    late MockValueCorrectionSharer sharer;
 
     Widget buildSut() {
       return BlocProvider(
-        create: (_) => ValueCorrectionFormCubit()..setIndex(CorrectionIndex.ipca),
+        create: (_) =>
+            ValueCorrectionFormCubit()..setIndex(CorrectionIndex.ipca),
         child: MaterialApp(
           theme: AppTheme.darkTheme,
           home: BlocProvider(
@@ -49,7 +55,7 @@ void main() {
               seriesRepository,
               calculateValueCorrection,
             ),
-            child: const ValueCorrectionPage(),
+            child: ValueCorrectionPage(sharer: sharer),
           ),
         ),
       );
@@ -58,6 +64,8 @@ void main() {
     setUp(() {
       seriesRepository = MockCorrectionSeriesRepository();
       calculateValueCorrection = MockCalculateValueCorrection();
+      sharer = MockValueCorrectionSharer();
+      when(() => sharer.share(any())).thenAnswer((_) async {});
     });
 
     testWidgets('renderiza a árvore do formulário e os botões da correção', (
@@ -86,10 +94,44 @@ void main() {
     });
 
     testWidgets(
+      'o aviso de moeda informa a disponibilidade do índice selecionado',
+      (tester) async {
+        await tester.pumpWidget(buildSut());
+        final formCubit = BlocProvider.of<ValueCorrectionFormCubit>(
+          tester.element(find.byType(ValueCorrectionPage)),
+        );
+
+        formCubit.setIndex(CorrectionIndex.ipcaE);
+        formCubit.initialDate.text = '12/1991';
+        formCubit.finalDate.text = '01/1992';
+        await tester.pump();
+
+        expect(
+          find.text('O índice IPCA-E (IBGE) possui dados a partir de 01/1992.'),
+          findsOneWidget,
+        );
+
+        formCubit.setIndex(CorrectionIndex.selic);
+        formCubit.initialDate.text = '03/06/1986';
+        formCubit.finalDate.text = '04/06/1986';
+        await tester.pump();
+
+        expect(
+          find.text('O índice Selic possui dados a partir de 04/06/1986.'),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets(
       'o botão Corrigir valor só chama o cubit quando o formulário é válido',
       (tester) async {
-        final formCubit = ValueCorrectionFormCubit()..setIndex(CorrectionIndex.ipca);
-        final cubit = ValueCorrectionCubit(seriesRepository, calculateValueCorrection);
+        final formCubit = ValueCorrectionFormCubit()
+          ..setIndex(CorrectionIndex.ipca);
+        final cubit = ValueCorrectionCubit(
+          seriesRepository,
+          calculateValueCorrection,
+        );
 
         when(
           () => seriesRepository.getSeries(
@@ -134,7 +176,7 @@ void main() {
             ],
             child: MaterialApp(
               theme: AppTheme.darkTheme,
-              home: const ValueCorrectionPage(),
+              home: ValueCorrectionPage(sharer: sharer),
             ),
           ),
         );
@@ -143,17 +185,23 @@ void main() {
           ElevatedButton,
           'Corrigir valor',
         );
-        expect(tester.widget<ElevatedButton>(calculateButton).onPressed, isNull);
+        expect(
+          tester.widget<ElevatedButton>(calculateButton).onPressed,
+          isNull,
+        );
 
         formCubit.initialDate.text = '01/2024';
         formCubit.finalDate.text = '12/2024';
         formCubit.value.text = '100';
         await tester.pump();
 
-        expect(tester.widget<ElevatedButton>(calculateButton).onPressed, isNotNull);
+        expect(
+          tester.widget<ElevatedButton>(calculateButton).onPressed,
+          isNotNull,
+        );
 
         await tester.tap(calculateButton);
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         verify(
           () => seriesRepository.getSeries(
@@ -162,8 +210,107 @@ void main() {
             end: DateTime(2024, 12, 1),
           ),
         ).called(1);
+
+        await tester.tap(find.text('Compartilhar'));
+        await tester.pump();
+
+        verify(
+          () => sharer.share(
+            'RealCalc · Correção de Valores\n'
+            'Índice: IPCA (IBGE)\n'
+            'Período: 01/2024 a 12/2024\n'
+            'Valor original: R\$ 100,00\n'
+            'Fator de correção: 1,0150000\n'
+            'Valor corrigido: R\$ 101,50 (+1,50%)\n\n'
+            'Simulação feita no RealCalc, sem valor oficial.',
+          ),
+        ).called(1);
       },
     );
+
+    testWidgets('tenta novamente após falha de rede com texto branco', (
+      tester,
+    ) async {
+      final formCubit = ValueCorrectionFormCubit()
+        ..setIndex(CorrectionIndex.ipca);
+      final cubit = ValueCorrectionCubit(
+        seriesRepository,
+        calculateValueCorrection,
+      );
+      var requestCount = 0;
+
+      when(
+        () => seriesRepository.getSeries(
+          index: any(named: 'index'),
+          start: any(named: 'start'),
+          end: any(named: 'end'),
+        ),
+      ).thenAnswer((_) async {
+        requestCount++;
+        if (requestCount == 1) {
+          return FailureResult<ErrorMessages, List<SeriesPoint>>(
+            ServerErrorMessages.connectionError,
+          );
+        }
+        return SuccessResult<ErrorMessages, List<SeriesPoint>>([
+          SeriesPoint(date: DateTime(2024, 1, 1), value: 1.5),
+        ]);
+      });
+
+      when(
+        () => calculateValueCorrection.call(
+          params: any(named: 'params'),
+          series: any(named: 'series'),
+          type: any(named: 'type'),
+        ),
+      ).thenReturn(
+        SuccessResult<Failure, ValueCorrection>(
+          ValueCorrection(
+            index: CorrectionIndex.ipca.sgsCode,
+            period: Period(
+              initial: DateTime(2024, 1, 1),
+              end: DateTime(2024, 1, 1),
+            ),
+            percentage: 0,
+            originalValue: 100,
+            factor: 1.015,
+            adjustedValue: 101.5,
+            variation: 1.5,
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: formCubit),
+            BlocProvider.value(value: cubit),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.darkTheme,
+            home: ValueCorrectionPage(sharer: sharer),
+          ),
+        ),
+      );
+
+      formCubit.initialDate.text = '01/2024';
+      formCubit.finalDate.text = '01/2024';
+      await tester.pump();
+      await tester.tap(find.text('Corrigir valor'));
+      await tester.pumpAndSettle();
+
+      final retryButton = find.widgetWithText(TextButton, 'Tentar novamente');
+      expect(retryButton, findsOneWidget);
+      final button = tester.widget<TextButton>(retryButton);
+      expect(button.onPressed, isNotNull);
+      expect(button.style?.foregroundColor?.resolve({}), Colors.white);
+
+      await tester.tap(retryButton);
+      await tester.pumpAndSettle();
+
+      expect(requestCount, 2);
+      expect(find.text('Valor corrigido'), findsOneWidget);
+    });
 
     ValueCorrection buildResult({
       bool withAdjustedValue = true,
@@ -211,7 +358,11 @@ void main() {
     testWidgets('mostra só o fator e o índice quando não há valor', (
       tester,
     ) async {
-      final result = buildResult(withAdjustedValue: false, originalValue: null, adjustedValue: null);
+      final result = buildResult(
+        withAdjustedValue: false,
+        originalValue: null,
+        adjustedValue: null,
+      );
 
       await tester.pumpWidget(
         MaterialApp(

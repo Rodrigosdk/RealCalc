@@ -144,4 +144,25 @@ enum CorrectionIndex {
   final int fromYear, fromMonth, fromDay;
 
   DateTime get availableFrom => DateTime(fromYear, fromMonth, fromDay);
+
+  DateTime get minimumInputDate => granularity == DateGranularity.month
+      ? DateTime(fromYear, fromMonth)
+      : availableFrom;
+
+  String get availableFromInputLabel => granularity == DateGranularity.month
+      ? '${fromMonth.toString().padLeft(2, '0')}/$fromYear'
+      : '${fromDay.toString().padLeft(2, '0')}/'
+            '${fromMonth.toString().padLeft(2, '0')}/$fromYear';
+
+  String get availabilityMessage =>
+      'O índice $label possui dados a partir de $availableFromInputLabel.';
+
+  DateTime latestAllowedEndDate(DateTime initialDate) {
+    final year = initialDate.year + 10;
+    final lastDayOfMonth = DateTime(year, initialDate.month + 1, 0).day;
+    final day = initialDate.day > lastDayOfMonth
+        ? lastDayOfMonth
+        : initialDate.day;
+    return DateTime(year, initialDate.month, day);
+  }
 }

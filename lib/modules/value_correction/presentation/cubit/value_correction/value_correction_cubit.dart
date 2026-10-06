@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/entites/period.dart';
 import '../../../domain/entites/value_correction.dart';
 import '../../../domain/enum/correction_index.dart';
+import '../../../domain/enum/series_kind.dart';
 import '../../../domain/repositories/i_correction_series_repository.dart';
 import '../../../domain/validation/value_correction_validation.dart';
 import '../../../use_cases/i_calculate_value_correction.dart';
@@ -33,6 +34,12 @@ class ValueCorrectionCubit extends Cubit<ValueCorrectionState> {
       return;
     }
 
+    if (start.isBefore(index.minimumInputDate) ||
+        end.isBefore(index.minimumInputDate)) {
+      emit(ValueCorrectionError(index.availabilityMessage));
+      return;
+    }
+
     final parsedPercentage = _resolvePercentage(index, percentage);
     final originalValue = _parseNumber(value);
     final params = ValueCorrection(
@@ -48,9 +55,14 @@ class ValueCorrectionCubit extends Cubit<ValueCorrectionState> {
     final validationResult = _validation.validate(params);
     final validationFailure = validationResult.getErrorOrNull();
     if (validationFailure != null) {
+      emit(ValueCorrectionError(validationFailure.message.first.message));
+      return;
+    }
+
+    if (end.isAfter(index.latestAllowedEndDate(start))) {
       emit(
-        ValueCorrectionError(
-          validationFailure.message.first.message,
+        const ValueCorrectionError(
+          'O período entre as datas não pode ser superior a 10 anos exatos.',
         ),
       );
       return;
@@ -75,11 +87,7 @@ class ValueCorrectionCubit extends Cubit<ValueCorrectionState> {
     );
 
     result.fold(
-      (failure) => emit(
-        ValueCorrectionError(
-          failure.message.first.message,
-        ),
-      ),
+      (failure) => emit(ValueCorrectionError(failure.message.first.message)),
       (value) => emit(ValueCorrectionCalculated(value)),
     );
   }
@@ -111,7 +119,9 @@ class ValueCorrectionCubit extends Cubit<ValueCorrectionState> {
   }
 
   double _resolvePercentage(CorrectionIndex index, String value) {
-    if (index != CorrectionIndex.cdi) return 0;
+    if (index != CorrectionIndex.cdi) {
+      return index.kind == SeriesKind.dailyRate ? 100 : 0;
+    }
 
     final parsed = _parseNumber(value);
     if (parsed == null) return 100;

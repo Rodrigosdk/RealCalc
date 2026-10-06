@@ -14,6 +14,8 @@ import '../../../../core/widgets/title_widget.dart';
 import '../../../../core/widgets/types/input_field_state.dart';
 import '../../domain/enum/correction_index.dart';
 import '../../domain/enum/date_granularity.dart';
+import '../../domain/services/value_correction_sharer.dart';
+import '../utils/value_correction_share_text.dart';
 import '../cubit/value_correction/value_correction_cubit.dart';
 import '../cubit/value_correction/value_correction_state.dart';
 import '../../presentation/cubit/forms/value_correction_form_cubit.dart';
@@ -22,7 +24,9 @@ import '../widgets/correction_index_picker.dart';
 import 'value_correction_result_page.dart';
 
 class ValueCorrectionPage extends StatelessWidget {
-  const ValueCorrectionPage({super.key});
+  final ValueCorrectionSharer sharer;
+
+  const ValueCorrectionPage({super.key, required this.sharer});
 
   @override
   Widget build(BuildContext context) {
@@ -37,28 +41,39 @@ class ValueCorrectionPage extends StatelessWidget {
         onEdit: () {
           context.read<ValueCorrectionCubit>().reset();
         },
-        onShare: () {},
+        onShare: () => sharer.share(buildShareText(calculationState.result)),
       );
     }
 
     final dateInputFormatter =
         formState.dateGranularity == DateGranularity.month
-            ? MonthYearInputFormatter()
-            : DateInputFormatter();
+        ? MonthYearInputFormatter()
+        : DateInputFormatter();
     final indexController = TextEditingController(
       text: formState.index?.label ?? CorrectionIndex.ipca.label,
     );
 
-    void calculate() {
-      if (!formState.canCalculate || formState.index == null) return;
-
+    void runCalculation(CorrectionIndex index) {
       context.read<ValueCorrectionCubit>().calculate(
-        index: formState.index!,
+        index: index,
         initialDate: formCubit.initialDate.text,
         finalDate: formCubit.finalDate.text,
         percentage: formCubit.percentage.text,
         value: formCubit.value.text,
       );
+    }
+
+    void calculate() {
+      final currentFormState = formCubit.state;
+      final index = currentFormState.index;
+      if (!currentFormState.canCalculate || index == null) return;
+      runCalculation(index);
+    }
+
+    void retryCalculation() {
+      final index = formCubit.state.index;
+      if (index == null) return;
+      runCalculation(index);
     }
 
     void clear() {
@@ -125,11 +140,14 @@ class ValueCorrectionPage extends StatelessWidget {
                         icon: Icons.calendar_today,
                         controller: formCubit.initialDate,
                         inputFormatters: [dateInputFormatter],
-                        state: formState.fieldErrors[ValueCorrectionField.initialDate] != null
+                        state:
+                            formState.fieldErrors[ValueCorrectionField
+                                    .initialDate] !=
+                                null
                             ? InputFieldState.error
                             : InputFieldState.neutral,
-                        validator: (_) =>
-                            formState.fieldErrors[ValueCorrectionField.initialDate],
+                        validator: (_) => formState
+                            .fieldErrors[ValueCorrectionField.initialDate],
                       ),
                     ),
                     Expanded(
@@ -139,17 +157,23 @@ class ValueCorrectionPage extends StatelessWidget {
                         icon: Icons.calendar_today,
                         controller: formCubit.finalDate,
                         inputFormatters: [dateInputFormatter],
-                        state: formState.fieldErrors[ValueCorrectionField.finalDate] != null
+                        state:
+                            formState.fieldErrors[ValueCorrectionField
+                                    .finalDate] !=
+                                null
                             ? InputFieldState.error
                             : InputFieldState.neutral,
-                        validator: (_) =>
-                            formState.fieldErrors[ValueCorrectionField.finalDate],
+                        validator: (_) => formState
+                            .fieldErrors[ValueCorrectionField.finalDate],
                       ),
                     ),
                   ],
                 ),
-                if (formState.showsCurrencyWarning)
-                  _CurrencyWarningBanner(formsTheme: formsTheme),
+                if (formState.warningBannerMessage.isNotEmpty)
+                  _CurrencyWarningBanner(
+                    formsTheme: formsTheme,
+                    message: formState.warningBannerMessage,
+                  ),
                 if (formState.showsPercentage)
                   InputFormsResultCard(
                     label: 'Percentual',
@@ -157,7 +181,10 @@ class ValueCorrectionPage extends StatelessWidget {
                     icon: Icons.percent,
                     controller: formCubit.percentage,
                     inputFormatters: [DecimalInputFormatter()],
-                    state: formState.fieldErrors[ValueCorrectionField.percentage] != null
+                    state:
+                        formState.fieldErrors[ValueCorrectionField
+                                .percentage] !=
+                            null
                         ? InputFieldState.error
                         : InputFieldState.neutral,
                     validator: (_) =>
@@ -169,11 +196,13 @@ class ValueCorrectionPage extends StatelessWidget {
                   icon: Icons.attach_money,
                   controller: formCubit.value,
                   inputFormatters: [DecimalInputFormatter()],
-                  state: formState.fieldErrors[ValueCorrectionField.value] != null
+                  state:
+                      formState.fieldErrors[ValueCorrectionField.value] != null
                       ? InputFieldState.error
                       : InputFieldState.neutral,
                   trailingBadge: 'opcional',
-                  validator: (_) => formState.fieldErrors[ValueCorrectionField.value],
+                  validator: (_) =>
+                      formState.fieldErrors[ValueCorrectionField.value],
                 ),
                 if (calculationState is ValueCorrectionLoading)
                   const LinearProgressIndicator(),
@@ -181,7 +210,7 @@ class ValueCorrectionPage extends StatelessWidget {
                   _ErrorBanner(
                     message: calculationState.message,
                     formsTheme: formsTheme,
-                    onRetry: formState.canCalculate ? calculate : null,
+                    onRetry: retryCalculation,
                   ),
                 OptionsBottomForms(
                   onCalculate: formState.canCalculate ? calculate : null,
@@ -237,6 +266,7 @@ class _ErrorBanner extends StatelessWidget {
                   TextButton(
                     onPressed: onRetry,
                     style: TextButton.styleFrom(
+                      foregroundColor: Colors.white,
                       padding: EdgeInsets.zero,
                       minimumSize: Size.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -255,8 +285,12 @@ class _ErrorBanner extends StatelessWidget {
 
 class _CurrencyWarningBanner extends StatelessWidget {
   final FinancingFormsTheme formsTheme;
+  final String message;
 
-  const _CurrencyWarningBanner({required this.formsTheme});
+  const _CurrencyWarningBanner({
+    required this.formsTheme,
+    required this.message,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -277,12 +311,7 @@ class _CurrencyWarningBanner extends StatelessWidget {
             size: 18,
           ),
           const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              'Atenção: antes de 07/1994, o valor deve ser informado na moeda vigente no início do período.',
-              style: formsTheme.errorTextStyle,
-            ),
-          ),
+          Expanded(child: Text(message, style: formsTheme.errorTextStyle)),
         ],
       ),
     );
