@@ -28,7 +28,13 @@ class PageHeader extends StatelessWidget implements PreferredSizeWidget {
                 onPressed: onBack ?? () => Navigator.of(context).maybePop(),
               ),
               const SizedBox(width: 4),
-              Text(title, style: theme.titleStyle),
+              Expanded(
+                child: Text(
+                  title,
+                  style: theme.titleStyle,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ],
           ),
         ),
