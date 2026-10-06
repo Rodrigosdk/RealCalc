@@ -50,24 +50,28 @@ class CalculateValueCorrection implements ICalculateValueCorrection {
     }).toList();
 
     final isTaxaLegal = params.index == CorrectionIndex.taxaLegal.sgsCode;
-    final isNewSavings = params.index == CorrectionIndex.poupancaNova.sgsCode;
+    final isOldSavings = params.index == CorrectionIndex.poupancaVelha.sgsCode;
+    final isSavings =
+        params.index == CorrectionIndex.poupancaNova.sgsCode || isOldSavings;
     final taxaLegalAccumulatedRate = isTaxaLegal
         ? _calculateTaxaLegalAccumulatedRate(series, start, end)
         : null;
 
-    final savingsRates = isNewSavings
+    final savingsRates = isSavings
         ? series.where((point) {
             final pointDate = DateTime(
               point.date.year,
               point.date.month,
               point.date.day,
             );
-            final nextAnniversary = _nextMonthlyAnniversary(pointDate);
-            return pointDate.isAfter(start) &&
+            final isInSavingsPeriod = isOldSavings
+                ? !pointDate.isBefore(start)
+                : pointDate.isAfter(start);
+            return isInSavingsPeriod &&
                 pointDate.isBefore(end) &&
                 pointDate.day == start.day &&
                 point.periodEnd != null &&
-                _sameDate(point.periodEnd!, nextAnniversary);
+                _sameDate(point.periodEnd!, _nextMonthlyAnniversary(pointDate));
           }).toList()
         : const <SeriesPoint>[];
 
@@ -76,7 +80,7 @@ class CalculateValueCorrection implements ICalculateValueCorrection {
         : const <SeriesPoint>[];
 
     if (((isTaxaLegal && taxaLegalAccumulatedRate == null) ||
-            (isNewSavings && savingsRates.isEmpty) ||
+            (isSavings && savingsRates.isEmpty) ||
             (!isTaxaLegal && filteredSeries.isEmpty) ||
             (params.index == CorrectionIndex.tr.sgsCode &&
                 trPeriods.isEmpty)) &&
@@ -99,7 +103,7 @@ class CalculateValueCorrection implements ICalculateValueCorrection {
       case SeriesKind.periodRate:
         final points = params.index == CorrectionIndex.tr.sgsCode
             ? trPeriods
-            : isNewSavings
+            : isSavings
             ? savingsRates
             : filteredSeries;
         for (final point in points) {
