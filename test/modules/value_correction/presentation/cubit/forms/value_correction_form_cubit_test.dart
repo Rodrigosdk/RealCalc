@@ -31,15 +31,6 @@ void main() {
     expect(cubit.state.dateGranularity, DateGranularity.day);
   });
 
-  test('showsCurrencyWarning verdadeiro para 06/1994 e falso para 07/1994', () {
-    cubit.setIndex(CorrectionIndex.ipca);
-    cubit.initialDate.text = '06/1994';
-    expect(cubit.state.showsCurrencyWarning, isTrue);
-
-    cubit.initialDate.text = '07/1994';
-    expect(cubit.state.showsCurrencyWarning, isFalse);
-  });
-
   test('data inicial e final não podem ser maiores que a data atual', () {
     cubit.setIndex(CorrectionIndex.ipca);
 
@@ -67,16 +58,19 @@ void main() {
       cubit.initialDate.text = '12/1991';
       cubit.finalDate.text = '01/1992';
 
+      expect(cubit.state.fieldErrors[ValueCorrectionField.initialDate], isNull);
       expect(
-        cubit.state.fieldErrors[ValueCorrectionField.initialDate],
+        cubit.state.warningBannerMessage,
         'O índice IPCA-E (IBGE) possui dados a partir de 01/1992.',
       );
+      expect(cubit.state.canCalculate, isFalse);
 
       cubit.setIndex(CorrectionIndex.igpM);
       cubit.initialDate.text = '04/2021';
       cubit.finalDate.text = '04/2021';
 
       expect(cubit.state.fieldErrors[ValueCorrectionField.initialDate], isNull);
+      expect(cubit.state.warningBannerMessage, isEmpty);
       expect(cubit.state.canCalculate, isTrue);
     },
   );
@@ -91,8 +85,9 @@ void main() {
 
     cubit.finalDate.text = '02/2020';
 
+    expect(cubit.state.fieldErrors[ValueCorrectionField.finalDate], isNull);
     expect(
-      cubit.state.fieldErrors[ValueCorrectionField.finalDate],
+      cubit.state.warningBannerMessage,
       'O período entre as datas não pode ser superior a 10 anos exatos.',
     );
     expect(cubit.state.canCalculate, isFalse);

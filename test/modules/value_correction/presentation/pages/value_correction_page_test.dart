@@ -93,6 +93,36 @@ void main() {
     });
 
     testWidgets(
+      'o aviso de moeda informa a disponibilidade do índice selecionado',
+      (tester) async {
+        await tester.pumpWidget(buildSut());
+        final formCubit = BlocProvider.of<ValueCorrectionFormCubit>(
+          tester.element(find.byType(ValueCorrectionPage)),
+        );
+
+        formCubit.setIndex(CorrectionIndex.ipcaE);
+        formCubit.initialDate.text = '12/1991';
+        formCubit.finalDate.text = '01/1992';
+        await tester.pump();
+
+        expect(
+          find.text('O índice IPCA-E (IBGE) possui dados a partir de 01/1992.'),
+          findsOneWidget,
+        );
+
+        formCubit.setIndex(CorrectionIndex.selic);
+        formCubit.initialDate.text = '03/06/1986';
+        formCubit.finalDate.text = '04/06/1986';
+        await tester.pump();
+
+        expect(
+          find.text('O índice Selic possui dados a partir de 04/06/1986.'),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets(
       'o botão Corrigir valor só chama o cubit quando o formulário é válido',
       (tester) async {
         final formCubit = ValueCorrectionFormCubit()

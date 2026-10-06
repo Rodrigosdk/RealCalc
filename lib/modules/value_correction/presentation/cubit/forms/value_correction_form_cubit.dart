@@ -78,6 +78,23 @@ class ValueCorrectionFormCubit extends Cubit<ValueCorrectionFormState> {
       errors[ValueCorrectionField.selectedIndex] = 'Selecione um índice';
     }
 
+    final initialBeforeAvailability =
+        index != null &&
+        hasInitialDate &&
+        _isValidDate(initialDate.text, dateGranularity) &&
+        _parseDate(
+          initialDate.text,
+          dateGranularity,
+        )!.isBefore(index.minimumInputDate);
+    final finalBeforeAvailability =
+        index != null &&
+        hasFinalDate &&
+        _isValidDate(finalDate.text, dateGranularity) &&
+        _parseDate(
+          finalDate.text,
+          dateGranularity,
+        )!.isBefore(index.minimumInputDate);
+
     if (hasInitialDate && !_isValidDate(initialDate.text, dateGranularity)) {
       errors[ValueCorrectionField.initialDate] = 'Data inicial inválida';
     } else if (hasInitialDate &&
@@ -93,30 +110,20 @@ class ValueCorrectionFormCubit extends Cubit<ValueCorrectionFormState> {
           'A data final não pode ser superior à data atual.';
     }
 
-    if (index != null &&
-        hasInitialDate &&
-        _isValidDate(initialDate.text, dateGranularity) &&
-        _parseDate(
-          initialDate.text,
-          dateGranularity,
-        )!.isBefore(index.minimumInputDate)) {
-      errors[ValueCorrectionField.initialDate] = index.availabilityMessage;
-    }
-
-    if (index != null &&
-        hasFinalDate &&
-        _isValidDate(finalDate.text, dateGranularity) &&
-        _parseDate(
-          finalDate.text,
-          dateGranularity,
-        )!.isBefore(index.minimumInputDate)) {
-      errors[ValueCorrectionField.finalDate] = index.availabilityMessage;
-    }
-
     final hasValidInitialDate =
-        hasInitialDate && errors[ValueCorrectionField.initialDate] == null;
+        hasInitialDate &&
+        !initialBeforeAvailability &&
+        errors[ValueCorrectionField.initialDate] == null;
     final hasValidFinalDate =
-        hasFinalDate && errors[ValueCorrectionField.finalDate] == null;
+        hasFinalDate &&
+        !finalBeforeAvailability &&
+        errors[ValueCorrectionField.finalDate] == null;
+    var exceedsMaximumPeriod = false;
+    var warningBannerMessage = '';
+
+    if (initialBeforeAvailability || finalBeforeAvailability) {
+      warningBannerMessage = index.availabilityMessage;
+    }
 
     if (hasValidInitialDate && hasValidFinalDate) {
       final initialDateValue = _parseDate(initialDate.text, dateGranularity)!;
@@ -139,7 +146,8 @@ class ValueCorrectionFormCubit extends Cubit<ValueCorrectionFormState> {
           finalDateValue.isAfter(
             index.latestAllowedEndDate(initialDateValue),
           )) {
-        errors[ValueCorrectionField.finalDate] =
+        exceedsMaximumPeriod = true;
+        warningBannerMessage =
             'O período entre as datas não pode ser superior a 10 anos exatos.';
       }
     }
@@ -157,15 +165,15 @@ class ValueCorrectionFormCubit extends Cubit<ValueCorrectionFormState> {
             index != null &&
             hasInitialDate &&
             hasFinalDate &&
+            !initialBeforeAvailability &&
+            !finalBeforeAvailability &&
+            !exceedsMaximumPeriod &&
             errors[ValueCorrectionField.initialDate] == null &&
             errors[ValueCorrectionField.finalDate] == null &&
             (!showsPercentage ||
                 (hasPercentage &&
                     errors[ValueCorrectionField.percentage] == null)),
-        showsCurrencyWarning: _isCurrencyWarning(
-          initialDate.text,
-          dateGranularity,
-        ),
+        warningBannerMessage: warningBannerMessage,
         fieldErrors: errors,
       ),
     );
@@ -194,10 +202,6 @@ class ValueCorrectionFormCubit extends Cubit<ValueCorrectionFormState> {
         dateGranularity: newIndex.granularity,
         showsPercentage: newIndex == CorrectionIndex.cdi,
         canCalculate: false,
-        showsCurrencyWarning: _isCurrencyWarning(
-          initialDate.text,
-          newIndex.granularity,
-        ),
       ),
     );
     _refreshValidation();
@@ -226,12 +230,6 @@ class ValueCorrectionFormCubit extends Cubit<ValueCorrectionFormState> {
   bool _looksLikeDayDate(String value) {
     final parts = value.trim().split('/');
     return value.trim().isNotEmpty && parts.length == 3;
-  }
-
-  bool _isCurrencyWarning(String value, DateGranularity granularity) {
-    final date = _parseDate(value, granularity);
-    if (date == null) return false;
-    return date.isBefore(DateTime(1994, 7, 1));
   }
 
   bool _isFutureDate(String value, DateGranularity granularity) {

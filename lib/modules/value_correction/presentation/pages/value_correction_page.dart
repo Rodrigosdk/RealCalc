@@ -158,8 +158,11 @@ class ValueCorrectionPage extends StatelessWidget {
                     ),
                   ],
                 ),
-                if (formState.showsCurrencyWarning)
-                  _CurrencyWarningBanner(formsTheme: formsTheme),
+                if (formState.warningBannerMessage.isNotEmpty)
+                  _CurrencyWarningBanner(
+                    formsTheme: formsTheme,
+                    message: formState.warningBannerMessage,
+                  ),
                 if (formState.showsPercentage)
                   InputFormsResultCard(
                     label: 'Percentual',
@@ -270,8 +273,12 @@ class _ErrorBanner extends StatelessWidget {
 
 class _CurrencyWarningBanner extends StatelessWidget {
   final FinancingFormsTheme formsTheme;
+  final String message;
 
-  const _CurrencyWarningBanner({required this.formsTheme});
+  const _CurrencyWarningBanner({
+    required this.formsTheme,
+    required this.message,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -292,12 +299,7 @@ class _CurrencyWarningBanner extends StatelessWidget {
             size: 18,
           ),
           const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              'Atenção: antes de 07/1994, o valor deve ser informado na moeda vigente no início do período.',
-              style: formsTheme.errorTextStyle,
-            ),
-          ),
+          Expanded(child: Text(message, style: formsTheme.errorTextStyle)),
         ],
       ),
     );
