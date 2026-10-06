@@ -3,12 +3,18 @@ import 'package:real_calc/modules/value_correction/domain/enum/correction_index.
 import 'package:real_calc/modules/value_correction/domain/enum/date_granularity.dart';
 import 'package:real_calc/modules/value_correction/presentation/cubit/forms/value_correction_form_cubit.dart';
 import 'package:real_calc/modules/value_correction/presentation/cubit/forms/value_correction_form_state.dart';
+import 'package:real_calc/modules/value_correction/presentation/cubit/forms/date_formatting/correction_form_input_formatter.dart';
+import 'package:real_calc/modules/value_correction/presentation/cubit/forms/date_parsing/correction_form_date_parser.dart';
+import 'package:real_calc/modules/value_correction/presentation/cubit/forms/validation/correction_form_validator.dart';
 
 void main() {
   late ValueCorrectionFormCubit cubit;
 
   setUp(() {
-    cubit = ValueCorrectionFormCubit();
+    cubit = ValueCorrectionFormCubit(
+      CorrectionFormInputFormatter(),
+      CorrectionFormValidator(CorrectionFormDateParser()),
+    );
   });
 
   tearDown(() async {
