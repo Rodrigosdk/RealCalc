@@ -1,6 +1,6 @@
 class AppRoutes {
   static const String base = '/';
-  
+
   // Absolutos
   static const String home = base;
 
@@ -9,6 +9,7 @@ class AppRoutes {
   static const String futureValueSegment = 'future_value';
   static const String depositsSegment = 'deposits';
   static const String correctionSegment = 'correction';
+  static const String correctionResultSegment = 'result';
   static const String historySegment = 'history';
   static const String profileSegment = 'profile';
 
@@ -16,7 +17,9 @@ class AppRoutes {
   static const String financing = '/home/$financingSegment';
   static const String futureValue = '$financing/$futureValueSegment';
   static const String deposits = '$financing/$depositsSegment';
-  static const String correction = '/$correctionSegment';
+  static const String correction = '/$correctionSegment/';
+  static const String correctionResult =
+      '/$correctionSegment/$correctionResultSegment';
   static const String history = '/home/$historySegment';
   static const String profile = '/home/$profileSegment';
 }
