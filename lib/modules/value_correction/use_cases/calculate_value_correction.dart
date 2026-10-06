@@ -50,15 +50,33 @@ class CalculateValueCorrection implements ICalculateValueCorrection {
     }).toList();
 
     final isTaxaLegal = params.index == CorrectionIndex.taxaLegal.sgsCode;
+    final isNewSavings = params.index == CorrectionIndex.poupancaNova.sgsCode;
     final taxaLegalAccumulatedRate = isTaxaLegal
         ? _calculateTaxaLegalAccumulatedRate(series, start, end)
         : null;
+
+    final savingsRates = isNewSavings
+        ? series.where((point) {
+            final pointDate = DateTime(
+              point.date.year,
+              point.date.month,
+              point.date.day,
+            );
+            final nextAnniversary = _nextMonthlyAnniversary(pointDate);
+            return pointDate.isAfter(start) &&
+                pointDate.isBefore(end) &&
+                pointDate.day == start.day &&
+                point.periodEnd != null &&
+                _sameDate(point.periodEnd!, nextAnniversary);
+          }).toList()
+        : const <SeriesPoint>[];
 
     final trPeriods = params.index == CorrectionIndex.tr.sgsCode
         ? _selectTrRates(series, start, end)
         : const <SeriesPoint>[];
 
     if (((isTaxaLegal && taxaLegalAccumulatedRate == null) ||
+            (isNewSavings && savingsRates.isEmpty) ||
             (!isTaxaLegal && filteredSeries.isEmpty) ||
             (params.index == CorrectionIndex.tr.sgsCode &&
                 trPeriods.isEmpty)) &&
@@ -81,6 +99,8 @@ class CalculateValueCorrection implements ICalculateValueCorrection {
       case SeriesKind.periodRate:
         final points = params.index == CorrectionIndex.tr.sgsCode
             ? trPeriods
+            : isNewSavings
+            ? savingsRates
             : filteredSeries;
         for (final point in points) {
           factor *= (1 + (point.value / 100));

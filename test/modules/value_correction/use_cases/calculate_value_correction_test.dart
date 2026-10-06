@@ -298,6 +298,59 @@ void main() {
       },
     );
 
+    test('Poupança Nova reproduz fator oficial sem taxas das datas-limite', () {
+      final anniversaryRates = <String, double>{
+        '2024-08': 0.5711,
+        '2024-09': 0.5678,
+        '2024-10': 0.5982,
+        '2024-11': 0.5652,
+        '2024-12': 0.5826,
+        '2025-01': 0.6698,
+        '2025-02': 0.6331,
+        '2025-03': 0.6097,
+        '2025-04': 0.6697,
+        '2025-05': 0.6721,
+        '2025-06': 0.6707,
+        '2025-07': 0.6767,
+        '2025-08': 0.6731,
+        '2025-09': 0.6751,
+        '2025-10': 0.6767,
+        '2025-11': 0.6642,
+        '2025-12': 0.6751,
+      };
+      final series = <SeriesPoint>[];
+      var date = DateTime(2024, 8, 1);
+      final end = DateTime(2025, 12, 1);
+      while (!date.isAfter(end)) {
+        final nextMonth = DateTime(date.year, date.month + 1, 1);
+        final monthKey =
+            '${date.year}-${date.month.toString().padLeft(2, '0')}';
+        series.add(
+          SeriesPoint(
+            date: date,
+            periodEnd: date.day == 1
+                ? nextMonth
+                : date.add(const Duration(days: 30)),
+            value: date.day == 1 ? anniversaryRates[monthKey]! : 0.67,
+          ),
+        );
+        date = date.add(const Duration(days: 1));
+      }
+
+      final result = CalculateValueCorrection(validation).call(
+        params: buildValueCorrection(
+          index: CorrectionIndex.poupancaNova.sgsCode,
+          initial: DateTime(2024, 8, 1),
+          end: end,
+        ),
+        series: series,
+        type: SeriesKind.periodRate,
+      );
+
+      expect(result.isSuccess, isTrue);
+      expect(result.getOrNull()!.factor, closeTo(1.10047240, 5e-8));
+    });
+
     test('calcula fator para taxa legal em juros simples', () {
       final result = CalculateValueCorrection(validation).call(
         params: buildValueCorrection(
