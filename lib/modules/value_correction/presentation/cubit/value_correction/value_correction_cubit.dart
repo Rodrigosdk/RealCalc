@@ -5,18 +5,20 @@ import '../../../domain/entites/value_correction.dart';
 import '../../../domain/enum/correction_index.dart';
 import '../../../domain/enum/series_kind.dart';
 import '../../../domain/repositories/i_correction_series_repository.dart';
-import '../../../domain/validation/value_correction_validation.dart';
+import '../../../domain/validation/i_value_correction_validation.dart';
 import '../../../use_cases/i_calculate_value_correction.dart';
 import 'value_correction_state.dart';
 
 class ValueCorrectionCubit extends Cubit<ValueCorrectionState> {
   final ICorrectionSeriesRepository _seriesRepository;
   final ICalculateValueCorrection _calculateValueCorrection;
-  final ValueCorrectionValidation _validation;
+  final IValueCorrectionValidation _validation;
 
-  ValueCorrectionCubit(this._seriesRepository, this._calculateValueCorrection)
-    : _validation = ValueCorrectionValidation(),
-      super(ValueCorrectionInitial());
+  ValueCorrectionCubit(
+    this._seriesRepository,
+    this._calculateValueCorrection,
+    this._validation,
+  ) : super(ValueCorrectionInitial());
 
   Future<void> calculate({
     required CorrectionIndex index,

@@ -11,6 +11,7 @@ import 'package:real_calc/modules/value_correction/domain/entites/value_correcti
 import 'package:real_calc/modules/value_correction/domain/enum/correction_index.dart';
 import 'package:real_calc/modules/value_correction/domain/enum/series_kind.dart';
 import 'package:real_calc/modules/value_correction/domain/repositories/i_correction_series_repository.dart';
+import 'package:real_calc/modules/value_correction/domain/validation/value_correction_validation.dart';
 import 'package:real_calc/modules/value_correction/presentation/cubit/value_correction/value_correction_cubit.dart';
 import 'package:real_calc/modules/value_correction/presentation/cubit/value_correction/value_correction_state.dart';
 import 'package:real_calc/modules/value_correction/use_cases/i_calculate_value_correction.dart';
@@ -37,7 +38,11 @@ void main() {
   setUp(() {
     repository = MockCorrectionSeriesRepository();
     calculateValueCorrection = MockCalculateValueCorrection();
-    cubit = ValueCorrectionCubit(repository, calculateValueCorrection);
+    cubit = ValueCorrectionCubit(
+      repository,
+      calculateValueCorrection,
+      ValueCorrectionValidation(),
+    );
   });
 
   tearDown(() {

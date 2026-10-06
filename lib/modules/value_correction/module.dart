@@ -7,6 +7,7 @@ import 'domain/entites/value_correction.dart';
 import 'domain/enum/correction_index.dart';
 import 'domain/repositories/i_correction_series_repository.dart';
 import 'domain/services/value_correction_sharer.dart';
+import 'domain/validation/i_value_correction_validation.dart';
 import 'domain/validation/value_correction_validation.dart';
 import 'infrastructure/repositories/sgs_repository.dart';
 import 'infrastructure/services/share_plus_value_correction_sharer.dart';
@@ -15,6 +16,16 @@ import 'presentation/cubit/forms/value_correction_form_cubit.dart';
 import 'presentation/pages/value_correction_page.dart';
 import 'presentation/pages/value_correction_result_page.dart';
 import 'use_cases/calculate_value_correction.dart';
+import 'use_cases/correction/data_preparation/correction_data_preparer.dart';
+import 'use_cases/correction/data_preparation/i_correction_data_preparer.dart';
+import 'use_cases/correction/data_validation/correction_data_validator.dart';
+import 'use_cases/correction/data_validation/i_correction_data_validator.dart';
+import 'use_cases/correction/rate_calculation/correction_rate_calculator.dart';
+import 'use_cases/correction/rate_calculation/i_correction_rate_calculator.dart';
+import 'use_cases/correction/series_filtering/correction_period_series_filter.dart';
+import 'use_cases/correction/series_filtering/i_correction_period_series_filter.dart';
+import 'use_cases/correction/series_selection/correction_index_series_selector.dart';
+import 'use_cases/correction/series_selection/i_correction_index_series_selector.dart';
 import 'use_cases/i_calculate_value_correction.dart';
 
 class ValueCorrectionModule extends Module {
@@ -23,9 +34,18 @@ class ValueCorrectionModule extends Module {
 
   @override
   void binds(Injector i) {
-    i.addLazySingleton<ValueCorrectionValidation>(
+    i.addLazySingleton<IValueCorrectionValidation>(
       ValueCorrectionValidation.new,
     );
+    i.addLazySingleton<ICorrectionRateCalculator>(CorrectionRateCalculator.new);
+    i.addLazySingleton<ICorrectionDataValidator>(CorrectionDataValidator.new);
+    i.addLazySingleton<ICorrectionPeriodSeriesFilter>(
+      CorrectionPeriodSeriesFilter.new,
+    );
+    i.addLazySingleton<ICorrectionIndexSeriesSelector>(
+      CorrectionIndexSeriesSelector.new,
+    );
+    i.addLazySingleton<ICorrectionDataPreparer>(CorrectionDataPreparer.new);
     i.addLazySingleton<ICorrectionSeriesRepository>(SgsRepository.new);
     i.addLazySingleton<ICalculateValueCorrection>(CalculateValueCorrection.new);
     i.addLazySingleton<ValueCorrectionSharer>(

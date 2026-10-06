@@ -1,18 +1,19 @@
 import 'package:real_calc/core/seed_works/result.dart';
 
 import '../../../core/errors/failures.dart';
-import '../../../core/errors/messages.dart';
+import '../domain/entites/correction_calculation_data.dart';
 import '../domain/entites/series_point.dart';
 import '../domain/entites/value_correction.dart';
-import '../domain/enum/correction_index.dart';
 import '../domain/enum/series_kind.dart';
-import '../domain/validation/value_correction_validation.dart';
+import 'correction/data_preparation/i_correction_data_preparer.dart';
+import 'correction/rate_calculation/i_correction_rate_calculator.dart';
 import 'i_calculate_value_correction.dart';
 
 class CalculateValueCorrection implements ICalculateValueCorrection {
-  final ValueCorrectionValidation _validation;
+  final ICorrectionDataPreparer _dataPreparer;
+  final ICorrectionRateCalculator _rateCalculator;
 
-  CalculateValueCorrection(this._validation);
+  CalculateValueCorrection(this._dataPreparer, this._rateCalculator);
 
   @override
   Result<Failure, ValueCorrection> call({
@@ -20,119 +21,23 @@ class CalculateValueCorrection implements ICalculateValueCorrection {
     required List<SeriesPoint> series,
     required SeriesKind type,
   }) {
-    final validationResult = _validation.validate(params);
-    if (validationResult.getErrorOrNull() != null) {
-      return FailureResult(validationResult.getErrorOrNull()!);
-    }
-
-    final start = DateTime(
-      params.period.initial.year,
-      params.period.initial.month,
-      params.period.initial.day,
-    );
-    final end = DateTime(
-      params.period.end.year,
-      params.period.end.month,
-      params.period.end.day,
+    final preparationResult = _dataPreparer.prepare(
+      params: params,
+      series: series,
+      type: type,
     );
 
-    final filteredSeries = series.where((point) {
-      final pointDate = DateTime(
-        point.date.year,
-        point.date.month,
-        point.date.day,
-      );
-
-      final isAfterStart = type == SeriesKind.dailyRate
-          ? pointDate.isAfter(start)
-          : !pointDate.isBefore(start);
-      return isAfterStart && !pointDate.isAfter(end);
-    }).toList();
-
-    final isTaxaLegal = params.index == CorrectionIndex.taxaLegal.sgsCode;
-    final isOldSavings = params.index == CorrectionIndex.poupancaVelha.sgsCode;
-    final isSavings =
-        params.index == CorrectionIndex.poupancaNova.sgsCode || isOldSavings;
-    final taxaLegalAccumulatedRate = isTaxaLegal
-        ? _calculateTaxaLegalAccumulatedRate(series, start, end)
-        : null;
-
-    final savingsRates = isSavings
-        ? series.where((point) {
-            final pointDate = DateTime(
-              point.date.year,
-              point.date.month,
-              point.date.day,
-            );
-            final isInSavingsPeriod = isOldSavings
-                ? !pointDate.isBefore(start)
-                : pointDate.isAfter(start);
-            return isInSavingsPeriod &&
-                pointDate.isBefore(end) &&
-                pointDate.day == start.day &&
-                point.periodEnd != null &&
-                _sameDate(point.periodEnd!, _nextMonthlyAnniversary(pointDate));
-          }).toList()
-        : const <SeriesPoint>[];
-
-    final trPeriods = params.index == CorrectionIndex.tr.sgsCode
-        ? _selectTrRates(series, start, end)
-        : const <SeriesPoint>[];
-
-    if (((isTaxaLegal && taxaLegalAccumulatedRate == null) ||
-            (isSavings && savingsRates.isEmpty) ||
-            (!isTaxaLegal && filteredSeries.isEmpty) ||
-            (params.index == CorrectionIndex.tr.sgsCode &&
-                trPeriods.isEmpty)) &&
-        type != SeriesKind.dailyRate) {
-      return FailureResult(
-        ValidationFailure(
-          message: [ValueCorrectionValidationMessage.invalidPeriod],
-        ),
-      );
+    final preparationFailure = preparationResult.getErrorOrNull();
+    if (preparationFailure != null) {
+      return FailureResult(preparationFailure);
     }
+    final calculationData = preparationResult.getOrNull()!;
 
-    double factor = 1.0;
-
-    switch (type) {
-      case SeriesKind.monthlyVariation:
-        for (final point in filteredSeries) {
-          factor *= (1 + (point.value / 100));
-        }
-        break;
-      case SeriesKind.periodRate:
-        final points = params.index == CorrectionIndex.tr.sgsCode
-            ? trPeriods
-            : isSavings
-            ? savingsRates
-            : filteredSeries;
-        for (final point in points) {
-          factor *= (1 + (point.value / 100));
-        }
-        break;
-      case SeriesKind.dailyRate:
-        final percentage = params.percentage / 100;
-        for (final point in filteredSeries) {
-          factor *= (1 + ((point.value / 100) * percentage));
-        }
-        break;
-      case SeriesKind.simpleMonthlyRate:
-        if (isTaxaLegal) {
-          factor = 1 + (taxaLegalAccumulatedRate ?? 0);
-        } else {
-          final accumulatedRate = filteredSeries.fold<double>(
-            0,
-            (total, point) => total + point.value / 100,
-          );
-          factor = 1 + accumulatedRate;
-        }
-        break;
-    }
-
-    final adjustedValue = params.originalValue != null
-        ? params.originalValue! * factor
-        : null;
-    final variation = (factor - 1) * 100;
+    final factor = _calculateFactor(
+      type: type,
+      percentage: params.percentage,
+      calculationData: calculationData,
+    );
 
     return SuccessResult(
       ValueCorrection(
@@ -141,112 +46,38 @@ class CalculateValueCorrection implements ICalculateValueCorrection {
         percentage: params.percentage,
         originalValue: params.originalValue,
         factor: factor,
-        adjustedValue: adjustedValue,
-        variation: variation,
+        adjustedValue: _calculateAdjustedValue(params.originalValue, factor),
+        variation: _calculateVariation(factor),
       ),
     );
   }
 
-  List<SeriesPoint> _selectTrRates(
-    List<SeriesPoint> series,
-    DateTime start,
-    DateTime end,
-  ) {
-    final rates = <SeriesPoint>[];
-    var cursor = start;
-
-    while (cursor.isBefore(end)) {
-      final nextAnniversary = _nextMonthlyAnniversary(cursor);
-      if (nextAnniversary.isAfter(end)) break;
-
-      final candidates =
-          series
-              .where(
-                (point) =>
-                    _sameDate(point.date, cursor) && point.periodEnd != null,
-              )
-              .toList()
-            ..sort((a, b) => a.periodEnd!.compareTo(b.periodEnd!));
-
-      if (candidates.isEmpty) break;
-
-      final selected = cursor.day == 1
-          ? candidates.first
-          : candidates.firstWhere(
-              (point) => _sameDate(point.periodEnd!, nextAnniversary),
-              orElse: () => candidates.last,
-            );
-      rates.add(selected);
-      cursor = selected.periodEnd!;
-      if (cursor.day == DateTime(cursor.year, cursor.month + 1, 0).day) {
-        cursor = cursor.add(const Duration(days: 1));
-      }
-    }
-
-    if (rates.isEmpty) {
-      return const <SeriesPoint>[];
-    }
-
-    if (!_sameDate(cursor, end)) {
-      final finalDateRate = series.where((point) {
-        return _sameDate(point.date, end);
-      }).toList();
-      if (finalDateRate.isEmpty) return const <SeriesPoint>[];
-      rates.add(finalDateRate.first);
-    }
-
-    return rates;
+  double _calculateFactor({
+    required SeriesKind type,
+    required double percentage,
+    required CorrectionCalculationData calculationData,
+  }) {
+    return switch (type) {
+      SeriesKind.monthlyVariation => _rateCalculator.calculateMonthlyVariation(
+        calculationData.filteredSeries,
+      ),
+      SeriesKind.periodRate => _rateCalculator.calculatePeriodRate(
+        calculationData.calculationSeries,
+      ),
+      SeriesKind.dailyRate => _rateCalculator.calculateDailyRate(
+        calculationData.filteredSeries,
+        percentage,
+      ),
+      SeriesKind.simpleMonthlyRate =>
+        _rateCalculator.calculateSimpleMonthlyRate(
+          calculationData.filteredSeries,
+          taxaLegalAccumulatedRate: calculationData.taxaLegalAccumulatedRate,
+        ),
+    };
   }
 
-  DateTime _nextMonthlyAnniversary(DateTime date) {
-    final monthStart = DateTime(date.year, date.month + 1, 1);
-    final lastDay = DateTime(monthStart.year, monthStart.month + 1, 0).day;
-    return DateTime(
-      monthStart.year,
-      monthStart.month,
-      date.day > lastDay ? lastDay : date.day,
-    );
-  }
+  double? _calculateAdjustedValue(double? originalValue, double factor) =>
+      originalValue == null ? null : originalValue * factor;
 
-  double? _calculateTaxaLegalAccumulatedRate(
-    List<SeriesPoint> series,
-    DateTime start,
-    DateTime end,
-  ) {
-    if (!start.isBefore(end)) return 0;
-
-    var accumulatedRate = 0.0;
-    var monthStart = DateTime(start.year, start.month);
-
-    while (monthStart.isBefore(end)) {
-      final nextMonth = DateTime(monthStart.year, monthStart.month + 1);
-      final overlapStart = start.isAfter(monthStart) ? start : monthStart;
-      final overlapEnd = end.isBefore(nextMonth) ? end : nextMonth;
-      final elapsedDays = overlapEnd.difference(overlapStart).inDays;
-
-      if (elapsedDays > 0) {
-        final monthRates = series.where((point) {
-          return point.date.year == monthStart.year &&
-              point.date.month == monthStart.month;
-        });
-        if (monthRates.isEmpty) return null;
-
-        final daysInMonth = nextMonth.difference(monthStart).inDays;
-        final proratedRatePercent =
-            (monthRates.first.value * elapsedDays / daysInMonth * 1000000)
-                .round() /
-            1000000;
-        accumulatedRate += proratedRatePercent / 100;
-      }
-
-      monthStart = nextMonth;
-    }
-
-    return accumulatedRate;
-  }
-
-  bool _sameDate(DateTime left, DateTime right) =>
-      left.year == right.year &&
-      left.month == right.month &&
-      left.day == right.day;
+  double _calculateVariation(double factor) => (factor - 1) * 100;
 }

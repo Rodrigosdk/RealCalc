@@ -14,6 +14,7 @@ import 'package:real_calc/modules/value_correction/domain/entites/period.dart';
 import 'package:real_calc/modules/value_correction/domain/entites/series_point.dart';
 import 'package:real_calc/modules/value_correction/domain/entites/value_correction.dart';
 import 'package:real_calc/modules/value_correction/domain/enum/correction_index.dart';
+import 'package:real_calc/modules/value_correction/domain/validation/value_correction_validation.dart';
 import 'package:real_calc/modules/value_correction/domain/enum/series_kind.dart';
 import 'package:real_calc/modules/value_correction/domain/repositories/i_correction_series_repository.dart';
 import 'package:real_calc/modules/value_correction/presentation/cubit/value_correction/value_correction_cubit.dart';
@@ -55,6 +56,7 @@ void main() {
             create: (_) => ValueCorrectionCubit(
               seriesRepository,
               calculateValueCorrection,
+              ValueCorrectionValidation(),
             ),
             child: const ValueCorrectionPage(),
           ),
@@ -135,6 +137,7 @@ void main() {
         final cubit = ValueCorrectionCubit(
           seriesRepository,
           calculateValueCorrection,
+          ValueCorrectionValidation(),
         );
 
         when(
@@ -236,6 +239,7 @@ void main() {
       final cubit = ValueCorrectionCubit(
         seriesRepository,
         calculateValueCorrection,
+        ValueCorrectionValidation(),
       );
       var requestCount = 0;
 

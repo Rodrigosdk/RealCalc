@@ -8,6 +8,11 @@ import 'package:real_calc/modules/value_correction/domain/enum/correction_index.
 import 'package:real_calc/modules/value_correction/domain/enum/series_kind.dart';
 import 'package:real_calc/modules/value_correction/domain/validation/value_correction_validation.dart';
 import 'package:real_calc/modules/value_correction/use_cases/calculate_value_correction.dart';
+import 'package:real_calc/modules/value_correction/use_cases/correction/data_preparation/correction_data_preparer.dart';
+import 'package:real_calc/modules/value_correction/use_cases/correction/data_validation/correction_data_validator.dart';
+import 'package:real_calc/modules/value_correction/use_cases/correction/rate_calculation/correction_rate_calculator.dart';
+import 'package:real_calc/modules/value_correction/use_cases/correction/series_filtering/correction_period_series_filter.dart';
+import 'package:real_calc/modules/value_correction/use_cases/correction/series_selection/correction_index_series_selector.dart';
 
 void main() {
   late ValueCorrectionValidation validation;
@@ -37,10 +42,25 @@ void main() {
     );
   }
 
+  CorrectionRateCalculator buildRateCalculator() => CorrectionRateCalculator();
+
+  CorrectionDataPreparer buildDataPreparer() {
+    final rateCalculator = buildRateCalculator();
+    final periodSeriesFilter = CorrectionPeriodSeriesFilter();
+    return CorrectionDataPreparer(
+      CorrectionDataValidator(validation),
+      periodSeriesFilter,
+      CorrectionIndexSeriesSelector(rateCalculator, periodSeriesFilter),
+    );
+  }
+
   group('CalculateValueCorrection', () {
     test('calcula o fator para variação mensal', () {
       final params = buildValueCorrection();
-      final useCase = CalculateValueCorrection(validation);
+      final useCase = CalculateValueCorrection(
+        buildDataPreparer(),
+        buildRateCalculator(),
+      );
       final result = useCase.call(
         params: params,
         series: [
@@ -59,7 +79,10 @@ void main() {
     });
 
     test('calcula taxa diária no intervalo (data inicial, data final]', () {
-      final useCase = CalculateValueCorrection(validation);
+      final useCase = CalculateValueCorrection(
+        buildDataPreparer(),
+        buildRateCalculator(),
+      );
       final firstResult = useCase.call(
         params: buildValueCorrection(percentage: 100),
         series: [
@@ -99,15 +122,19 @@ void main() {
         ),
       );
 
-      final result = CalculateValueCorrection(validation).call(
-        params: buildValueCorrection(
-          initial: start,
-          end: DateTime(2025, 12, 31),
-          percentage: 100,
-        ),
-        series: series,
-        type: SeriesKind.dailyRate,
-      );
+      final result =
+          CalculateValueCorrection(
+            buildDataPreparer(),
+            buildRateCalculator(),
+          ).call(
+            params: buildValueCorrection(
+              initial: start,
+              end: DateTime(2025, 12, 31),
+              percentage: 100,
+            ),
+            series: series,
+            type: SeriesKind.dailyRate,
+          );
 
       expect(result.isSuccess, isTrue);
       expect(result.getOrNull()!.factor, closeTo(1.0353328397522692, 1e-12));
@@ -115,11 +142,15 @@ void main() {
 
     test('intervalo diário na mesma data tem fator 1', () {
       final date = DateTime(2025, 10, 1);
-      final result = CalculateValueCorrection(validation).call(
-        params: buildValueCorrection(initial: date, end: date),
-        series: [SeriesPoint(date: date, value: 0.055131)],
-        type: SeriesKind.dailyRate,
-      );
+      final result =
+          CalculateValueCorrection(
+            buildDataPreparer(),
+            buildRateCalculator(),
+          ).call(
+            params: buildValueCorrection(initial: date, end: date),
+            series: [SeriesPoint(date: date, value: 0.055131)],
+            type: SeriesKind.dailyRate,
+          );
 
       expect(result.isSuccess, isTrue);
       expect(result.getOrNull()!.factor, 1);
@@ -128,15 +159,19 @@ void main() {
     test(
       'case de referência: IPCA de 01/2003 a 01/2003 produz fator 1,0225',
       () {
-        final result = CalculateValueCorrection(validation).call(
-          params: buildValueCorrection(
-            initial: DateTime(2003, 1, 1),
-            end: DateTime(2003, 1, 1),
-            originalValue: 1000,
-          ),
-          series: [SeriesPoint(date: DateTime(2003, 1, 1), value: 2.25)],
-          type: SeriesKind.monthlyVariation,
-        );
+        final result =
+            CalculateValueCorrection(
+              buildDataPreparer(),
+              buildRateCalculator(),
+            ).call(
+              params: buildValueCorrection(
+                initial: DateTime(2003, 1, 1),
+                end: DateTime(2003, 1, 1),
+                originalValue: 1000,
+              ),
+              series: [SeriesPoint(date: DateTime(2003, 1, 1), value: 2.25)],
+              type: SeriesKind.monthlyVariation,
+            );
 
         expect(result.isSuccess, isTrue);
         expect(result.getOrNull()!.factor, closeTo(1.0225, 1e-12));
@@ -155,15 +190,19 @@ void main() {
           ),
         );
 
-        final result = CalculateValueCorrection(validation).call(
-          params: buildValueCorrection(
-            initial: DateTime(2003, 1, 1),
-            end: DateTime(2003, 12, 1),
-            originalValue: 1000,
-          ),
-          series: series,
-          type: SeriesKind.monthlyVariation,
-        );
+        final result =
+            CalculateValueCorrection(
+              buildDataPreparer(),
+              buildRateCalculator(),
+            ).call(
+              params: buildValueCorrection(
+                initial: DateTime(2003, 1, 1),
+                end: DateTime(2003, 12, 1),
+                originalValue: 1000,
+              ),
+              series: series,
+              type: SeriesKind.monthlyVariation,
+            );
 
         expect(result.isSuccess, isTrue);
         expect(result.getOrNull()!.factor, closeTo(1.0929994, 1e-7));
@@ -182,15 +221,19 @@ void main() {
           ),
         );
 
-        final result = CalculateValueCorrection(validation).call(
-          params: buildValueCorrection(
-            initial: DateTime(1994, 1, 1),
-            end: DateTime(1994, 6, 1),
-            originalValue: 1000,
-          ),
-          series: series,
-          type: SeriesKind.monthlyVariation,
-        );
+        final result =
+            CalculateValueCorrection(
+              buildDataPreparer(),
+              buildRateCalculator(),
+            ).call(
+              params: buildValueCorrection(
+                initial: DateTime(1994, 1, 1),
+                end: DateTime(1994, 6, 1),
+                originalValue: 1000,
+              ),
+              series: series,
+              type: SeriesKind.monthlyVariation,
+            );
 
         expect(result.isSuccess, isTrue);
         expect(result.getOrNull()!.adjustedValue, closeTo(8591.5, 1e-6));
@@ -209,15 +252,19 @@ void main() {
           ),
         );
 
-        final result = CalculateValueCorrection(validation).call(
-          params: buildValueCorrection(
-            initial: DateTime(1989, 1, 1),
-            end: DateTime(1989, 5, 1),
-            originalValue: 1000,
-          ),
-          series: series,
-          type: SeriesKind.monthlyVariation,
-        );
+        final result =
+            CalculateValueCorrection(
+              buildDataPreparer(),
+              buildRateCalculator(),
+            ).call(
+              params: buildValueCorrection(
+                initial: DateTime(1989, 1, 1),
+                end: DateTime(1989, 5, 1),
+                originalValue: 1000,
+              ),
+              series: series,
+              type: SeriesKind.monthlyVariation,
+            );
 
         expect(result.isSuccess, isTrue);
         expect(result.getOrNull()!.factor, closeTo(2.1046, 1e-7));
@@ -227,19 +274,23 @@ void main() {
     test(
       'calcula fator para taxa de período usando encadeamento acumulado',
       () {
-        final result = CalculateValueCorrection(validation).call(
-          params: buildValueCorrection(
-            initial: DateTime(2024, 1, 1),
-            end: DateTime(2024, 3, 1),
-            originalValue: 1000,
-          ),
-          series: [
-            SeriesPoint(date: DateTime(2024, 1, 1), value: 1),
-            SeriesPoint(date: DateTime(2024, 2, 1), value: 2),
-            SeriesPoint(date: DateTime(2024, 3, 1), value: 3),
-          ],
-          type: SeriesKind.periodRate,
-        );
+        final result =
+            CalculateValueCorrection(
+              buildDataPreparer(),
+              buildRateCalculator(),
+            ).call(
+              params: buildValueCorrection(
+                initial: DateTime(2024, 1, 1),
+                end: DateTime(2024, 3, 1),
+                originalValue: 1000,
+              ),
+              series: [
+                SeriesPoint(date: DateTime(2024, 1, 1), value: 1),
+                SeriesPoint(date: DateTime(2024, 2, 1), value: 2),
+                SeriesPoint(date: DateTime(2024, 3, 1), value: 3),
+              ],
+              type: SeriesKind.periodRate,
+            );
 
         expect(result.isSuccess, isTrue);
         expect(result.getOrNull()!.factor, closeTo(1.061106, 1e-9));
@@ -252,46 +303,50 @@ void main() {
       () {
         final start = DateTime(2025, 10, 1);
         final end = DateTime(2025, 12, 31);
-        final result = CalculateValueCorrection(validation).call(
-          params: buildValueCorrection(
-            index: CorrectionIndex.tr.sgsCode,
-            initial: start,
-            end: end,
-          ),
-          series: [
-            SeriesPoint(
-              date: DateTime(2025, 10, 1),
-              periodEnd: DateTime(2025, 10, 31),
-              value: 0.1738,
-            ),
-            SeriesPoint(
-              date: DateTime(2025, 10, 1),
-              periodEnd: DateTime(2025, 11, 1),
-              value: 0.1758,
-            ),
-            SeriesPoint(
-              date: DateTime(2025, 11, 1),
-              periodEnd: DateTime(2025, 12, 1),
-              value: 0.1634,
-            ),
-            SeriesPoint(
-              date: DateTime(2025, 12, 1),
-              periodEnd: DateTime(2025, 12, 31),
-              value: 0.1723,
-            ),
-            SeriesPoint(
-              date: DateTime(2025, 12, 1),
-              periodEnd: DateTime(2026, 1, 1),
-              value: 0.1742,
-            ),
-            SeriesPoint(
-              date: DateTime(2025, 12, 31),
-              periodEnd: DateTime(2026, 1, 31),
-              value: 0.1738,
-            ),
-          ],
-          type: SeriesKind.periodRate,
-        );
+        final result =
+            CalculateValueCorrection(
+              buildDataPreparer(),
+              buildRateCalculator(),
+            ).call(
+              params: buildValueCorrection(
+                index: CorrectionIndex.tr.sgsCode,
+                initial: start,
+                end: end,
+              ),
+              series: [
+                SeriesPoint(
+                  date: DateTime(2025, 10, 1),
+                  periodEnd: DateTime(2025, 10, 31),
+                  value: 0.1738,
+                ),
+                SeriesPoint(
+                  date: DateTime(2025, 10, 1),
+                  periodEnd: DateTime(2025, 11, 1),
+                  value: 0.1758,
+                ),
+                SeriesPoint(
+                  date: DateTime(2025, 11, 1),
+                  periodEnd: DateTime(2025, 12, 1),
+                  value: 0.1634,
+                ),
+                SeriesPoint(
+                  date: DateTime(2025, 12, 1),
+                  periodEnd: DateTime(2025, 12, 31),
+                  value: 0.1723,
+                ),
+                SeriesPoint(
+                  date: DateTime(2025, 12, 1),
+                  periodEnd: DateTime(2026, 1, 1),
+                  value: 0.1742,
+                ),
+                SeriesPoint(
+                  date: DateTime(2025, 12, 31),
+                  periodEnd: DateTime(2026, 1, 31),
+                  value: 0.1738,
+                ),
+              ],
+              type: SeriesKind.periodRate,
+            );
 
         expect(result.isSuccess, isTrue);
         expect(result.getOrNull()!.factor, closeTo(1.00511520, 4e-6));
@@ -337,15 +392,19 @@ void main() {
         date = date.add(const Duration(days: 1));
       }
 
-      final result = CalculateValueCorrection(validation).call(
-        params: buildValueCorrection(
-          index: CorrectionIndex.poupancaNova.sgsCode,
-          initial: DateTime(2024, 8, 1),
-          end: end,
-        ),
-        series: series,
-        type: SeriesKind.periodRate,
-      );
+      final result =
+          CalculateValueCorrection(
+            buildDataPreparer(),
+            buildRateCalculator(),
+          ).call(
+            params: buildValueCorrection(
+              index: CorrectionIndex.poupancaNova.sgsCode,
+              initial: DateTime(2024, 8, 1),
+              end: end,
+            ),
+            series: series,
+            type: SeriesKind.periodRate,
+          );
 
       expect(result.isSuccess, isTrue);
       expect(result.getOrNull()!.factor, closeTo(1.10047240, 5e-8));
@@ -390,56 +449,68 @@ void main() {
         date = date.add(const Duration(days: 1));
       }
 
-      final result = CalculateValueCorrection(validation).call(
-        params: buildValueCorrection(
-          index: CorrectionIndex.poupancaVelha.sgsCode,
-          initial: DateTime(2024, 8, 1),
-          end: end,
-        ),
-        series: series,
-        type: SeriesKind.periodRate,
-      );
+      final result =
+          CalculateValueCorrection(
+            buildDataPreparer(),
+            buildRateCalculator(),
+          ).call(
+            params: buildValueCorrection(
+              index: CorrectionIndex.poupancaVelha.sgsCode,
+              initial: DateTime(2024, 8, 1),
+              end: end,
+            ),
+            series: series,
+            type: SeriesKind.periodRate,
+          );
 
       expect(result.isSuccess, isTrue);
       expect(result.getOrNull()!.factor, closeTo(1.1067571662922076, 1e-12));
     });
 
     test('Poupança Velha inclui a taxa da data inicial e exclui a final', () {
-      final result = CalculateValueCorrection(validation).call(
-        params: buildValueCorrection(
-          index: CorrectionIndex.poupancaVelha.sgsCode,
-          initial: DateTime(2001, 1, 1),
-          end: DateTime(2001, 2, 1),
-        ),
-        series: [
-          SeriesPoint(
-            date: DateTime(2001, 1, 1),
-            periodEnd: DateTime(2001, 2, 1),
-            value: 0.6376,
-          ),
-          SeriesPoint(
-            date: DateTime(2001, 2, 1),
-            periodEnd: DateTime(2001, 3, 1),
-            value: 0.6611,
-          ),
-        ],
-        type: SeriesKind.periodRate,
-      );
+      final result =
+          CalculateValueCorrection(
+            buildDataPreparer(),
+            buildRateCalculator(),
+          ).call(
+            params: buildValueCorrection(
+              index: CorrectionIndex.poupancaVelha.sgsCode,
+              initial: DateTime(2001, 1, 1),
+              end: DateTime(2001, 2, 1),
+            ),
+            series: [
+              SeriesPoint(
+                date: DateTime(2001, 1, 1),
+                periodEnd: DateTime(2001, 2, 1),
+                value: 0.6376,
+              ),
+              SeriesPoint(
+                date: DateTime(2001, 2, 1),
+                periodEnd: DateTime(2001, 3, 1),
+                value: 0.6611,
+              ),
+            ],
+            type: SeriesKind.periodRate,
+          );
 
       expect(result.isSuccess, isTrue);
       expect(result.getOrNull()!.factor, closeTo(1.006376, 1e-12));
     });
 
     test('calcula fator para taxa legal em juros simples', () {
-      final result = CalculateValueCorrection(validation).call(
-        params: buildValueCorrection(
-          initial: DateTime(2024, 11, 1),
-          end: DateTime(2024, 12, 1),
-          originalValue: 1000,
-        ),
-        series: [SeriesPoint(date: DateTime(2024, 11, 1), value: 0.385874)],
-        type: SeriesKind.simpleMonthlyRate,
-      );
+      final result =
+          CalculateValueCorrection(
+            buildDataPreparer(),
+            buildRateCalculator(),
+          ).call(
+            params: buildValueCorrection(
+              initial: DateTime(2024, 11, 1),
+              end: DateTime(2024, 12, 1),
+              originalValue: 1000,
+            ),
+            series: [SeriesPoint(date: DateTime(2024, 11, 1), value: 0.385874)],
+            type: SeriesKind.simpleMonthlyRate,
+          );
 
       expect(result.isSuccess, isTrue);
       expect(result.getOrNull()!.factor, closeTo(1.00385874, 1e-9));
@@ -447,71 +518,83 @@ void main() {
     });
 
     test('Taxa Legal acumula mensalmente os dados SGS 29543', () {
-      final result = CalculateValueCorrection(validation).call(
-        params: buildValueCorrection(
-          index: CorrectionIndex.taxaLegal.sgsCode,
-          initial: DateTime(2025, 10, 1),
-          end: DateTime(2026, 1, 1),
-        ),
-        series: [
-          SeriesPoint(date: DateTime(2025, 10, 1), value: 0.736394),
-          SeriesPoint(date: DateTime(2025, 11, 1), value: 1.093764),
-          SeriesPoint(date: DateTime(2025, 12, 1), value: 0.851001),
-        ],
-        type: SeriesKind.simpleMonthlyRate,
-      );
+      final result =
+          CalculateValueCorrection(
+            buildDataPreparer(),
+            buildRateCalculator(),
+          ).call(
+            params: buildValueCorrection(
+              index: CorrectionIndex.taxaLegal.sgsCode,
+              initial: DateTime(2025, 10, 1),
+              end: DateTime(2026, 1, 1),
+            ),
+            series: [
+              SeriesPoint(date: DateTime(2025, 10, 1), value: 0.736394),
+              SeriesPoint(date: DateTime(2025, 11, 1), value: 1.093764),
+              SeriesPoint(date: DateTime(2025, 12, 1), value: 0.851001),
+            ],
+            type: SeriesKind.simpleMonthlyRate,
+          );
 
       expect(result.isSuccess, isTrue);
       expect(result.getOrNull()!.factor, closeTo(1.02681159, 1e-12));
     });
 
     test('Taxa Legal aplica pro rata die em meses parciais', () {
-      final result = CalculateValueCorrection(validation).call(
-        params: buildValueCorrection(
-          index: CorrectionIndex.taxaLegal.sgsCode,
-          initial: DateTime(2025, 10, 1),
-          end: DateTime(2025, 12, 31),
-        ),
-        series: [
-          SeriesPoint(date: DateTime(2025, 10, 1), value: 0.736394),
-          SeriesPoint(date: DateTime(2025, 11, 1), value: 1.093764),
-          SeriesPoint(date: DateTime(2025, 12, 1), value: 0.851001),
-        ],
-        type: SeriesKind.simpleMonthlyRate,
-      );
+      final result =
+          CalculateValueCorrection(
+            buildDataPreparer(),
+            buildRateCalculator(),
+          ).call(
+            params: buildValueCorrection(
+              index: CorrectionIndex.taxaLegal.sgsCode,
+              initial: DateTime(2025, 10, 1),
+              end: DateTime(2025, 12, 31),
+            ),
+            series: [
+              SeriesPoint(date: DateTime(2025, 10, 1), value: 0.736394),
+              SeriesPoint(date: DateTime(2025, 11, 1), value: 1.093764),
+              SeriesPoint(date: DateTime(2025, 12, 1), value: 0.851001),
+            ],
+            type: SeriesKind.simpleMonthlyRate,
+          );
 
       expect(result.isSuccess, isTrue);
       expect(result.getOrNull()!.factor, closeTo(1.02653707, 1e-12));
     });
 
     test('Taxa Legal reproduz 10,927298% de 30/08/2024 a 31/12/2025', () {
-      final result = CalculateValueCorrection(validation).call(
-        params: buildValueCorrection(
-          index: CorrectionIndex.taxaLegal.sgsCode,
-          initial: DateTime(2024, 8, 30),
-          end: DateTime(2025, 12, 31),
-        ),
-        series: [
-          SeriesPoint(date: DateTime(2024, 8, 1), value: 0.605306),
-          SeriesPoint(date: DateTime(2024, 9, 1), value: 0.676227),
-          SeriesPoint(date: DateTime(2024, 10, 1), value: 0.704241),
-          SeriesPoint(date: DateTime(2024, 11, 1), value: 0.385874),
-          SeriesPoint(date: DateTime(2024, 12, 1), value: 0.171924),
-          SeriesPoint(date: DateTime(2025, 1, 1), value: 0.589427),
-          SeriesPoint(date: DateTime(2025, 2, 1), value: 0.902209),
-          SeriesPoint(date: DateTime(2025, 3, 1), value: 0),
-          SeriesPoint(date: DateTime(2025, 4, 1), value: 0.321969),
-          SeriesPoint(date: DateTime(2025, 5, 1), value: 0.6232),
-          SeriesPoint(date: DateTime(2025, 6, 1), value: 0.775982),
-          SeriesPoint(date: DateTime(2025, 7, 1), value: 0.83488),
-          SeriesPoint(date: DateTime(2025, 8, 1), value: 0.942622),
-          SeriesPoint(date: DateTime(2025, 9, 1), value: 1.305984),
-          SeriesPoint(date: DateTime(2025, 10, 1), value: 0.736394),
-          SeriesPoint(date: DateTime(2025, 11, 1), value: 1.093764),
-          SeriesPoint(date: DateTime(2025, 12, 1), value: 0.851001),
-        ],
-        type: SeriesKind.simpleMonthlyRate,
-      );
+      final result =
+          CalculateValueCorrection(
+            buildDataPreparer(),
+            buildRateCalculator(),
+          ).call(
+            params: buildValueCorrection(
+              index: CorrectionIndex.taxaLegal.sgsCode,
+              initial: DateTime(2024, 8, 30),
+              end: DateTime(2025, 12, 31),
+            ),
+            series: [
+              SeriesPoint(date: DateTime(2024, 8, 1), value: 0.605306),
+              SeriesPoint(date: DateTime(2024, 9, 1), value: 0.676227),
+              SeriesPoint(date: DateTime(2024, 10, 1), value: 0.704241),
+              SeriesPoint(date: DateTime(2024, 11, 1), value: 0.385874),
+              SeriesPoint(date: DateTime(2024, 12, 1), value: 0.171924),
+              SeriesPoint(date: DateTime(2025, 1, 1), value: 0.589427),
+              SeriesPoint(date: DateTime(2025, 2, 1), value: 0.902209),
+              SeriesPoint(date: DateTime(2025, 3, 1), value: 0),
+              SeriesPoint(date: DateTime(2025, 4, 1), value: 0.321969),
+              SeriesPoint(date: DateTime(2025, 5, 1), value: 0.6232),
+              SeriesPoint(date: DateTime(2025, 6, 1), value: 0.775982),
+              SeriesPoint(date: DateTime(2025, 7, 1), value: 0.83488),
+              SeriesPoint(date: DateTime(2025, 8, 1), value: 0.942622),
+              SeriesPoint(date: DateTime(2025, 9, 1), value: 1.305984),
+              SeriesPoint(date: DateTime(2025, 10, 1), value: 0.736394),
+              SeriesPoint(date: DateTime(2025, 11, 1), value: 1.093764),
+              SeriesPoint(date: DateTime(2025, 12, 1), value: 0.851001),
+            ],
+            type: SeriesKind.simpleMonthlyRate,
+          );
 
       expect(result.isSuccess, isTrue);
       expect(result.getOrNull()!.variation, closeTo(10.927298, 1e-6));
@@ -521,17 +604,21 @@ void main() {
     test(
       'retorna erro quando não há pontos na série para o período informado',
       () {
-        final result = CalculateValueCorrection(validation).call(
-          params: buildValueCorrection(
-            initial: DateTime(2024, 2, 1),
-            end: DateTime(2024, 2, 10),
-          ),
-          series: [
-            SeriesPoint(date: DateTime(2024, 1, 1), value: 2),
-            SeriesPoint(date: DateTime(2024, 1, 2), value: 3),
-          ],
-          type: SeriesKind.monthlyVariation,
-        );
+        final result =
+            CalculateValueCorrection(
+              buildDataPreparer(),
+              buildRateCalculator(),
+            ).call(
+              params: buildValueCorrection(
+                initial: DateTime(2024, 2, 1),
+                end: DateTime(2024, 2, 10),
+              ),
+              series: [
+                SeriesPoint(date: DateTime(2024, 1, 1), value: 2),
+                SeriesPoint(date: DateTime(2024, 1, 2), value: 3),
+              ],
+              type: SeriesKind.monthlyVariation,
+            );
 
         expect(result.isError, isTrue);
         expect(result.getErrorOrNull(), isA<ValidationFailure>());
