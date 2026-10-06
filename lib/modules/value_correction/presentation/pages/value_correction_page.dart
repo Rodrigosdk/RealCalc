@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/themes/extensions/financing_forms_theme.dart';
 import '../../../../core/themes/spacing.dart';
@@ -15,12 +14,12 @@ import '../../../../core/widgets/title_widget.dart';
 import '../../../../core/widgets/types/input_field_state.dart';
 import '../../domain/enum/correction_index.dart';
 import '../../domain/enum/date_granularity.dart';
-import '../../domain/entites/value_correction.dart';
 import '../cubit/value_correction/value_correction_cubit.dart';
 import '../cubit/value_correction/value_correction_state.dart';
 import '../../presentation/cubit/forms/value_correction_form_cubit.dart';
 import '../../presentation/cubit/forms/value_correction_form_state.dart';
 import '../widgets/correction_index_picker.dart';
+import 'value_correction_result_page.dart';
 
 class ValueCorrectionPage extends StatelessWidget {
   const ValueCorrectionPage({super.key});
@@ -31,6 +30,17 @@ class ValueCorrectionPage extends StatelessWidget {
     final formState = formCubit.state;
     final calculationState = context.watch<ValueCorrectionCubit>().state;
     final formsTheme = Theme.of(context).extension<FinancingFormsTheme>()!;
+
+    if (calculationState is ValueCorrectionCalculated) {
+      return ValueCorrectionResultPage(
+        result: calculationState.result,
+        onEdit: () {
+          context.read<ValueCorrectionCubit>().reset();
+        },
+        onShare: () {},
+      );
+    }
+
     final dateInputFormatter =
         formState.dateGranularity == DateGranularity.month
             ? MonthYearInputFormatter()
@@ -178,40 +188,9 @@ class ValueCorrectionPage extends StatelessWidget {
                   onClear: clear,
                   calculateLabel: 'Corrigir valor',
                 ),
-                if (calculationState is ValueCorrectionCalculated)
-                  _CorrectionResultCard(result: calculationState.result),
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CorrectionResultCard extends StatelessWidget {
-  final ValueCorrection result;
-
-  const _CorrectionResultCard({required this.result});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final currencyFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Resultado da correção', style: theme.textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.sm),
-            Text('Fator de correção: ${result.factor.toStringAsFixed(6)}'),
-            Text('Variação acumulada: ${result.variation.toStringAsFixed(2)}%'),
-            if (result.adjustedValue != null)
-              Text('Valor corrigido: ${currencyFormat.format(result.adjustedValue)}'),
-          ],
         ),
       ),
     );
