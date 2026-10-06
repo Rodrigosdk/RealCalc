@@ -56,7 +56,7 @@ void main() {
       expect(valueCorrection.adjustedValue, closeTo(1050.6, 1e-9));
     });
 
-    test('calcula o fator para taxa diária considerando o percentual', () {
+    test('calcula taxa diária no intervalo (data inicial, data final]', () {
       final useCase = CalculateValueCorrection(validation);
       final firstResult = useCase.call(
         params: buildValueCorrection(percentage: 100),
@@ -78,119 +78,172 @@ void main() {
 
       expect(firstResult.isSuccess, isTrue);
       expect(secondResult.isSuccess, isTrue);
-      expect(firstResult.getOrNull()!.factor, closeTo(1.0302, 1e-9));
-      expect(secondResult.getOrNull()!.factor, closeTo(1.024128, 1e-9));
-      expect(secondResult.getOrNull()!.factor, lessThan(firstResult.getOrNull()!.factor));
-    });
-
-    test('case de referência: IPCA de 01/2003 a 01/2003 produz fator 1,0225', () {
-      final result = CalculateValueCorrection(validation).call(
-        params: buildValueCorrection(
-          initial: DateTime(2003, 1, 1),
-          end: DateTime(2003, 1, 1),
-          originalValue: 1000,
-        ),
-        series: [
-          SeriesPoint(date: DateTime(2003, 1, 1), value: 2.25),
-        ],
-        type: SeriesKind.monthlyVariation,
+      expect(firstResult.getOrNull()!.factor, closeTo(1.02, 1e-9));
+      expect(secondResult.getOrNull()!.factor, closeTo(1.016, 1e-9));
+      expect(
+        secondResult.getOrNull()!.factor,
+        lessThan(firstResult.getOrNull()!.factor),
       );
-
-      expect(result.isSuccess, isTrue);
-      expect(result.getOrNull()!.factor, closeTo(1.0225, 1e-12));
     });
 
-    test('case de referência: IPCA de 01/2003 a 12/2003 produz fator 1,0929994', () {
-      final monthlyRate = 0.7437997182806688;
+    test('Selic: reproduz o fator oficial 1,03533284 em out-dez/2025', () {
+      const dailyRate = 0.055131;
+      final start = DateTime(2025, 10, 1);
       final series = List.generate(
-        12,
+        64,
         (index) => SeriesPoint(
-          date: DateTime(2003, index + 1, 1),
-          value: monthlyRate,
+          date: start.add(Duration(days: index)),
+          value: dailyRate,
         ),
       );
 
       final result = CalculateValueCorrection(validation).call(
         params: buildValueCorrection(
-          initial: DateTime(2003, 1, 1),
-          end: DateTime(2003, 12, 1),
-          originalValue: 1000,
+          initial: start,
+          end: DateTime(2025, 12, 31),
+          percentage: 100,
         ),
         series: series,
-        type: SeriesKind.monthlyVariation,
+        type: SeriesKind.dailyRate,
       );
 
       expect(result.isSuccess, isTrue);
-      expect(result.getOrNull()!.factor, closeTo(1.0929994, 1e-7));
+      expect(result.getOrNull()!.factor, closeTo(1.0353328397522692, 1e-12));
     });
 
-    test('case de referência: INPC de 01/1994 a 06/1994 com valor 1000 produz 8591,50', () {
-      final monthlyRate = 43.11269684741077;
-      final series = List.generate(
-        6,
-        (index) => SeriesPoint(
-          date: DateTime(1994, index + 1, 1),
-          value: monthlyRate,
-        ),
-      );
-
+    test('intervalo diário na mesma data tem fator 1', () {
+      final date = DateTime(2025, 10, 1);
       final result = CalculateValueCorrection(validation).call(
-        params: buildValueCorrection(
-          initial: DateTime(1994, 1, 1),
-          end: DateTime(1994, 6, 1),
-          originalValue: 1000,
-        ),
-        series: series,
-        type: SeriesKind.monthlyVariation,
+        params: buildValueCorrection(initial: date, end: date),
+        series: [SeriesPoint(date: date, value: 0.055131)],
+        type: SeriesKind.dailyRate,
       );
 
       expect(result.isSuccess, isTrue);
-      expect(result.getOrNull()!.adjustedValue, closeTo(8591.5, 1e-6));
+      expect(result.getOrNull()!.factor, 1);
     });
 
-    test('case de referência: INPC de 01/1989 a 05/1989 produz fator 2,1046', () {
-      final monthlyRate = 16.046998792301913;
-      final series = List.generate(
-        5,
-        (index) => SeriesPoint(
-          date: DateTime(1989, index + 1, 1),
-          value: monthlyRate,
-        ),
-      );
+    test(
+      'case de referência: IPCA de 01/2003 a 01/2003 produz fator 1,0225',
+      () {
+        final result = CalculateValueCorrection(validation).call(
+          params: buildValueCorrection(
+            initial: DateTime(2003, 1, 1),
+            end: DateTime(2003, 1, 1),
+            originalValue: 1000,
+          ),
+          series: [SeriesPoint(date: DateTime(2003, 1, 1), value: 2.25)],
+          type: SeriesKind.monthlyVariation,
+        );
 
-      final result = CalculateValueCorrection(validation).call(
-        params: buildValueCorrection(
-          initial: DateTime(1989, 1, 1),
-          end: DateTime(1989, 5, 1),
-          originalValue: 1000,
-        ),
-        series: series,
-        type: SeriesKind.monthlyVariation,
-      );
+        expect(result.isSuccess, isTrue);
+        expect(result.getOrNull()!.factor, closeTo(1.0225, 1e-12));
+      },
+    );
 
-      expect(result.isSuccess, isTrue);
-      expect(result.getOrNull()!.factor, closeTo(2.1046, 1e-7));
-    });
+    test(
+      'case de referência: IPCA de 01/2003 a 12/2003 produz fator 1,0929994',
+      () {
+        final monthlyRate = 0.7437997182806688;
+        final series = List.generate(
+          12,
+          (index) => SeriesPoint(
+            date: DateTime(2003, index + 1, 1),
+            value: monthlyRate,
+          ),
+        );
 
-    test('calcula fator para taxa de período usando encadeamento acumulado', () {
-      final result = CalculateValueCorrection(validation).call(
-        params: buildValueCorrection(
-          initial: DateTime(2024, 1, 1),
-          end: DateTime(2024, 3, 1),
-          originalValue: 1000,
-        ),
-        series: [
-          SeriesPoint(date: DateTime(2024, 1, 1), value: 1),
-          SeriesPoint(date: DateTime(2024, 2, 1), value: 2),
-          SeriesPoint(date: DateTime(2024, 3, 1), value: 3),
-        ],
-        type: SeriesKind.periodRate,
-      );
+        final result = CalculateValueCorrection(validation).call(
+          params: buildValueCorrection(
+            initial: DateTime(2003, 1, 1),
+            end: DateTime(2003, 12, 1),
+            originalValue: 1000,
+          ),
+          series: series,
+          type: SeriesKind.monthlyVariation,
+        );
 
-      expect(result.isSuccess, isTrue);
-      expect(result.getOrNull()!.factor, closeTo(1.061106, 1e-9));
-      expect(result.getOrNull()!.adjustedValue, closeTo(1061.106, 1e-9));
-    });
+        expect(result.isSuccess, isTrue);
+        expect(result.getOrNull()!.factor, closeTo(1.0929994, 1e-7));
+      },
+    );
+
+    test(
+      'case de referência: INPC de 01/1994 a 06/1994 com valor 1000 produz 8591,50',
+      () {
+        final monthlyRate = 43.11269684741077;
+        final series = List.generate(
+          6,
+          (index) => SeriesPoint(
+            date: DateTime(1994, index + 1, 1),
+            value: monthlyRate,
+          ),
+        );
+
+        final result = CalculateValueCorrection(validation).call(
+          params: buildValueCorrection(
+            initial: DateTime(1994, 1, 1),
+            end: DateTime(1994, 6, 1),
+            originalValue: 1000,
+          ),
+          series: series,
+          type: SeriesKind.monthlyVariation,
+        );
+
+        expect(result.isSuccess, isTrue);
+        expect(result.getOrNull()!.adjustedValue, closeTo(8591.5, 1e-6));
+      },
+    );
+
+    test(
+      'case de referência: INPC de 01/1989 a 05/1989 produz fator 2,1046',
+      () {
+        final monthlyRate = 16.046998792301913;
+        final series = List.generate(
+          5,
+          (index) => SeriesPoint(
+            date: DateTime(1989, index + 1, 1),
+            value: monthlyRate,
+          ),
+        );
+
+        final result = CalculateValueCorrection(validation).call(
+          params: buildValueCorrection(
+            initial: DateTime(1989, 1, 1),
+            end: DateTime(1989, 5, 1),
+            originalValue: 1000,
+          ),
+          series: series,
+          type: SeriesKind.monthlyVariation,
+        );
+
+        expect(result.isSuccess, isTrue);
+        expect(result.getOrNull()!.factor, closeTo(2.1046, 1e-7));
+      },
+    );
+
+    test(
+      'calcula fator para taxa de período usando encadeamento acumulado',
+      () {
+        final result = CalculateValueCorrection(validation).call(
+          params: buildValueCorrection(
+            initial: DateTime(2024, 1, 1),
+            end: DateTime(2024, 3, 1),
+            originalValue: 1000,
+          ),
+          series: [
+            SeriesPoint(date: DateTime(2024, 1, 1), value: 1),
+            SeriesPoint(date: DateTime(2024, 2, 1), value: 2),
+            SeriesPoint(date: DateTime(2024, 3, 1), value: 3),
+          ],
+          type: SeriesKind.periodRate,
+        );
+
+        expect(result.isSuccess, isTrue);
+        expect(result.getOrNull()!.factor, closeTo(1.061106, 1e-9));
+        expect(result.getOrNull()!.adjustedValue, closeTo(1061.106, 1e-9));
+      },
+    );
 
     test('calcula fator para taxa legal em juros simples', () {
       final result = CalculateValueCorrection(validation).call(
@@ -199,9 +252,7 @@ void main() {
           end: DateTime(2024, 12, 1),
           originalValue: 1000,
         ),
-        series: [
-          SeriesPoint(date: DateTime(2024, 11, 1), value: 0.385874),
-        ],
+        series: [SeriesPoint(date: DateTime(2024, 11, 1), value: 0.385874)],
         type: SeriesKind.simpleMonthlyRate,
       );
 
@@ -210,25 +261,28 @@ void main() {
       expect(result.getOrNull()!.adjustedValue, closeTo(1003.85874, 1e-9));
     });
 
-    test('retorna erro quando não há pontos na série para o período informado', () {
-      final result = CalculateValueCorrection(validation).call(
-        params: buildValueCorrection(
-          initial: DateTime(2024, 2, 1),
-          end: DateTime(2024, 2, 10),
-        ),
-        series: [
-          SeriesPoint(date: DateTime(2024, 1, 1), value: 2),
-          SeriesPoint(date: DateTime(2024, 1, 2), value: 3),
-        ],
-        type: SeriesKind.monthlyVariation,
-      );
+    test(
+      'retorna erro quando não há pontos na série para o período informado',
+      () {
+        final result = CalculateValueCorrection(validation).call(
+          params: buildValueCorrection(
+            initial: DateTime(2024, 2, 1),
+            end: DateTime(2024, 2, 10),
+          ),
+          series: [
+            SeriesPoint(date: DateTime(2024, 1, 1), value: 2),
+            SeriesPoint(date: DateTime(2024, 1, 2), value: 3),
+          ],
+          type: SeriesKind.monthlyVariation,
+        );
 
-      expect(result.isError, isTrue);
-      expect(result.getErrorOrNull(), isA<ValidationFailure>());
-      expect(
-        result.getErrorOrNull()!.message,
-        contains(ValueCorrectionValidationMessage.invalidPeriod),
-      );
-    });
+        expect(result.isError, isTrue);
+        expect(result.getErrorOrNull(), isA<ValidationFailure>());
+        expect(
+          result.getErrorOrNull()!.message,
+          contains(ValueCorrectionValidationMessage.invalidPeriod),
+        );
+      },
+    );
   });
 }

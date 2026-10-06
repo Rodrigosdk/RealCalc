@@ -41,12 +41,17 @@ class CalculateValueCorrection implements ICalculateValueCorrection {
         point.date.month,
         point.date.day,
       );
-      return !pointDate.isBefore(start) && !pointDate.isAfter(end);
+      final isAfterStart = type == SeriesKind.dailyRate
+          ? pointDate.isAfter(start)
+          : !pointDate.isBefore(start);
+      return isAfterStart && !pointDate.isAfter(end);
     }).toList();
 
-    if (filteredSeries.isEmpty) {
+    if (filteredSeries.isEmpty && type != SeriesKind.dailyRate) {
       return FailureResult(
-        ValidationFailure(message: [ValueCorrectionValidationMessage.invalidPeriod]),
+        ValidationFailure(
+          message: [ValueCorrectionValidationMessage.invalidPeriod],
+        ),
       );
     }
 
@@ -74,7 +79,9 @@ class CalculateValueCorrection implements ICalculateValueCorrection {
         break;
     }
 
-    final adjustedValue = params.originalValue != null ? params.originalValue! * factor : null;
+    final adjustedValue = params.originalValue != null
+        ? params.originalValue! * factor
+        : null;
     final variation = (factor - 1) * 100;
 
     return SuccessResult(
