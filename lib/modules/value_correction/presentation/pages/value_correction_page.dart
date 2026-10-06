@@ -14,6 +14,8 @@ import '../../../../core/widgets/title_widget.dart';
 import '../../../../core/widgets/types/input_field_state.dart';
 import '../../domain/enum/correction_index.dart';
 import '../../domain/enum/date_granularity.dart';
+import '../../domain/services/value_correction_sharer.dart';
+import '../utils/value_correction_share_text.dart';
 import '../cubit/value_correction/value_correction_cubit.dart';
 import '../cubit/value_correction/value_correction_state.dart';
 import '../../presentation/cubit/forms/value_correction_form_cubit.dart';
@@ -22,7 +24,9 @@ import '../widgets/correction_index_picker.dart';
 import 'value_correction_result_page.dart';
 
 class ValueCorrectionPage extends StatelessWidget {
-  const ValueCorrectionPage({super.key});
+  final ValueCorrectionSharer sharer;
+
+  const ValueCorrectionPage({super.key, required this.sharer});
 
   @override
   Widget build(BuildContext context) {
@@ -37,14 +41,14 @@ class ValueCorrectionPage extends StatelessWidget {
         onEdit: () {
           context.read<ValueCorrectionCubit>().reset();
         },
-        onShare: () {},
+        onShare: () => sharer.share(buildShareText(calculationState.result)),
       );
     }
 
     final dateInputFormatter =
         formState.dateGranularity == DateGranularity.month
-            ? MonthYearInputFormatter()
-            : DateInputFormatter();
+        ? MonthYearInputFormatter()
+        : DateInputFormatter();
     final indexController = TextEditingController(
       text: formState.index?.label ?? CorrectionIndex.ipca.label,
     );
@@ -125,11 +129,14 @@ class ValueCorrectionPage extends StatelessWidget {
                         icon: Icons.calendar_today,
                         controller: formCubit.initialDate,
                         inputFormatters: [dateInputFormatter],
-                        state: formState.fieldErrors[ValueCorrectionField.initialDate] != null
+                        state:
+                            formState.fieldErrors[ValueCorrectionField
+                                    .initialDate] !=
+                                null
                             ? InputFieldState.error
                             : InputFieldState.neutral,
-                        validator: (_) =>
-                            formState.fieldErrors[ValueCorrectionField.initialDate],
+                        validator: (_) => formState
+                            .fieldErrors[ValueCorrectionField.initialDate],
                       ),
                     ),
                     Expanded(
@@ -139,11 +146,14 @@ class ValueCorrectionPage extends StatelessWidget {
                         icon: Icons.calendar_today,
                         controller: formCubit.finalDate,
                         inputFormatters: [dateInputFormatter],
-                        state: formState.fieldErrors[ValueCorrectionField.finalDate] != null
+                        state:
+                            formState.fieldErrors[ValueCorrectionField
+                                    .finalDate] !=
+                                null
                             ? InputFieldState.error
                             : InputFieldState.neutral,
-                        validator: (_) =>
-                            formState.fieldErrors[ValueCorrectionField.finalDate],
+                        validator: (_) => formState
+                            .fieldErrors[ValueCorrectionField.finalDate],
                       ),
                     ),
                   ],
@@ -157,7 +167,10 @@ class ValueCorrectionPage extends StatelessWidget {
                     icon: Icons.percent,
                     controller: formCubit.percentage,
                     inputFormatters: [DecimalInputFormatter()],
-                    state: formState.fieldErrors[ValueCorrectionField.percentage] != null
+                    state:
+                        formState.fieldErrors[ValueCorrectionField
+                                .percentage] !=
+                            null
                         ? InputFieldState.error
                         : InputFieldState.neutral,
                     validator: (_) =>
@@ -169,11 +182,13 @@ class ValueCorrectionPage extends StatelessWidget {
                   icon: Icons.attach_money,
                   controller: formCubit.value,
                   inputFormatters: [DecimalInputFormatter()],
-                  state: formState.fieldErrors[ValueCorrectionField.value] != null
+                  state:
+                      formState.fieldErrors[ValueCorrectionField.value] != null
                       ? InputFieldState.error
                       : InputFieldState.neutral,
                   trailingBadge: 'opcional',
-                  validator: (_) => formState.fieldErrors[ValueCorrectionField.value],
+                  validator: (_) =>
+                      formState.fieldErrors[ValueCorrectionField.value],
                 ),
                 if (calculationState is ValueCorrectionLoading)
                   const LinearProgressIndicator(),

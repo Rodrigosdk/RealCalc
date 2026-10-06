@@ -5,8 +5,10 @@ import 'package:real_calc/core/module.dart';
 import '../../core/routes/app_routes.dart';
 import 'domain/enum/correction_index.dart';
 import 'domain/repositories/i_correction_series_repository.dart';
+import 'domain/services/value_correction_sharer.dart';
 import 'domain/validation/value_correction_validation.dart';
 import 'infrastructure/repositories/sgs_repository.dart';
+import 'infrastructure/services/share_plus_value_correction_sharer.dart';
 import 'presentation/cubit/value_correction/value_correction_cubit.dart';
 import 'presentation/cubit/forms/value_correction_form_cubit.dart';
 import 'presentation/pages/value_correction_page.dart';
@@ -24,6 +26,9 @@ class ValueCorrectionModule extends Module {
     );
     i.addLazySingleton<ICorrectionSeriesRepository>(SgsRepository.new);
     i.addLazySingleton<ICalculateValueCorrection>(CalculateValueCorrection.new);
+    i.addLazySingleton<ValueCorrectionSharer>(
+      SharePlusValueCorrectionSharer.new,
+    );
     i.addLazySingleton<ValueCorrectionFormCubit>(ValueCorrectionFormCubit.new);
     i.addLazySingleton<ValueCorrectionCubit>(ValueCorrectionCubit.new);
   }
@@ -41,7 +46,9 @@ class ValueCorrectionModule extends Module {
           ),
           BlocProvider(create: (_) => Modular.get<ValueCorrectionCubit>()),
         ],
-        child: const ValueCorrectionPage(),
+        child: ValueCorrectionPage(
+          sharer: Modular.get<ValueCorrectionSharer>(),
+        ),
       ),
     );
   }
