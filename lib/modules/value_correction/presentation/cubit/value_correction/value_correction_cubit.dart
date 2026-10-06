@@ -1,23 +1,23 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../domain/entites/period.dart';
-import '../../../domain/entites/value_correction.dart';
 import '../../../domain/enum/correction_index.dart';
-import '../../../domain/enum/series_kind.dart';
 import '../../../domain/repositories/i_correction_series_repository.dart';
-import '../../../domain/validation/i_value_correction_validation.dart';
 import '../../../use_cases/i_calculate_value_correction.dart';
+import 'request_parsing/i_value_correction_request_parser.dart';
+import 'request_validation/i_value_correction_request_validator.dart';
 import 'value_correction_state.dart';
 
 class ValueCorrectionCubit extends Cubit<ValueCorrectionState> {
   final ICorrectionSeriesRepository _seriesRepository;
   final ICalculateValueCorrection _calculateValueCorrection;
-  final IValueCorrectionValidation _validation;
+  final IValueCorrectionRequestParser _requestParser;
+  final IValueCorrectionRequestValidator _requestValidator;
 
   ValueCorrectionCubit(
     this._seriesRepository,
     this._calculateValueCorrection,
-    this._validation,
+    this._requestParser,
+    this._requestValidator,
   ) : super(ValueCorrectionInitial());
 
   Future<void> calculate({
@@ -29,51 +29,31 @@ class ValueCorrectionCubit extends Cubit<ValueCorrectionState> {
   }) async {
     emit(ValueCorrectionLoading());
 
-    final start = _parseDate(initialDate, index);
-    final end = _parseDate(finalDate, index);
-    if (start == null || end == null) {
+    final params = _requestParser.parse(
+      index: index,
+      initialDate: initialDate,
+      finalDate: finalDate,
+      percentage: percentage,
+      value: value,
+    );
+    if (params == null) {
       emit(const ValueCorrectionError('Informe um período válido.'));
       return;
     }
 
-    if (start.isBefore(index.minimumInputDate) ||
-        end.isBefore(index.minimumInputDate)) {
-      emit(ValueCorrectionError(index.availabilityMessage));
-      return;
-    }
-
-    final parsedPercentage = _resolvePercentage(index, percentage);
-    final originalValue = _parseNumber(value);
-    final params = ValueCorrection(
-      index: index.sgsCode,
-      period: Period(initial: start, end: end),
-      percentage: parsedPercentage,
-      originalValue: originalValue,
-      factor: 1,
-      adjustedValue: originalValue,
-      variation: 0,
+    final validationMessage = _requestValidator.validate(
+      index: index,
+      params: params,
     );
-
-    final validationResult = _validation.validate(params);
-    final validationFailure = validationResult.getErrorOrNull();
-    if (validationFailure != null) {
-      emit(ValueCorrectionError(validationFailure.message.first.message));
-      return;
-    }
-
-    if (end.isAfter(index.latestAllowedEndDate(start))) {
-      emit(
-        const ValueCorrectionError(
-          'O período entre as datas não pode ser superior a 10 anos exatos.',
-        ),
-      );
+    if (validationMessage != null) {
+      emit(ValueCorrectionError(validationMessage));
       return;
     }
 
     final seriesResult = await _seriesRepository.getSeries(
       index: index,
-      start: start,
-      end: end,
+      start: params.period.initial,
+      end: params.period.end,
     );
 
     final seriesError = seriesResult.getErrorOrNull();
@@ -95,43 +75,4 @@ class ValueCorrectionCubit extends Cubit<ValueCorrectionState> {
   }
 
   void reset() => emit(ValueCorrectionInitial());
-
-  DateTime? _parseDate(String value, CorrectionIndex index) {
-    final parts = value.trim().split('/');
-    if (index.granularity.name == 'month') {
-      if (parts.length != 2) return null;
-      final month = int.tryParse(parts[0]);
-      final year = int.tryParse(parts[1]);
-      if (month == null || year == null || month < 1 || month > 12) return null;
-      return DateTime(year, month, 1);
-    }
-
-    if (parts.length != 3) return null;
-    final day = int.tryParse(parts[0]);
-    final month = int.tryParse(parts[1]);
-    final year = int.tryParse(parts[2]);
-    if (day == null || month == null || year == null) return null;
-    if (month < 1 || month > 12 || day < 1) return null;
-
-    final parsed = DateTime(year, month, day);
-    if (parsed.year != year || parsed.month != month || parsed.day != day) {
-      return null;
-    }
-    return parsed;
-  }
-
-  double _resolvePercentage(CorrectionIndex index, String value) {
-    if (index != CorrectionIndex.cdi) {
-      return index.kind == SeriesKind.dailyRate ? 100 : 0;
-    }
-
-    final parsed = _parseNumber(value);
-    if (parsed == null) return 100;
-    return parsed > 0 ? parsed : 100;
-  }
-
-  double? _parseNumber(String value) {
-    final normalized = value.trim().replaceAll('.', '').replaceAll(',', '.');
-    return normalized.isEmpty ? null : double.tryParse(normalized);
-  }
 }

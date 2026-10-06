@@ -18,7 +18,12 @@ import 'package:real_calc/modules/value_correction/domain/validation/value_corre
 import 'package:real_calc/modules/value_correction/domain/enum/series_kind.dart';
 import 'package:real_calc/modules/value_correction/domain/repositories/i_correction_series_repository.dart';
 import 'package:real_calc/modules/value_correction/presentation/cubit/value_correction/value_correction_cubit.dart';
+import 'package:real_calc/modules/value_correction/presentation/cubit/value_correction/request_parsing/value_correction_request_parser.dart';
+import 'package:real_calc/modules/value_correction/presentation/cubit/value_correction/request_validation/value_correction_request_validator.dart';
 import 'package:real_calc/modules/value_correction/presentation/cubit/forms/value_correction_form_cubit.dart';
+import 'package:real_calc/modules/value_correction/presentation/cubit/forms/date_formatting/correction_form_input_formatter.dart';
+import 'package:real_calc/modules/value_correction/presentation/cubit/forms/date_parsing/correction_form_date_parser.dart';
+import 'package:real_calc/modules/value_correction/presentation/cubit/forms/validation/correction_form_validator.dart';
 import 'package:real_calc/modules/value_correction/presentation/pages/value_correction_page.dart';
 import 'package:real_calc/modules/value_correction/presentation/pages/value_correction_result_page.dart';
 import 'package:real_calc/modules/value_correction/use_cases/i_calculate_value_correction.dart';
@@ -32,6 +37,21 @@ class MockCalculateValueCorrection extends Mock
 class MockNavigator extends Mock implements IModularNavigator {}
 
 class ValueCorrectionFake extends Fake implements ValueCorrection {}
+
+ValueCorrectionFormCubit buildFormCubit() => ValueCorrectionFormCubit(
+  CorrectionFormInputFormatter(),
+  CorrectionFormValidator(CorrectionFormDateParser()),
+);
+
+ValueCorrectionCubit buildValueCorrectionCubit(
+  ICorrectionSeriesRepository repository,
+  ICalculateValueCorrection calculateValueCorrection,
+) => ValueCorrectionCubit(
+  repository,
+  calculateValueCorrection,
+  ValueCorrectionRequestParser(CorrectionFormDateParser()),
+  ValueCorrectionRequestValidator(ValueCorrectionValidation()),
+);
 
 void main() {
   setUpAll(() async {
@@ -48,15 +68,13 @@ void main() {
 
     Widget buildSut() {
       return BlocProvider(
-        create: (_) =>
-            ValueCorrectionFormCubit()..setIndex(CorrectionIndex.ipca),
+        create: (_) => buildFormCubit()..setIndex(CorrectionIndex.ipca),
         child: MaterialApp(
           theme: AppTheme.darkTheme,
           home: BlocProvider(
-            create: (_) => ValueCorrectionCubit(
+            create: (_) => buildValueCorrectionCubit(
               seriesRepository,
               calculateValueCorrection,
-              ValueCorrectionValidation(),
             ),
             child: const ValueCorrectionPage(),
           ),
@@ -132,12 +150,10 @@ void main() {
     testWidgets(
       'o botão Corrigir valor só chama o cubit quando o formulário é válido',
       (tester) async {
-        final formCubit = ValueCorrectionFormCubit()
-          ..setIndex(CorrectionIndex.ipca);
-        final cubit = ValueCorrectionCubit(
+        final formCubit = buildFormCubit()..setIndex(CorrectionIndex.ipca);
+        final cubit = buildValueCorrectionCubit(
           seriesRepository,
           calculateValueCorrection,
-          ValueCorrectionValidation(),
         );
 
         when(
@@ -234,12 +250,10 @@ void main() {
     testWidgets('tenta novamente após falha de rede com texto branco', (
       tester,
     ) async {
-      final formCubit = ValueCorrectionFormCubit()
-        ..setIndex(CorrectionIndex.ipca);
-      final cubit = ValueCorrectionCubit(
+      final formCubit = buildFormCubit()..setIndex(CorrectionIndex.ipca);
+      final cubit = buildValueCorrectionCubit(
         seriesRepository,
         calculateValueCorrection,
-        ValueCorrectionValidation(),
       );
       var requestCount = 0;
 
