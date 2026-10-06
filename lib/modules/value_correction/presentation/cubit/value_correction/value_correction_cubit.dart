@@ -33,6 +33,12 @@ class ValueCorrectionCubit extends Cubit<ValueCorrectionState> {
       return;
     }
 
+    if (start.isBefore(index.minimumInputDate) ||
+        end.isBefore(index.minimumInputDate)) {
+      emit(ValueCorrectionError(index.availabilityMessage));
+      return;
+    }
+
     final parsedPercentage = _resolvePercentage(index, percentage);
     final originalValue = _parseNumber(value);
     final params = ValueCorrection(
@@ -48,9 +54,14 @@ class ValueCorrectionCubit extends Cubit<ValueCorrectionState> {
     final validationResult = _validation.validate(params);
     final validationFailure = validationResult.getErrorOrNull();
     if (validationFailure != null) {
+      emit(ValueCorrectionError(validationFailure.message.first.message));
+      return;
+    }
+
+    if (end.isAfter(index.latestAllowedEndDate(start))) {
       emit(
-        ValueCorrectionError(
-          validationFailure.message.first.message,
+        const ValueCorrectionError(
+          'O período entre as datas não pode ser superior a 10 anos exatos.',
         ),
       );
       return;
@@ -75,11 +86,7 @@ class ValueCorrectionCubit extends Cubit<ValueCorrectionState> {
     );
 
     result.fold(
-      (failure) => emit(
-        ValueCorrectionError(
-          failure.message.first.message,
-        ),
-      ),
+      (failure) => emit(ValueCorrectionError(failure.message.first.message)),
       (value) => emit(ValueCorrectionCalculated(value)),
     );
   }

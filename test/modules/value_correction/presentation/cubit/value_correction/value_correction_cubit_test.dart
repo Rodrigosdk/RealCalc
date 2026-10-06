@@ -47,10 +47,7 @@ void main() {
   group('ValueCorrectionCubit - Testes Unitários de Cálculo', () {
     final ipcaValueCorrection = ValueCorrection(
       index: CorrectionIndex.ipca.sgsCode,
-      period: Period(
-        initial: DateTime(2024, 1, 1),
-        end: DateTime(2024, 1, 1),
-      ),
+      period: Period(initial: DateTime(2024, 1, 1), end: DateTime(2024, 1, 1)),
       percentage: 0,
       originalValue: 100,
       factor: 1.015,
@@ -60,10 +57,7 @@ void main() {
 
     final cdiValueCorrection = ValueCorrection(
       index: CorrectionIndex.cdi.sgsCode,
-      period: Period(
-        initial: DateTime(2024, 1, 1),
-        end: DateTime(2024, 1, 1),
-      ),
+      period: Period(initial: DateTime(2024, 1, 1), end: DateTime(2024, 1, 1)),
       percentage: 80,
       originalValue: 100,
       factor: 1.0008,
@@ -92,7 +86,9 @@ void main() {
             series: any<List<SeriesPoint>>(named: 'series'),
             type: any<SeriesKind>(named: 'type'),
           ),
-        ).thenReturn(SuccessResult<Failure, ValueCorrection>(ipcaValueCorrection));
+        ).thenReturn(
+          SuccessResult<Failure, ValueCorrection>(ipcaValueCorrection),
+        );
       },
       build: () => cubit,
       act: (cubit) => cubit.calculate(
@@ -133,7 +129,9 @@ void main() {
             series: any<List<SeriesPoint>>(named: 'series'),
             type: any<SeriesKind>(named: 'type'),
           ),
-        ).thenReturn(SuccessResult<Failure, ValueCorrection>(cdiValueCorrection));
+        ).thenReturn(
+          SuccessResult<Failure, ValueCorrection>(cdiValueCorrection),
+        );
       },
       build: () => cubit,
       act: (cubit) => cubit.calculate(
@@ -169,6 +167,64 @@ void main() {
           (state) => state.message,
           'message',
           contains('A data inicial não pode ser maior do que a data final'),
+        ),
+      ],
+      verify: (_) {
+        verifyNever(
+          () => repository.getSeries(
+            index: any(named: 'index'),
+            start: any(named: 'start'),
+            end: any(named: 'end'),
+          ),
+        );
+      },
+    );
+
+    blocTest<ValueCorrectionCubit, ValueCorrectionState>(
+      'rejeita período superior a dez anos sem consultar a série',
+      build: () => cubit,
+      act: (cubit) => cubit.calculate(
+        index: CorrectionIndex.ipca,
+        initialDate: '01/2010',
+        finalDate: '02/2020',
+        percentage: '0',
+        value: '100',
+      ),
+      expect: () => [
+        isA<ValueCorrectionLoading>(),
+        isA<ValueCorrectionError>().having(
+          (state) => state.message,
+          'message',
+          'O período entre as datas não pode ser superior a 10 anos exatos.',
+        ),
+      ],
+      verify: (_) {
+        verifyNever(
+          () => repository.getSeries(
+            index: any(named: 'index'),
+            start: any(named: 'start'),
+            end: any(named: 'end'),
+          ),
+        );
+      },
+    );
+
+    blocTest<ValueCorrectionCubit, ValueCorrectionState>(
+      'rejeita datas anteriores ao início disponível do índice',
+      build: () => cubit,
+      act: (cubit) => cubit.calculate(
+        index: CorrectionIndex.ipcaE,
+        initialDate: '12/1991',
+        finalDate: '01/1992',
+        percentage: '0',
+        value: '100',
+      ),
+      expect: () => [
+        isA<ValueCorrectionLoading>(),
+        isA<ValueCorrectionError>().having(
+          (state) => state.message,
+          'message',
+          'O índice IPCA-E (IBGE) possui dados a partir de 01/1992.',
         ),
       ],
       verify: (_) {

@@ -80,7 +80,8 @@ class ValueCorrectionFormCubit extends Cubit<ValueCorrectionFormState> {
 
     if (hasInitialDate && !_isValidDate(initialDate.text, dateGranularity)) {
       errors[ValueCorrectionField.initialDate] = 'Data inicial inválida';
-    } else if (hasInitialDate && _isFutureDate(initialDate.text, dateGranularity)) {
+    } else if (hasInitialDate &&
+        _isFutureDate(initialDate.text, dateGranularity)) {
       errors[ValueCorrectionField.initialDate] =
           'A data inicial não pode ser superior à data atual.';
     }
@@ -90,6 +91,26 @@ class ValueCorrectionFormCubit extends Cubit<ValueCorrectionFormState> {
     } else if (hasFinalDate && _isFutureDate(finalDate.text, dateGranularity)) {
       errors[ValueCorrectionField.finalDate] =
           'A data final não pode ser superior à data atual.';
+    }
+
+    if (index != null &&
+        hasInitialDate &&
+        _isValidDate(initialDate.text, dateGranularity) &&
+        _parseDate(
+          initialDate.text,
+          dateGranularity,
+        )!.isBefore(index.minimumInputDate)) {
+      errors[ValueCorrectionField.initialDate] = index.availabilityMessage;
+    }
+
+    if (index != null &&
+        hasFinalDate &&
+        _isValidDate(finalDate.text, dateGranularity) &&
+        _parseDate(
+          finalDate.text,
+          dateGranularity,
+        )!.isBefore(index.minimumInputDate)) {
+      errors[ValueCorrectionField.finalDate] = index.availabilityMessage;
     }
 
     final hasValidInitialDate =
@@ -102,7 +123,8 @@ class ValueCorrectionFormCubit extends Cubit<ValueCorrectionFormState> {
       final finalDateValue = _parseDate(finalDate.text, dateGranularity)!;
 
       if (initialDateValue.isAfter(finalDateValue)) {
-        final targetField = _lastEditedDateField ?? ValueCorrectionField.finalDate;
+        final targetField =
+            _lastEditedDateField ?? ValueCorrectionField.finalDate;
 
         if (targetField == ValueCorrectionField.finalDate) {
           errors[ValueCorrectionField.finalDate] =
@@ -113,6 +135,12 @@ class ValueCorrectionFormCubit extends Cubit<ValueCorrectionFormState> {
               'A data inicial deve ser anterior ou igual à data final.';
           errors[ValueCorrectionField.finalDate] = null;
         }
+      } else if (index != null &&
+          finalDateValue.isAfter(
+            index.latestAllowedEndDate(initialDateValue),
+          )) {
+        errors[ValueCorrectionField.finalDate] =
+            'O período entre as datas não pode ser superior a 10 anos exatos.';
       }
     }
 
