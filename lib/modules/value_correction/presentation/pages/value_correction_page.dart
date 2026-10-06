@@ -53,16 +53,27 @@ class ValueCorrectionPage extends StatelessWidget {
       text: formState.index?.label ?? CorrectionIndex.ipca.label,
     );
 
-    void calculate() {
-      if (!formState.canCalculate || formState.index == null) return;
-
+    void runCalculation(CorrectionIndex index) {
       context.read<ValueCorrectionCubit>().calculate(
-        index: formState.index!,
+        index: index,
         initialDate: formCubit.initialDate.text,
         finalDate: formCubit.finalDate.text,
         percentage: formCubit.percentage.text,
         value: formCubit.value.text,
       );
+    }
+
+    void calculate() {
+      final currentFormState = formCubit.state;
+      final index = currentFormState.index;
+      if (!currentFormState.canCalculate || index == null) return;
+      runCalculation(index);
+    }
+
+    void retryCalculation() {
+      final index = formCubit.state.index;
+      if (index == null) return;
+      runCalculation(index);
     }
 
     void clear() {
@@ -199,7 +210,7 @@ class ValueCorrectionPage extends StatelessWidget {
                   _ErrorBanner(
                     message: calculationState.message,
                     formsTheme: formsTheme,
-                    onRetry: formState.canCalculate ? calculate : null,
+                    onRetry: retryCalculation,
                   ),
                 OptionsBottomForms(
                   onCalculate: formState.canCalculate ? calculate : null,
@@ -255,6 +266,7 @@ class _ErrorBanner extends StatelessWidget {
                   TextButton(
                     onPressed: onRetry,
                     style: TextButton.styleFrom(
+                      foregroundColor: Colors.white,
                       padding: EdgeInsets.zero,
                       minimumSize: Size.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,

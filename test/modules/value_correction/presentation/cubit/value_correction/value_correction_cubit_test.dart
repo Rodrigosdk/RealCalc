@@ -152,6 +152,70 @@ void main() {
     );
 
     blocTest<ValueCorrectionCubit, ValueCorrectionState>(
+      'aplica 100% da taxa diária da Selic',
+      setUp: () {
+        when(
+          () => repository.getSeries(
+            index: CorrectionIndex.selic,
+            start: DateTime(2024, 1, 2),
+            end: DateTime(2024, 1, 3),
+          ),
+        ).thenAnswer((_) async {
+          return SuccessResult<ErrorMessages, List<SeriesPoint>>([
+            SeriesPoint(date: DateTime(2024, 1, 2), value: 0.055131),
+            SeriesPoint(date: DateTime(2024, 1, 3), value: 0.055131),
+          ]);
+        });
+        when(
+          () => calculateValueCorrection.call(
+            params: any<ValueCorrection>(named: 'params'),
+            series: any<List<SeriesPoint>>(named: 'series'),
+            type: any<SeriesKind>(named: 'type'),
+          ),
+        ).thenReturn(
+          SuccessResult<Failure, ValueCorrection>(
+            ValueCorrection(
+              index: CorrectionIndex.selic.sgsCode,
+              period: Period(
+                initial: DateTime(2024, 1, 2),
+                end: DateTime(2024, 1, 3),
+              ),
+              percentage: 100,
+              originalValue: 100,
+              factor: 1.001103,
+              adjustedValue: 100.1103,
+              variation: 0.1103,
+            ),
+          ),
+        );
+      },
+      build: () => cubit,
+      act: (cubit) => cubit.calculate(
+        index: CorrectionIndex.selic,
+        initialDate: '02/01/2024',
+        finalDate: '03/01/2024',
+        percentage: '',
+        value: '100',
+      ),
+      expect: () => [
+        isA<ValueCorrectionLoading>(),
+        isA<ValueCorrectionCalculated>(),
+      ],
+      verify: (_) {
+        final params =
+            verify(
+                  () => calculateValueCorrection.call(
+                    params: captureAny<ValueCorrection>(named: 'params'),
+                    series: any<List<SeriesPoint>>(named: 'series'),
+                    type: SeriesKind.dailyRate,
+                  ),
+                ).captured.single
+                as ValueCorrection;
+        expect(params.percentage, 100);
+      },
+    );
+
+    blocTest<ValueCorrectionCubit, ValueCorrectionState>(
       'Deve emitir [Loading, Error] ao validar dados inválidos sem chamar o repositório',
       build: () => cubit,
       act: (cubit) => cubit.calculate(

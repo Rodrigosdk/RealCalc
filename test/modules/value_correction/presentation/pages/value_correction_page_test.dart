@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:real_calc/core/errors/failures.dart';
+import 'package:real_calc/core/errors/messages.dart';
 import 'package:real_calc/core/seed_works/error.dart';
 import 'package:real_calc/core/seed_works/result.dart';
 import 'package:real_calc/core/themes/app_theme.dart';
@@ -226,6 +227,90 @@ void main() {
         ).called(1);
       },
     );
+
+    testWidgets('tenta novamente após falha de rede com texto branco', (
+      tester,
+    ) async {
+      final formCubit = ValueCorrectionFormCubit()
+        ..setIndex(CorrectionIndex.ipca);
+      final cubit = ValueCorrectionCubit(
+        seriesRepository,
+        calculateValueCorrection,
+      );
+      var requestCount = 0;
+
+      when(
+        () => seriesRepository.getSeries(
+          index: any(named: 'index'),
+          start: any(named: 'start'),
+          end: any(named: 'end'),
+        ),
+      ).thenAnswer((_) async {
+        requestCount++;
+        if (requestCount == 1) {
+          return FailureResult<ErrorMessages, List<SeriesPoint>>(
+            ServerErrorMessages.connectionError,
+          );
+        }
+        return SuccessResult<ErrorMessages, List<SeriesPoint>>([
+          SeriesPoint(date: DateTime(2024, 1, 1), value: 1.5),
+        ]);
+      });
+
+      when(
+        () => calculateValueCorrection.call(
+          params: any(named: 'params'),
+          series: any(named: 'series'),
+          type: any(named: 'type'),
+        ),
+      ).thenReturn(
+        SuccessResult<Failure, ValueCorrection>(
+          ValueCorrection(
+            index: CorrectionIndex.ipca.sgsCode,
+            period: Period(
+              initial: DateTime(2024, 1, 1),
+              end: DateTime(2024, 1, 1),
+            ),
+            percentage: 0,
+            originalValue: 100,
+            factor: 1.015,
+            adjustedValue: 101.5,
+            variation: 1.5,
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: formCubit),
+            BlocProvider.value(value: cubit),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.darkTheme,
+            home: ValueCorrectionPage(sharer: sharer),
+          ),
+        ),
+      );
+
+      formCubit.initialDate.text = '01/2024';
+      formCubit.finalDate.text = '01/2024';
+      await tester.pump();
+      await tester.tap(find.text('Corrigir valor'));
+      await tester.pumpAndSettle();
+
+      final retryButton = find.widgetWithText(TextButton, 'Tentar novamente');
+      expect(retryButton, findsOneWidget);
+      final button = tester.widget<TextButton>(retryButton);
+      expect(button.onPressed, isNotNull);
+      expect(button.style?.foregroundColor?.resolve({}), Colors.white);
+
+      await tester.tap(retryButton);
+      await tester.pumpAndSettle();
+
+      expect(requestCount, 2);
+      expect(find.text('Valor corrigido'), findsOneWidget);
+    });
 
     ValueCorrection buildResult({
       bool withAdjustedValue = true,

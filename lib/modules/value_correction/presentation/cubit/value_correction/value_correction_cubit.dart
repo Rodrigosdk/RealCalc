@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/entites/period.dart';
 import '../../../domain/entites/value_correction.dart';
 import '../../../domain/enum/correction_index.dart';
+import '../../../domain/enum/series_kind.dart';
 import '../../../domain/repositories/i_correction_series_repository.dart';
 import '../../../domain/validation/value_correction_validation.dart';
 import '../../../use_cases/i_calculate_value_correction.dart';
@@ -118,7 +119,9 @@ class ValueCorrectionCubit extends Cubit<ValueCorrectionState> {
   }
 
   double _resolvePercentage(CorrectionIndex index, String value) {
-    if (index != CorrectionIndex.cdi) return 0;
+    if (index != CorrectionIndex.cdi) {
+      return index.kind == SeriesKind.dailyRate ? 100 : 0;
+    }
 
     final parsed = _parseNumber(value);
     if (parsed == null) return 100;
