@@ -13,6 +13,7 @@ import 'extensions/page_header_theme.dart';
 import 'extensions/title_widget_theme.dart';
 import 'extensions/value_correction_result_theme.dart';
 import 'extensions/warning_banner_theme.dart';
+import 'extensions/error_banner_theme.dart';
 import 'text_styles.dart';
 
 class AppTheme {
@@ -196,6 +197,13 @@ class AppTheme {
           borderColor: ColorTokens.errorContainerBorder,
           iconColor: ColorTokens.error,
           textStyle: AppTextStyles.errorBannerText,
+        ),
+        ErrorBannerTheme(
+          backgroundColor: ColorTokens.errorContainerBg,
+          borderColor: ColorTokens.errorContainerBorder,
+          iconColor: ColorTokens.errorContainerBorder,
+          retryTextColor: Colors.white,
+          messageStyle: AppTextStyles.errorBannerText,
         ),
         HighlightCardTheme(
           gradientColors: [

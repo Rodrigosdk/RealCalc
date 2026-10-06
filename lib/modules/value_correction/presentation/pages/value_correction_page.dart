@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/themes/extensions/financing_forms_theme.dart';
 import '../../../../core/themes/spacing.dart';
 import '../../../../core/utils/date_input_formatter.dart';
 import '../../../../core/utils/decimal_input_formatter.dart';
@@ -12,6 +11,7 @@ import '../../../../core/widgets/options_bottom_forms.dart';
 import '../../../../core/widgets/page_header.dart';
 import '../../../../core/widgets/title_widget.dart';
 import '../../../../core/widgets/types/input_field_state.dart';
+import '../../../../core/widgets/error_banner.dart';
 import '../../../../core/widgets/warning_banner.dart';
 import '../../domain/enum/correction_index.dart';
 import '../../domain/enum/date_granularity.dart';
@@ -34,8 +34,6 @@ class ValueCorrectionPage extends StatelessWidget {
     final formCubit = context.watch<ValueCorrectionFormCubit>();
     final formState = formCubit.state;
     final calculationState = context.watch<ValueCorrectionCubit>().state;
-    final formsTheme = Theme.of(context).extension<FinancingFormsTheme>()!;
-
     if (calculationState is ValueCorrectionCalculated) {
       return ValueCorrectionResultPage(
         result: calculationState.result,
@@ -205,9 +203,8 @@ class ValueCorrectionPage extends StatelessWidget {
                 if (calculationState is ValueCorrectionLoading)
                   const LinearProgressIndicator(),
                 if (calculationState is ValueCorrectionError)
-                  _ErrorBanner(
+                  ErrorBanner(
                     message: calculationState.message,
-                    formsTheme: formsTheme,
                     onRetry: retryCalculation,
                   ),
                 OptionsBottomForms(
@@ -219,63 +216,6 @@ class ValueCorrectionPage extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _ErrorBanner extends StatelessWidget {
-  final String message;
-  final FinancingFormsTheme formsTheme;
-  final VoidCallback? onRetry;
-
-  const _ErrorBanner({
-    required this.message,
-    required this.formsTheme,
-    this.onRetry,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: formsTheme.errorContainerPadding,
-      decoration: BoxDecoration(
-        color: formsTheme.errorBackgroundColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: formsTheme.errorBorderColor),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            Icons.warning_amber_rounded,
-            size: 18,
-            color: formsTheme.errorBorderColor,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(message, style: formsTheme.errorTextStyle),
-                if (onRetry != null) ...[
-                  const SizedBox(height: AppSpacing.sm),
-                  TextButton(
-                    onPressed: onRetry,
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: const Text('Tentar novamente'),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
