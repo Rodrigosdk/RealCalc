@@ -12,6 +12,7 @@ import 'extensions/metric_card_theme.dart';
 import 'extensions/page_header_theme.dart';
 import 'extensions/title_widget_theme.dart';
 import 'extensions/value_correction_result_theme.dart';
+import 'extensions/warning_banner_theme.dart';
 import 'text_styles.dart';
 
 class AppTheme {
@@ -59,7 +60,10 @@ class AppTheme {
         hintStyle: TextStyle(color: ColorTokens.textHint),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5),
-          borderSide: const BorderSide(color: ColorTokens.background, width: 1.0),
+          borderSide: const BorderSide(
+            color: ColorTokens.background,
+            width: 1.0,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5),
@@ -116,7 +120,7 @@ class AppTheme {
           calculateButtonForeground: Colors.white,
           actionButtonBackground: ColorTokens.background,
           actionButtonForeground: ColorTokens.textSecondary,
-          borderButtonColor: ColorTokens.successContainerBorder
+          borderButtonColor: ColorTokens.successContainerBorder,
         ),
         TitleWidgetTheme(
           titleStyle: AppTextStyles.headlineMedium.copyWith(
@@ -187,6 +191,12 @@ class AppTheme {
           errorBorderColor: ColorTokens.errorContainerBorder,
           errorTextStyle: AppTextStyles.errorBannerText,
         ),
+        WarningBannerTheme(
+          backgroundColor: ColorTokens.errorContainerBg,
+          borderColor: ColorTokens.errorContainerBorder,
+          iconColor: ColorTokens.error,
+          textStyle: AppTextStyles.errorBannerText,
+        ),
         HighlightCardTheme(
           gradientColors: [
             ColorTokens.surface,
@@ -223,7 +233,6 @@ class AppTheme {
           variationNegativeColor: ColorTokens.error,
           variationNeutralColor: ColorTokens.textSecondary,
           skeletonColor: ColorTokens.surfaceVariant,
-          
         ),
         PageHeaderTheme(
           backgroundColor: ColorTokens.background,

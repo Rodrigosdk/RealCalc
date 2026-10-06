@@ -12,6 +12,7 @@ import '../../../../core/widgets/options_bottom_forms.dart';
 import '../../../../core/widgets/page_header.dart';
 import '../../../../core/widgets/title_widget.dart';
 import '../../../../core/widgets/types/input_field_state.dart';
+import '../../../../core/widgets/warning_banner.dart';
 import '../../domain/enum/correction_index.dart';
 import '../../domain/enum/date_granularity.dart';
 import '../../domain/services/value_correction_sharer.dart';
@@ -170,10 +171,7 @@ class ValueCorrectionPage extends StatelessWidget {
                   ],
                 ),
                 if (formState.warningBannerMessage.isNotEmpty)
-                  _CurrencyWarningBanner(
-                    formsTheme: formsTheme,
-                    message: formState.warningBannerMessage,
-                  ),
+                  WarningBanner(message: formState.warningBannerMessage),
                 if (formState.showsPercentage)
                   InputFormsResultCard(
                     label: 'Percentual',
@@ -277,41 +275,6 @@ class _ErrorBanner extends StatelessWidget {
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CurrencyWarningBanner extends StatelessWidget {
-  final FinancingFormsTheme formsTheme;
-  final String message;
-
-  const _CurrencyWarningBanner({
-    required this.formsTheme,
-    required this.message,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: formsTheme.errorContainerPadding,
-      decoration: BoxDecoration(
-        color: formsTheme.errorBackgroundColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: formsTheme.errorBorderColor),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            Icons.warning_amber_rounded,
-            color: formsTheme.errorBorderColor,
-            size: 18,
-          ),
-          const SizedBox(width: 10),
-          Expanded(child: Text(message, style: formsTheme.errorTextStyle)),
         ],
       ),
     );
