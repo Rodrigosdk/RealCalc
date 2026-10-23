@@ -91,3 +91,29 @@ enum FutureValueValidationMessage implements ErrorMessages {
 
   const FutureValueValidationMessage(this.message);
 }
+
+enum ValueCorrectionValidationMessage implements ErrorMessages {
+  invalidPeriod("A data inicial não pode ser maior do que a data final. Por favor, corrija o intervalo selecionado."), 
+  invalidIndex("O período selecionado não possui dados disponíveis para o índice escolhido. Por favor, tente um intervalo diferente."), 
+  invalidPercentage("O percentual informado deve ser maior que zero. Por favor, insira um valor positivo"), 
+  invalidValue("O valor inserido deve ser maior que zero. Certifique-se de preencher o campo corretamente");
+  
+  @override
+  final String message;
+
+  const ValueCorrectionValidationMessage(this.message);
+}
+
+class SeriesUnavailableError implements ErrorMessages {
+  const SeriesUnavailableError(this.lastAvailableMonth);
+
+  final DateTime lastAvailableMonth;
+
+  @override
+  String get message =>
+      'A série não possui dados para o período solicitado. O último mês disponível é ${_formatMonth(lastAvailableMonth)}.';
+
+  static String _formatMonth(DateTime date) {
+    return '${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+}

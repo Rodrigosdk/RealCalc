@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:real_calc/modules/financial_calculators/domain/entities/financial_calculation.dart';
 import 'package:real_calc/modules/financial_calculators/domain/enum/financial_calculation_target.dart';
-import 'package:real_calc/modules/financial_calculators/domain/enum/input_field_state.dart';
+import 'package:real_calc/core/widgets/types/input_field_state.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/cubit/forms/financing_form_cubit.dart';
 
 void main() {

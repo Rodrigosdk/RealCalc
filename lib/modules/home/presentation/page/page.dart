@@ -107,8 +107,8 @@ class HomePage extends StatelessWidget {
           description: 'Atualize valores por índices de inflação',
           cardColor: theme.cardColor,
           iconColor: theme.iconContainerColor,
-          onTap: null,
-          variant: MenuCardVariant.disabled,
+          onTap: () => Modular.to.pushNamed(AppRoutes.correction),
+          variant: MenuCardVariant.standard,
         ),
       ],
     );

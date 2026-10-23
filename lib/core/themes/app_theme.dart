@@ -6,10 +6,14 @@ import 'package:real_calc/core/themes/extensions/options_bottom_forms_theme.dart
 import 'color_tokens.dart';
 import 'extensions/financing_forms_theme.dart';
 import 'extensions/home_page_theme.dart';
+import 'extensions/index_picker_theme.dart';
 import 'extensions/input_forms_result_card_theme.dart';
 import 'extensions/metric_card_theme.dart';
 import 'extensions/page_header_theme.dart';
 import 'extensions/title_widget_theme.dart';
+import 'extensions/value_correction_result_theme.dart';
+import 'extensions/warning_banner_theme.dart';
+import 'extensions/error_banner_theme.dart';
 import 'text_styles.dart';
 
 class AppTheme {
@@ -57,7 +61,10 @@ class AppTheme {
         hintStyle: TextStyle(color: ColorTokens.textHint),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5),
-          borderSide: const BorderSide(color: ColorTokens.background, width: 1.0),
+          borderSide: const BorderSide(
+            color: ColorTokens.background,
+            width: 1.0,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5),
@@ -114,7 +121,7 @@ class AppTheme {
           calculateButtonForeground: Colors.white,
           actionButtonBackground: ColorTokens.background,
           actionButtonForeground: ColorTokens.textSecondary,
-          borderButtonColor: ColorTokens.successContainerBorder
+          borderButtonColor: ColorTokens.successContainerBorder,
         ),
         TitleWidgetTheme(
           titleStyle: AppTextStyles.headlineMedium.copyWith(
@@ -143,7 +150,27 @@ class AppTheme {
           errorColor: ColorTokens.error,
           badgeStyle: AppTextStyles.stateBadge,
         ),
-
+        IndexPickerTheme(
+          backgroundColor: ColorTokens.surface,
+          surfaceColor: ColorTokens.background,
+          dividerColor: ColorTokens.border,
+          selectedColor: ColorTokens.accentAmber.withValues(alpha: 0.12),
+          selectedBorderColor: ColorTokens.accentAmber,
+          titleColor: ColorTokens.textPrimary,
+          subtitleColor: ColorTokens.textSecondary,
+          checkColor: ColorTokens.accentAmber,
+          sectionTitleStyle: AppTextStyles.labelLarge.copyWith(
+            color: ColorTokens.textSecondary,
+            letterSpacing: 1.2,
+          ),
+          itemTitleStyle: AppTextStyles.bodyLarge.copyWith(
+            color: ColorTokens.textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+          itemSubtitleStyle: AppTextStyles.bodyMedium.copyWith(
+            color: ColorTokens.textSecondary,
+          ),
+        ),
         HomePageTheme(
           scaffoldBackgroundColor: ColorTokens.background,
           cardColor: ColorTokens.background,
@@ -164,6 +191,19 @@ class AppTheme {
           errorBackgroundColor: ColorTokens.errorContainerBg,
           errorBorderColor: ColorTokens.errorContainerBorder,
           errorTextStyle: AppTextStyles.errorBannerText,
+        ),
+        WarningBannerTheme(
+          backgroundColor: ColorTokens.errorContainerBg,
+          borderColor: ColorTokens.errorContainerBorder,
+          iconColor: ColorTokens.error,
+          textStyle: AppTextStyles.errorBannerText,
+        ),
+        ErrorBannerTheme(
+          backgroundColor: ColorTokens.errorContainerBg,
+          borderColor: ColorTokens.errorContainerBorder,
+          iconColor: ColorTokens.errorContainerBorder,
+          retryTextColor: Colors.white,
+          messageStyle: AppTextStyles.errorBannerText,
         ),
         HighlightCardTheme(
           gradientColors: [
@@ -201,13 +241,50 @@ class AppTheme {
           variationNegativeColor: ColorTokens.error,
           variationNeutralColor: ColorTokens.textSecondary,
           skeletonColor: ColorTokens.surfaceVariant,
-          
         ),
         PageHeaderTheme(
           backgroundColor: ColorTokens.background,
           iconColor: ColorTokens.textSecondary,
           titleStyle: AppTextStyles.headlineMedium.copyWith(
             color: ColorTokens.textPrimary,
+          ),
+        ),
+        ValueCorrectionResultTheme(
+          cardBackgroundColor: ColorTokens.background,
+          cardBorderColor: ColorTokens.border,
+          spotlightBackground: ColorTokens.successContainerBg,
+          spotlightBorderColor: ColorTokens.successContainerBorder,
+          variationPositiveColor: ColorTokens.success,
+          shareButtonColor: ColorTokens.accentAmber,
+          editButtonColor: ColorTokens.textPrimary,
+          titleStyle: AppTextStyles.headlineMedium.copyWith(
+            color: ColorTokens.textPrimary,
+          ),
+          subtitleStyle: AppTextStyles.bodyMedium.copyWith(
+            color: ColorTokens.textSecondary,
+          ),
+          spotlightLabelStyle: AppTextStyles.labelLarge.copyWith(
+            color: ColorTokens.textPrimary,
+          ),
+          spotlightValueStyle: AppTextStyles.headlineLarge.copyWith(
+            color: ColorTokens.textPrimary,
+            fontSize: 32,
+            fontWeight: FontWeight.w700,
+          ),
+          spotlightVariationStyle: AppTextStyles.stateBadge.copyWith(
+            color: ColorTokens.success,
+            fontWeight: FontWeight.w600,
+          ),
+          detailLabelStyle: AppTextStyles.bodyMedium.copyWith(
+            color: ColorTokens.textSecondary,
+          ),
+          detailValueStyle: AppTextStyles.bodyLarge.copyWith(
+            color: ColorTokens.textPrimary,
+            fontWeight: FontWeight.w500,
+          ),
+          linkStyle: AppTextStyles.bodyMedium.copyWith(
+            color: ColorTokens.textPrimary,
+            decoration: TextDecoration.underline,
           ),
         ),
       ],

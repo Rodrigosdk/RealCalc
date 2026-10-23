@@ -6,11 +6,11 @@ import 'package:real_calc/core/widgets/page_header.dart';
 import 'package:real_calc/core/widgets/title_widget.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/models/field_spec.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/widgets/forms_view.dart';
-import 'package:real_calc/modules/financial_calculators/presentation/widgets/help_card.dart';
+import 'package:real_calc/core/widgets/help_card.dart';
 
 import '../../../../core/utils/decimal_input_formatter.dart';
 import '../../domain/enum/financial_calculation_target.dart';
-import '../../domain/enum/input_field_state.dart';
+import '../../../../core/widgets/types/input_field_state.dart';
 import '../cubit/financing/financing_cubit.dart';
 import '../cubit/forms/financing_form_cubit.dart';
 

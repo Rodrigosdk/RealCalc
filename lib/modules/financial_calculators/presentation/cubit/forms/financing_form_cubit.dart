@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:real_calc/core/utils/decimal_input_formatter.dart';
 import '../../../domain/entities/financial_calculation.dart';
 import '../../../domain/enum/financial_calculation_target.dart';
-import '../../../domain/enum/input_field_state.dart';
+import '../../../../../core/widgets/types/input_field_state.dart';
 import 'financing_form_state.dart';
 
 class FinancingFormCubit extends Cubit<FinancingFormState> {

@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:real_calc/core/themes/extensions/help_card_theme.dart';
 import 'package:real_calc/core/themes/color_tokens.dart';
 import 'package:real_calc/core/themes/text_styles.dart';
-import 'package:real_calc/modules/financial_calculators/presentation/widgets/help_card.dart';
+import 'package:real_calc/core/widgets/help_card.dart';
 
 void main() {
   group('HelpCard', () {

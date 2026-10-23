@@ -7,7 +7,7 @@ import 'package:real_calc/core/widgets/title_widget.dart';
 import 'package:real_calc/modules/financial_calculators/domain/enum/financial_calculation_target.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/cubit/forms/financing_form_cubit.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/widgets/forms_view.dart';
-import 'package:real_calc/modules/financial_calculators/presentation/widgets/help_card.dart';
+import 'package:real_calc/core/widgets/help_card.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/cubit/regular_deposits/regular_deposits_cubit.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/pages/regular_deposits_page.dart';
 

@@ -13,13 +13,13 @@ import 'package:real_calc/core/utils/decimal_input_formatter.dart';
 import 'package:real_calc/core/widgets/options_bottom_forms.dart';
 import 'package:real_calc/modules/financial_calculators/domain/entities/financial_calculation.dart';
 import 'package:real_calc/modules/financial_calculators/domain/enum/financial_calculation_target.dart';
-import 'package:real_calc/modules/financial_calculators/domain/enum/input_field_state.dart';
+import 'package:real_calc/core/widgets/types/input_field_state.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/cubit/financing/financing_cubit.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/cubit/forms/financing_form_cubit.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/cubit/forms/financing_form_state.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/models/field_spec.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/widgets/forms_view.dart';
-import 'package:real_calc/modules/financial_calculators/presentation/widgets/input_forms_result_card.dart';
+import 'package:real_calc/core/widgets/input_forms_result_card.dart';
 
 import '../../../../mock_cubits.dart';
 import '../../../../test_harness.dart';

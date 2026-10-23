@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:real_calc/core/themes/extensions/input_forms_result_card_theme.dart';
-import 'package:real_calc/modules/financial_calculators/domain/enum/input_field_state.dart';
-import 'package:real_calc/modules/financial_calculators/presentation/widgets/input_forms_result_card.dart';
+import 'package:real_calc/core/widgets/types/input_field_state.dart';
+import 'package:real_calc/core/widgets/input_forms_result_card.dart';
 
 void main() {
   final testTheme = InputFormsResultCardTheme(
@@ -26,6 +26,7 @@ void main() {
     String? Function(String?)? validator,
     List<TextInputFormatter>? inputFormatters,
     VoidCallback? onTap,
+    String? trailingBadge,
   }) {
     return MaterialApp(
       theme: ThemeData(extensions: [testTheme]),
@@ -39,6 +40,7 @@ void main() {
           validator: validator,
           inputFormatters: inputFormatters,
           onTap: onTap,
+          trailingBadge: trailingBadge,
         ),
       ),
     );
@@ -114,6 +116,38 @@ void main() {
 
       expect(find.text('vazio'), findsNothing);
       expect(find.text('calculado'), findsNothing);
+    });
+
+    testWidgets('prioriza trailingBadge quando ele for informado', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildTestWidget(
+          controller: controller,
+          state: InputFieldState.neutral,
+          trailingBadge: 'opcional',
+        ),
+      );
+
+      expect(find.text('opcional'), findsOneWidget);
+    });
+
+    testWidgets('mostra a mensagem de erro vinda do validator quando o campo falha', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        buildTestWidget(
+          controller: controller,
+          state: InputFieldState.error,
+          validator: (value) => value == null || value.isEmpty ? 'Obrigatório' : null,
+        ),
+      );
+
+      controller.text = '';
+      await tester.pump();
+
+      final textField = tester.widget<TextField>(find.byType(TextField));
+      expect(textField.decoration?.errorText, 'Obrigatório');
     });
 
     testWidgets('aplica a cor de destaque correta ao ícone conforme o estado', (
