@@ -202,7 +202,7 @@ class _SpotlightBadge extends StatelessWidget {
       ),
       child: Text(
         'calculado',
-        style: theme.spotlightVariationStyle.copyWith(fontSize: 10),
+        style: theme.spotlightVariationStyle.copyWith(fontSize: 12),
       ),
     );
   }

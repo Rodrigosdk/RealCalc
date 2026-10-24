@@ -1,15 +1,10 @@
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:real_calc/modules/app_module.dart';
 import 'package:real_calc/modules/app_widget.dart';
 import 'package:real_calc/modules/home/presentation/page/page.dart';
 
 void main() {
-  setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  });
-
   tearDown(() {
     Modular.destroy();
   });

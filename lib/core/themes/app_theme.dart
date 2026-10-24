@@ -24,6 +24,7 @@ class AppTheme {
     return ThemeData(
       brightness: Brightness.dark,
       useMaterial3: true,
+      fontFamily: AppTextStyles.manropeFamily,
 
       // Cores base
       scaffoldBackgroundColor: colors.background,
