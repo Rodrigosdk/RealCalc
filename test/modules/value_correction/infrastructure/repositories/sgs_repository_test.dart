@@ -48,29 +48,34 @@ void main() {
       },
     );
 
-    test('consulta o IGP-M histórico pela série SGS 189', () async {
-      when(() => network.get<List<dynamic>>(any())).thenAnswer(
-        (_) async => SuccessResult<ErrorMessages, List<dynamic>>([
-          {'data': '01/01/2015', 'valor': '0.76'},
-          {'data': '01/12/2020', 'valor': '0.96'},
-        ]),
-      );
+    test(
+      'consulta o IGP-M histórico de alta precisão pela série SGS 28655',
+      () async {
+        when(() => network.get<List<dynamic>>(any())).thenAnswer(
+          (_) async => SuccessResult<ErrorMessages, List<dynamic>>([
+            {'data': '01/01/2015', 'valor': '0.7647618382'},
+            {'data': '01/12/2020', 'valor': '0.9581082789'},
+          ]),
+        );
 
-      final result = await repository.getSeries(
-        index: CorrectionIndex.igpM,
-        start: DateTime(2015, 1, 1),
-        end: DateTime(2020, 12, 1),
-      );
+        final result = await repository.getSeries(
+          index: CorrectionIndex.igpM,
+          start: DateTime(2015, 1, 1),
+          end: DateTime(2020, 12, 1),
+        );
 
-      expect(result.isSuccess, isTrue);
-      expect(result.getOrNull(), [
-        SeriesPoint(date: DateTime(2015, 1, 1), value: 0.76),
-        SeriesPoint(date: DateTime(2020, 12, 1), value: 0.96),
-      ]);
-      verify(
-        () => network.get<List<dynamic>>(any(that: contains('bcdata.sgs.189'))),
-      ).called(1);
-    });
+        expect(result.isSuccess, isTrue);
+        expect(result.getOrNull(), [
+          SeriesPoint(date: DateTime(2015, 1, 1), value: 0.7647618382),
+          SeriesPoint(date: DateTime(2020, 12, 1), value: 0.9581082789),
+        ]);
+        verify(
+          () => network.get<List<dynamic>>(
+            any(that: contains('bcdata.sgs.28655')),
+          ),
+        ).called(1);
+      },
+    );
 
     test('deve ignorar pontos com valor inválido', () async {
       when(() => network.get<List<dynamic>>(any())).thenAnswer(

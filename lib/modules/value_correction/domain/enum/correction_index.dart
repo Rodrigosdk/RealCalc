@@ -14,8 +14,8 @@ enum CorrectionIndex {
   ),
   inpc(
     label: 'INPC (IBGE)',
-    sgsCode: 188,
     group: CorrectionGroup.inflation,
+    sgsCode: 188,
     kind: SeriesKind.monthlyVariation,
     granularity: DateGranularity.month,
     fromYear: 1979,
@@ -41,7 +41,7 @@ enum CorrectionIndex {
   ),
   igpM(
     label: 'IGP-M (FGV)',
-    sgsCode: 189,
+    sgsCode: 28655,
     group: CorrectionGroup.inflation,
     kind: SeriesKind.monthlyVariation,
     granularity: DateGranularity.month,

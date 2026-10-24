@@ -157,6 +157,54 @@ void main() {
     });
 
     test(
+      'case de referência: IGP-M de 01/2015 a 12/2020 reproduz a Calculadora do Cidadão',
+      () {
+        const monthlyRates = '''
+          0.7647618382, 0.2705864365, 0.9808441075, 1.1656857512, 0.4063001692, 0.6715458172,
+          0.6911045826, 0.2755675908, 0.9461909183, 1.8911533913, 1.5242249087, 0.4874187975,
+          1.1370339879, 1.2905810339, 0.5117747748, 0.3281660945, 0.8184376735, 1.6875411382,
+          0.1752114780, 0.1467980160, 0.1970707838, 0.1572552040, -0.0265986956, 0.5400211630,
+          0.6408550379, 0.0836911870, 0.0147125277, -1.0956218656, -0.9318589524, -0.6662499732,
+          -0.7160603878, 0.0958422781, 0.4681998128, 0.1964782206, 0.5243019585, 0.8873239653,
+          0.7550250130, 0.0731715412, 0.6351470125, 0.5697173435, 1.3781659311, 1.8672336349,
+          0.5067165546, 0.6999138921, 1.5243480975, 0.8859122959, -0.4895058190, -1.0801688000,
+          0.0066436636, 0.8846793161, 1.2553467825, 0.9186295414, 0.4454675833, 0.7952552229,
+          0.3961154951, -0.6668950800, -0.0054318158, 0.6750755742, 0.3001350270, 2.0918341273,
+          0.4770047108, -0.0406433182, 1.2440600559, 0.8022976831, 0.2800407659, 1.5570051776,
+          2.2278336608, 2.7441632524, 4.3407948692, 3.2314190240, 3.2773938796, 0.9581082789
+        ''';
+        final rates = monthlyRates
+            .split(',')
+            .map((value) => double.parse(value.trim()))
+            .toList();
+        final series = List.generate(
+          rates.length,
+          (index) => SeriesPoint(
+            date: DateTime(2015, index + 1, 1),
+            value: rates[index],
+          ),
+        );
+
+        final result =
+            CalculateValueCorrection(
+              buildDataPreparer(),
+              buildRateCalculator(),
+            ).call(
+              params: buildValueCorrection(
+                index: CorrectionIndex.igpM.sgsCode,
+                initial: DateTime(2015, 1, 1),
+                end: DateTime(2020, 12, 1),
+              ),
+              series: series,
+              type: SeriesKind.monthlyVariation,
+            );
+
+        expect(result.isSuccess, isTrue);
+        expect(result.getOrNull()!.factor, closeTo(1.67455430, 1e-7));
+      },
+    );
+
+    test(
       'case de referência: IPCA de 01/2003 a 01/2003 produz fator 1,0225',
       () {
         final result =

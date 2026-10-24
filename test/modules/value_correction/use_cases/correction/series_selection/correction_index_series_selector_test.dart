@@ -23,7 +23,7 @@ void main() {
         SeriesPoint(date: DateTime(2020, 12, 1), value: 0.96),
       ];
 
-      expect(CorrectionIndex.igpM.sgsCode, 189);
+      expect(CorrectionIndex.igpM.sgsCode, 28655);
       expect(CorrectionIndex.igpM.fromYear, 1989);
       expect(CorrectionIndex.igpM.fromMonth, 6);
       expect(CorrectionIndex.igpM.fromDay, 1);
