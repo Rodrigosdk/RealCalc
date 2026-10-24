@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+@Deprecated('Use AppColors de app_colors.dart para cores adaptadas ao tema.')
 abstract class ColorTokens {
   // Superfícies
   static const Color background = Color(0xFF0A0D12);
