@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:real_calc/core/routes/app_routes.dart';
 import 'package:real_calc/core/themes/calculator_palette.dart';
 import 'package:real_calc/core/themes/spacing.dart';
+import 'package:real_calc/core/widgets/theme_toggle_button.dart';
 import 'package:real_calc/core/widgets/title_widget.dart';
 import 'package:real_calc/modules/home/domain/enum/menu_card_variant.dart';
 import '../../../../core/themes/extensions/home_page_theme.dart';
@@ -15,15 +17,25 @@ import '../cubit/selic_cubit.dart';
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  BlocBuilder<GreetingCubit, String> _buildGreetingWidget(
-    BuildContext context,
-  ) {
-    return BlocBuilder<GreetingCubit, String>(
+  Widget _buildGreetingWidget(BuildContext context) {
+    final greeting = BlocBuilder<GreetingCubit, String>(
       builder: (context, greeting) => TitleWidget(
         title: greeting,
         subtitle: 'O que vamos calcular?',
         invert: true,
       ),
+    );
+
+    // Provisório até a #119 levar o botão para a faixa da tela inicial:
+    // só aparece em debug, para testar as telas já migradas.
+    if (!kDebugMode) return greeting;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: greeting),
+        ThemeToggleButton(color: Theme.of(context).colorScheme.onSurface),
+      ],
     );
   }
 
