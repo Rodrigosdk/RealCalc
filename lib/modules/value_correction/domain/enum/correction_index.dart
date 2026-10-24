@@ -41,13 +41,12 @@ enum CorrectionIndex {
   ),
   igpM(
     label: 'IGP-M (FGV)',
-    sgsCode: 28655,
+    sgsCode: 189,
     group: CorrectionGroup.inflation,
     kind: SeriesKind.monthlyVariation,
     granularity: DateGranularity.month,
-    fromYear: 2021,
-    fromMonth: 4,
-    fromDay: 12,
+    fromYear: 1989,
+    fromMonth: 6,
   ),
   ipcBrasil(
     label: 'IPC-Brasil (FGV)',

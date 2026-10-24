@@ -17,6 +17,29 @@ void main() {
   });
 
   group('CorrectionIndexSeriesSelector', () {
+    test('IGP-M usa a série mensal histórica desde 06/1989', () {
+      final igpMSeries = [
+        SeriesPoint(date: DateTime(2015, 1, 1), value: 0.76),
+        SeriesPoint(date: DateTime(2020, 12, 1), value: 0.96),
+      ];
+
+      expect(CorrectionIndex.igpM.sgsCode, 189);
+      expect(CorrectionIndex.igpM.fromYear, 1989);
+      expect(CorrectionIndex.igpM.fromMonth, 6);
+      expect(CorrectionIndex.igpM.fromDay, 1);
+      expect(CorrectionIndex.igpM.availableFromInputLabel, '06/1989');
+      expect(
+        selector.selectCalculationSeries(
+          index: CorrectionIndex.igpM.sgsCode,
+          type: SeriesKind.monthlyVariation,
+          filteredSeries: igpMSeries,
+          savingsRates: const [],
+          trRates: const [],
+        ),
+        igpMSeries,
+      );
+    });
+
     test('calcula taxa legal apenas para o índice Taxa Legal', () {
       final series = [SeriesPoint(date: DateTime(2024, 1, 1), value: 1)];
 
