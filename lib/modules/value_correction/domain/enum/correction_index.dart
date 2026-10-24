@@ -14,8 +14,8 @@ enum CorrectionIndex {
   ),
   inpc(
     label: 'INPC (IBGE)',
-    sgsCode: 188,
     group: CorrectionGroup.inflation,
+    sgsCode: 188,
     kind: SeriesKind.monthlyVariation,
     granularity: DateGranularity.month,
     fromYear: 1979,
@@ -45,9 +45,8 @@ enum CorrectionIndex {
     group: CorrectionGroup.inflation,
     kind: SeriesKind.monthlyVariation,
     granularity: DateGranularity.month,
-    fromYear: 2021,
-    fromMonth: 4,
-    fromDay: 12,
+    fromYear: 1989,
+    fromMonth: 6,
   ),
   ipcBrasil(
     label: 'IPC-Brasil (FGV)',
