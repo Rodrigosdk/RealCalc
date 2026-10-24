@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:real_calc/core/module.dart';
+import 'package:real_calc/core/themes/calculator_palette.dart';
+import 'package:real_calc/core/themes/calculator_scope.dart';
 
 import '../../core/routes/app_routes.dart';
 import 'domain/entites/value_correction.dart';
@@ -89,14 +91,20 @@ class ValueCorrectionModule extends Module {
           ),
           BlocProvider(create: (_) => Modular.get<ValueCorrectionCubit>()),
         ],
-        child: const ValueCorrectionPage(),
+        child: const CalculatorScope(
+          kind: CalculatorKind.correction,
+          child: ValueCorrectionPage(),
+        ),
       ),
     );
     r.child(
       '/${AppRoutes.correctionResultSegment}',
       child: (_) {
         final result = Modular.args.data as ValueCorrection;
-        return ValueCorrectionResultPage(result: result);
+        return CalculatorScope(
+          kind: CalculatorKind.correction,
+          child: ValueCorrectionResultPage(result: result),
+        );
       },
     );
   }

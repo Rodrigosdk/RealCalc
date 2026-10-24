@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:real_calc/core/routes/app_routes.dart';
+import 'package:real_calc/core/themes/calculator_palette.dart';
 import 'package:real_calc/core/themes/spacing.dart';
 import 'package:real_calc/core/widgets/title_widget.dart';
 import 'package:real_calc/modules/home/domain/enum/menu_card_variant.dart';
@@ -18,8 +19,11 @@ class HomePage extends StatelessWidget {
     BuildContext context,
   ) {
     return BlocBuilder<GreetingCubit, String>(
-      builder: (context, greeting) =>
-          TitleWidget(title: greeting, subtitle: 'O que vamos calcular?', invert: true),
+      builder: (context, greeting) => TitleWidget(
+        title: greeting,
+        subtitle: 'O que vamos calcular?',
+        invert: true,
+      ),
     );
   }
 
@@ -55,6 +59,7 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildOpitionForms(BuildContext context, HomePageTheme theme) {
+    final brightness = Theme.of(context).brightness;
     return Column(
       spacing: AppSpacing.md,
       children: [
@@ -63,7 +68,10 @@ class HomePage extends StatelessWidget {
           title: 'Financiamento',
           description: 'Prestações com juros compostos',
           cardColor: theme.cardColor,
-          iconColor: theme.iconContainerColor,
+          iconColor: CalculatorPalette.of(
+            CalculatorKind.financing,
+            brightness: brightness,
+          ).solid,
           onTap: () => Modular.to.pushNamed(AppRoutes.financing),
           variant: MenuCardVariant.featured,
         ),
@@ -77,7 +85,10 @@ class HomePage extends StatelessWidget {
                   title: 'Depósitos Regulares',
                   description: 'Prestações com juros compostos',
                   cardColor: theme.cardColor,
-                  iconColor: theme.iconContainerColor,
+                  iconColor: CalculatorPalette.of(
+                    CalculatorKind.deposits,
+                    brightness: brightness,
+                  ).solid,
                   onTap: () => Modular.to.pushNamed(AppRoutes.deposits),
                   variant: MenuCardVariant.standard,
                 ),
@@ -93,7 +104,10 @@ class HomePage extends StatelessWidget {
                   title: 'Valor Futuro',
                   description: 'Prestações com juros compostos',
                   cardColor: theme.cardColor,
-                  iconColor: theme.iconContainerColor,
+                  iconColor: CalculatorPalette.of(
+                    CalculatorKind.futureValue,
+                    brightness: brightness,
+                  ).solid,
                   onTap: () => Modular.to.pushNamed(AppRoutes.futureValue),
                   variant: MenuCardVariant.standard,
                 ),
@@ -106,7 +120,10 @@ class HomePage extends StatelessWidget {
           title: 'Correção de Valores',
           description: 'Atualize valores por índices de inflação',
           cardColor: theme.cardColor,
-          iconColor: theme.iconContainerColor,
+          iconColor: CalculatorPalette.of(
+            CalculatorKind.correction,
+            brightness: brightness,
+          ).solid,
           onTap: () => Modular.to.pushNamed(AppRoutes.correction),
           variant: MenuCardVariant.standard,
         ),
@@ -118,7 +135,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context).extension<HomePageTheme>()!;
     final spacing = 4;
-    
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -127,7 +144,7 @@ class HomePage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: AppSpacing.xl,
             children: [
-              SizedBox(height: AppSpacing.xs- spacing), 
+              SizedBox(height: AppSpacing.xs - spacing),
               _buildGreetingWidget(context),
               _buildMetricCard(context),
               _buildOpitionForms(context, theme),
