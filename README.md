@@ -54,7 +54,7 @@ Essa lógica vive num Cubit dedicado por calculadora, reagindo em tempo real a c
 | `Dio` | Cliente HTTP |
 | `equatable` | Comparação de estados e objetos |
 | `intl` | Formatação de valores e datas |
-| `google_fonts` | Tipografia (Manrope) |
+| Manrope e Bricolage Grotesque | Tipografia empacotada no app para uso offline |
 | `mocktail` e `bloc_test` | Testes |
 
 **API de terceiros:** [API do Banco Central do Brasil](https://dadosabertos.bcb.gov.br/), usada como fonte de dados da taxa Selic.

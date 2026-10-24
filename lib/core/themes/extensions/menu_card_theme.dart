@@ -37,7 +37,10 @@ class MenuCardTheme extends ThemeExtension<MenuCardTheme> {
     this.iconSizeCompact = 20,
     this.borderRadius = 20,
     this.padding = const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-    this.compactPadding = const EdgeInsets.all(8),
+    this.compactPadding = const EdgeInsets.symmetric(
+      horizontal: 8,
+      vertical: 4,
+    ),
     this.heightThreshold = 100,
   });
 

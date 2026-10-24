@@ -40,7 +40,7 @@ void main() {
 
       expect(theme.messageStyle.color, ColorTokens.textPrimary);
       expect(theme.messageStyle.fontSize, 14);
-      expect(theme.messageStyle.fontWeight, FontWeight.w400);
+      expect(theme.messageStyle.fontWeight, FontWeight.w500);
     });
 
     testWidgets('Deve exibir o texto da mensagem e o ícone de lâmpada', (tester) async {
@@ -54,7 +54,7 @@ void main() {
 
       expect(resolvedStyle?.color, ColorTokens.textPrimary);
       expect(resolvedStyle?.fontSize, 14);
-      expect(resolvedStyle?.fontWeight, FontWeight.w400);
+      expect(resolvedStyle?.fontWeight, FontWeight.w500);
 
       expect(find.byIcon(Icons.lightbulb), findsOneWidget);
     });
