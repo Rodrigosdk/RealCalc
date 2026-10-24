@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:real_calc/core/themes/extensions/help_card_theme.dart';
 import 'package:real_calc/core/themes/extensions/highlight_card_theme.dart';
 import 'package:real_calc/core/themes/extensions/menu_card_theme.dart';
 import 'package:real_calc/core/themes/extensions/options_bottom_forms_theme.dart';
+import 'app_colors.dart';
 import 'color_tokens.dart';
 import 'extensions/financing_forms_theme.dart';
 import 'extensions/home_page_theme.dart';
@@ -18,26 +20,33 @@ import 'text_styles.dart';
 
 class AppTheme {
   static ThemeData get darkTheme {
+    const colors = AppColors.dark;
     return ThemeData(
       brightness: Brightness.dark,
       useMaterial3: true,
 
       // Cores base
-      scaffoldBackgroundColor: ColorTokens.background,
+      scaffoldBackgroundColor: colors.background,
 
       // ColorScheme do Material 3
-      colorScheme: const ColorScheme.dark(
-        surface: ColorTokens.surface,
-        error: ColorTokens.error,
-        onPrimary: Colors.white,
-        onSecondary: Colors.white,
-        onSurface: ColorTokens.textPrimary,
+      colorScheme: ColorScheme.dark(
+        primary: colors.textPrimary,
+        surface: colors.sheet,
+        error: colors.error,
+        onPrimary: colors.background,
+        onSecondary: colors.background,
+        onSurface: colors.textPrimary,
         onError: Colors.black,
+      ),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: colors.textPrimary,
+        selectionColor: colors.textPrimary.withValues(alpha: 0.32),
+        selectionHandleColor: colors.textPrimary,
       ),
 
       // AppBar global
       appBarTheme: AppBarTheme(
-        backgroundColor: ColorTokens.surface,
+        backgroundColor: colors.sheet,
         elevation: 0,
         centerTitle: true,
         actionsIconTheme: const IconThemeData(color: ColorTokens.accentAmber),
@@ -116,6 +125,7 @@ class AppTheme {
       ),
 
       extensions: [
+        colors,
         const OptionsBottomFormsTheme(
           calculateButtonBackground: ColorTokens.accentAmber,
           calculateButtonForeground: Colors.white,
@@ -292,6 +302,48 @@ class AppTheme {
   }
 
   static ThemeData get lightTheme {
-    return darkTheme;
+    final base = darkTheme;
+    const colors = AppColors.light;
+    return base.copyWith(
+      brightness: Brightness.light,
+      scaffoldBackgroundColor: colors.background,
+      colorScheme: ColorScheme.light(
+        primary: colors.textPrimary,
+        surface: colors.sheet,
+        error: colors.error,
+        onPrimary: colors.onCalc,
+        onSecondary: colors.onCalc,
+        onSurface: colors.textPrimary,
+        onError: colors.onCalc,
+      ),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: colors.textPrimary,
+        selectionColor: colors.textPrimary.withValues(alpha: 0.32),
+        selectionHandleColor: colors.textPrimary,
+      ),
+      appBarTheme: base.appBarTheme.copyWith(backgroundColor: colors.sheet),
+      inputDecorationTheme: base.inputDecorationTheme.copyWith(
+        fillColor: colors.background,
+        hintStyle: TextStyle(color: colors.textHint),
+      ),
+      extensions: [
+        colors,
+        ...base.extensions.values.where((extension) => extension is! AppColors),
+      ],
+    );
+  }
+
+  static SystemUiOverlayStyle systemUiOverlayStyle(AppColors colors) {
+    return SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+      statusBarBrightness: Brightness.dark,
+      systemNavigationBarColor: colors.background,
+      systemNavigationBarIconBrightness: colors == AppColors.light
+          ? Brightness.dark
+          : Brightness.light,
+      systemNavigationBarDividerColor: colors.background,
+      systemNavigationBarContrastEnforced: false,
+    );
   }
 }
