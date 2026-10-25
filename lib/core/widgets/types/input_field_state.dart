@@ -1,1 +1,1 @@
-enum InputFieldState { neutral, highlighted, calculated, error }
+enum InputFieldState { neutral, unknown, calculated, error }

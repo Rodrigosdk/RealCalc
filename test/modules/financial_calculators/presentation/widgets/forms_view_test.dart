@@ -357,7 +357,7 @@ void main() {
                           onClear: formCubit.clear,
                           onFieldTap: (field) {
                             if (formState.stateOf(field) ==
-                                InputFieldState.highlighted) {
+                                InputFieldState.unknown) {
                               calculate();
                             }
                           },

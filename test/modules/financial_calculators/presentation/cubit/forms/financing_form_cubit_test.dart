@@ -41,7 +41,7 @@ void main() {
     );
     expect(
       cubit.state.stateOf(FinancialCalculationTarget.interestRate),
-      InputFieldState.highlighted,
+      InputFieldState.unknown,
     );
   });
 }

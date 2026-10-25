@@ -86,7 +86,7 @@ class FinancingFormCubit extends Cubit<FinancingFormState> {
       return InputFieldState.neutral;
     }
 
-    return InputFieldState.highlighted;
+    return InputFieldState.unknown;
   }
 
   void _setFormattedValue(

@@ -29,8 +29,8 @@ class InputFormsResultCard extends StatelessWidget {
     this.readOnly = false,
     this.trailingBadge,
   });
-  bool get _isHighlightedAndEmptyText {
-    if (state == InputFieldState.highlighted && controller.text.isEmpty) {
+  bool get _isUnknownAndEmptyText {
+    if (state == InputFieldState.unknown && controller.text.isEmpty) {
       return true;
     }
     return false;
@@ -39,14 +39,14 @@ class InputFormsResultCard extends StatelessWidget {
   Color _accentColor(InputFormsResultCardTheme theme) {
     return switch (state) {
       InputFieldState.neutral => theme.neutralIconColor,
-      InputFieldState.highlighted => theme.highlightedColor,
+      InputFieldState.unknown => theme.highlightedColor,
       InputFieldState.calculated => theme.calculatedColor,
       InputFieldState.error => theme.errorColor,
     };
   }
 
   String? get _badgeText => switch (state) {
-    InputFieldState.highlighted => 'vazio',
+    InputFieldState.unknown => 'vazio',
     InputFieldState.calculated => 'calculado',
     InputFieldState.neutral || InputFieldState.error => null,
   };
@@ -54,7 +54,7 @@ class InputFormsResultCard extends StatelessWidget {
   String? get _resolvedBadgeText => trailingBadge ?? _badgeText;
 
   String get _effectiveHint {
-    if (_isHighlightedAndEmptyText) {
+    if (_isUnknownAndEmptyText) {
       return 'toque para calcular';
     }
     return hint;
@@ -68,7 +68,7 @@ class InputFormsResultCard extends StatelessWidget {
     final String? badgeText = _resolvedBadgeText;
     final String? errorText = validator?.call(controller.text);
 
-    final bool isHintMessage = _isHighlightedAndEmptyText == true;
+    final bool isHintMessage = _isUnknownAndEmptyText == true;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

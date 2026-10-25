@@ -80,7 +80,7 @@ class FutureValuePage extends StatelessWidget {
             onCalculate: calculate,
             onClear: formCubit.clear,
             onFieldTap: (field) {
-              if (formState.stateOf(field) == InputFieldState.highlighted) {
+              if (formState.stateOf(field) == InputFieldState.unknown) {
                 calculate();
               }
             },

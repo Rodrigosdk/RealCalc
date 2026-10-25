@@ -83,13 +83,13 @@ void main() {
       expect(find.text('calculado'), findsNothing);
     });
 
-    testWidgets('exibe badge "vazio" quando o estado é highlighted', (
+    testWidgets('exibe badge "vazio" quando o estado é unknown', (
       tester,
     ) async {
       await tester.pumpWidget(
         buildTestWidget(
           controller: controller,
-          state: InputFieldState.highlighted,
+          state: InputFieldState.unknown,
         ),
       );
 
@@ -282,13 +282,13 @@ void main() {
 
     group("hint dinâmico", () {
       testWidgets(
-        'exibe hint "toque para calcular" quando estado é highlighted e campo vazio',
+        'exibe hint "toque para calcular" quando estado é unknown e campo vazio',
         (tester) async {
           await tester.pumpWidget(
             buildTestWidget(
               controller: controller,
               hint: 'Digite o valor',
-              state: InputFieldState.highlighted,
+              state: InputFieldState.unknown,
             ),
           );
 
@@ -298,7 +298,7 @@ void main() {
       );
 
       testWidgets(
-        'mantém o hint original quando estado é highlighted mas o campo tem texto',
+        'mantém o hint original quando estado é unknown mas o campo tem texto',
         (tester) async {
           controller.text = '1500';
 
@@ -306,7 +306,7 @@ void main() {
             buildTestWidget(
               controller: controller,
               hint: 'Digite o valor',
-              state: InputFieldState.highlighted,
+              state: InputFieldState.unknown,
             ),
           );
 
@@ -316,7 +316,7 @@ void main() {
       );
 
       testWidgets(
-        'mantém o hint original quando o campo está vazio mas o estado não é highlighted',
+        'mantém o hint original quando o campo está vazio mas o estado não é unknown',
         (tester) async {
           await tester.pumpWidget(
             buildTestWidget(
@@ -338,7 +338,7 @@ void main() {
             buildTestWidget(
               controller: controller,
               hint: 'Digite o valor',
-              state: InputFieldState.highlighted,
+              state: InputFieldState.unknown,
             ),
           );
 
@@ -368,7 +368,7 @@ void main() {
       );
 
       testWidgets(
-        'aplica a cor neutra no hint quando o estado é highlighted mas o campo tem texto',
+        'aplica a cor neutra no hint quando o estado é unknown mas o campo tem texto',
         (tester) async {
           controller.text = '1500';
 
@@ -376,7 +376,7 @@ void main() {
             buildTestWidget(
               controller: controller,
               hint: 'Digite o valor',
-              state: InputFieldState.highlighted,
+              state: InputFieldState.unknown,
             ),
           );
 
@@ -390,7 +390,7 @@ void main() {
       testWidgets('o hint muda quando onTap altera o estado para calculado', (
         tester,
       ) async {
-        InputFieldState state = InputFieldState.highlighted;
+        InputFieldState state = InputFieldState.unknown;
 
         await tester.pumpWidget(
           MaterialApp(

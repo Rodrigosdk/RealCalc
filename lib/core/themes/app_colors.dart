@@ -63,6 +63,13 @@ class AppColors extends ThemeExtension<AppColors> {
     onCalc: Color(0xFFFFFFFF),
   );
 
+  /// Cores do tema atual; sem a extensão registrada, escolhe pelo brilho.
+  static AppColors of(BuildContext context) {
+    final theme = Theme.of(context);
+    return theme.extension<AppColors>() ??
+        (theme.brightness == Brightness.dark ? dark : light);
+  }
+
   @override
   AppColors copyWith({
     Color? background,
