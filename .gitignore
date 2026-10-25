@@ -48,3 +48,6 @@ app.*.map.json
 
 # Binários locais de ferramentas (ex.: act)
 /bin/
+
+# Imagens geradas quando um golden falha
+**/failures/
