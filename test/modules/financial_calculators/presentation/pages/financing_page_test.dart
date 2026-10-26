@@ -1,82 +1,258 @@
-import 'package:flutter/rendering.dart';
-import 'package:flutter_test/flutter_test.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:real_calc/core/themes/app_theme.dart';
-import 'package:real_calc/core/widgets/page_header.dart';
-import 'package:real_calc/core/widgets/title_widget.dart';
+import 'package:real_calc/core/widgets/bottom_action_bar.dart';
+import 'package:real_calc/core/widgets/calculator_band/calculator_band.dart';
+import 'package:real_calc/core/widgets/field_list/field_row.dart';
+import 'package:real_calc/core/widgets/form_notice.dart';
+import 'package:real_calc/core/widgets/result_details/result_details.dart';
 import 'package:real_calc/modules/financial_calculators/domain/enum/financial_calculation_target.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/cubit/financing/financing_cubit.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/cubit/forms/financing_form_cubit.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/pages/financing_page.dart';
-import 'package:real_calc/modules/financial_calculators/presentation/widgets/forms_view.dart';
-import 'package:real_calc/core/widgets/help_card.dart';
-
-import '../../../../test_harness.dart';
-
+import 'package:real_calc/modules/financial_calculators/use_case/financing/calculate_financing.dart';
 
 void main() {
-  late TestHarness harness;
- 
+  late FinancingCubit financingCubit;
+  late FinancingFormCubit formCubit;
+
   setUp(() {
-    harness = TestHarness()..setUpDefaults();
+    financingCubit = FinancingCubit(CalculateFinancing());
+    formCubit = FinancingFormCubit();
   });
- 
-  tearDown(() => harness.dispose());
-  
-  Widget createSut() {
-    return MaterialApp(
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.dark,
-      home: MultiBlocProvider(
-        providers: [
-          BlocProvider<FinancingCubit>.value(value: harness.financingCubit),
-          BlocProvider<FinancingFormCubit>.value(
-            value: harness.financingFormCubit,
-          ),
-        ],
-        child: const FinancingPage(),
+
+  tearDown(() async {
+    await financingCubit.close();
+    await formCubit.close();
+  });
+
+  Future<void> pump(
+    WidgetTester tester, {
+    ThemeMode themeMode = ThemeMode.light,
+    Size size = const Size(400, 900),
+    double textScale = 1,
+  }) async {
+    tester.view.physicalSize = size;
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = textScale;
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: themeMode,
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: financingCubit),
+            BlocProvider.value(value: formCubit),
+          ],
+          child: const FinancingPage(),
+        ),
       ),
     );
   }
 
-  group('FinancingPage - Testes de Integração da Tela', () {
-    testWidgets('Deve renderizar a árvore de componentes completa com sucesso', (tester) async {
-      await tester.pumpWidget(createSut());
+  Finder row(FinancialCalculationTarget field) => find.byKey(ValueKey(field));
 
-      // 1. Verifica se a estrutura de componentes customizados está presente
-      expect(find.byType(PageHeader), findsOneWidget);
-      expect(find.byType(TitleWidget), findsOneWidget);
-      expect(find.byType(HelpCard), findsOneWidget);
-      expect(find.byType(FormsView<FinancialCalculationTarget>), findsOneWidget);
+  Future<void> type(
+    WidgetTester tester,
+    FinancialCalculationTarget field,
+    String text,
+  ) async {
+    await tester.enterText(
+      find.descendant(of: row(field), matching: find.byType(TextField)),
+      text,
+    );
+    await tester.pump();
+  }
 
+  Future<void> fillExample(WidgetTester tester) async {
+    await type(tester, FinancialCalculationTarget.initialValue, '250000');
+    await type(tester, FinancialCalculationTarget.periods, '12');
+    await type(tester, FinancialCalculationTarget.interestRate, '200');
+  }
+
+  Finder inBand(String text) => find.descendant(
+    of: find.byType(CalculatorBand),
+    matching: find.text(text),
+  );
+
+  group('FinancingPage', () {
+    testWidgets('monta faixa, lista de campos e barra de ações', (
+      tester,
+    ) async {
+      await pump(tester);
+
+      expect(find.byType(CalculatorBand), findsOneWidget);
+      expect(find.byType(FieldRow), findsNWidgets(4));
+      expect(find.byType(BottomActionBar), findsOneWidget);
+      expect(find.text('Financiamento'), findsOneWidget);
+      for (final label in [
+        'Valor financiado',
+        'Prazo',
+        'Taxa de juros',
+        'Prestação',
+      ]) {
+        expect(find.text(label), findsOneWidget);
+      }
+      expect(find.text('meses'), findsOneWidget);
+      expect(find.text('% a.m.'), findsOneWidget);
+      expect(inBand('e descubra o quarto'), findsOneWidget);
+      expect(find.byType(ResultDetails), findsNothing);
+      expect(find.byType(FormNotice), findsNothing);
     });
 
-    testWidgets('Deve garantir que a página inteira possui um scroll ativado', (tester) async {
-      await tester.pumpWidget(createSut());
+    testWidgets('com três campos, a prestação fica "a descobrir"', (
+      tester,
+    ) async {
+      await pump(tester);
+      await fillExample(tester);
 
-      expect(find.byType(SingleChildScrollView), findsOneWidget);
+      expect(inBand('a prestação'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: row(FinancialCalculationTarget.finalValue),
+          matching: find.text(FieldRow.calculateText),
+        ),
+        findsOneWidget,
+      );
     });
-  });
-  group("FinancingPage - Testes da PageHeader", () {
-    testWidgets('Deve conseguir criar uma PageHeader', (tester) async {
-      await tester.pumpWidget(createSut());
-      expect(find.byType(PageHeader), findsOneWidget);
+
+    testWidgets('2.500 / 12 / 2%: prestação, total, juros, taxa anual e '
+        'barra 88/12', (tester) async {
+      await pump(tester);
+      await fillExample(tester);
+
+      await tester.tap(find.text('Calcular'));
+      await tester.pumpAndSettle();
+
+      expect(inBand('Sua prestação vai ser'), findsOneWidget);
+      expect(inBand('236,40'), findsOneWidget);
+      expect(inBand('12 parcelas iguais, pela Tabela Price'), findsOneWidget);
+      expect(formCubit.finalValue.text, '236,40');
+
+      expect(find.text('Do total que você vai pagar'), findsOneWidget);
+      expect(find.textContaining('2.836,80'), findsOneWidget);
+      expect(find.textContaining('336,80'), findsOneWidget);
+      expect(find.text('26,82% a.a.'), findsOneWidget);
+      expect(find.text('Emprestado 88%'), findsOneWidget);
+      expect(find.text('Juros 12%'), findsOneWidget);
     });
 
+    testWidgets('tocar na linha "a descobrir" também calcula', (tester) async {
+      await pump(tester);
+      await fillExample(tester);
 
-    testWidgets("Deve conter uma fontSize de 18 e fontWeight bold", (tester) async {
-      await tester.pumpWidget(createSut());
+      await tester.tap(find.text(FieldRow.calculateText));
+      await tester.pumpAndSettle();
 
-      final textFinder = find.text('Financiamento');
-      final RenderParagraph renderObject = tester.renderObject<RenderParagraph>(textFinder.first);
+      expect(inBand('236,40'), findsOneWidget);
+    });
 
-      final TextStyle? resolvedStyle = renderObject.text.style;
+    testWidgets('calcula a taxa a partir da prestação', (tester) async {
+      await pump(tester);
+      await type(tester, FinancialCalculationTarget.initialValue, '250000');
+      await type(tester, FinancialCalculationTarget.periods, '12');
+      await type(tester, FinancialCalculationTarget.finalValue, '23640');
 
-      expect(resolvedStyle?.fontSize, 18);
-      expect(resolvedStyle?.fontWeight, FontWeight.w700);
+      await tester.tap(find.text('Calcular'));
+      await tester.pumpAndSettle();
+
+      expect(inBand('A taxa de juros é de'), findsOneWidget);
+      expect(inBand('2,00% ao mês'), findsOneWidget);
+    });
+
+    testWidgets('com menos de três campos, mostra o aviso com os campos '
+        'vazios e desabilita "Calcular"', (tester) async {
+      await pump(tester);
+      await type(tester, FinancialCalculationTarget.initialValue, '250000');
+      await type(tester, FinancialCalculationTarget.periods, '12');
+
+      expect(find.text('Faltam dados para calcular'), findsOneWidget);
+      expect(
+        find.text(
+          'Preencha a taxa de juros ou a prestação. '
+          'O campo que ficar em branco é calculado.',
+        ),
+        findsOneWidget,
+      );
+      expect(inBand('falta 1 campo'), findsOneWidget);
+      expect(
+        tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
+        isNull,
+      );
+    });
+
+    testWidgets('limpar mostra "Campos limpos" e desfazer recalcula', (
+      tester,
+    ) async {
+      await pump(tester);
+      await fillExample(tester);
+      await tester.tap(find.text('Calcular'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.bySemanticsLabel(CalculatorBand.clearLabel));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Campos limpos'), findsOneWidget);
+      expect(inBand('e descubra o quarto'), findsOneWidget);
+      expect(formCubit.initialValue.text, isEmpty);
+
+      await tester.tap(find.text('Desfazer'));
+      await tester.pumpAndSettle();
+
+      expect(formCubit.initialValue.text, '2.500,00');
+      expect(inBand('236,40'), findsOneWidget);
+      expect(find.byType(ResultDetails), findsOneWidget);
+    });
+
+    testWidgets('"?" abre a ajuda', (tester) async {
+      await pump(tester);
+
+      await tester.tap(find.bySemanticsLabel(CalculatorBand.helpLabel));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Como funciona'), findsOneWidget);
+    });
+
+    for (final themeMode in [ThemeMode.light, ThemeMode.dark]) {
+      testWidgets('em 360dp com fonte em 130% no tema ${themeMode.name}', (
+        tester,
+      ) async {
+        await pump(
+          tester,
+          themeMode: themeMode,
+          size: const Size(360, 780),
+          textScale: 1.3,
+        );
+        await fillExample(tester);
+        await tester.tap(find.text('Calcular'));
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+        expect(inBand('236,40'), findsOneWidget);
+      });
+    }
+
+    testWidgets('o teclado não cobre o campo em foco', (tester) async {
+      await pump(tester, size: const Size(360, 700));
+
+      await tester.showKeyboard(
+        find.descendant(
+          of: row(FinancialCalculationTarget.finalValue),
+          matching: find.byType(TextField),
+        ),
+      );
+      tester.view.viewInsets = const FakeViewPadding(bottom: 320);
+      await tester.pumpAndSettle();
+
+      final field = tester.getRect(row(FinancialCalculationTarget.finalValue));
+      final bar = tester.getRect(find.byType(BottomActionBar));
+      expect(bar.bottom, 700 - 320);
+      expect(field.bottom, lessThanOrEqualTo(bar.top));
     });
   });
 }

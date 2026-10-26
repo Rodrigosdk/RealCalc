@@ -118,7 +118,7 @@ class FinancingFormCubit extends Cubit<FinancingFormState> {
     _suppressRecompute = true;
     _setFormattedValue(initialValue, result.initialValue);
     months.text = result.periods > 0 ? result.periods.toString() : '';
-    _setFormattedValue(rate, result.rate, fractionDigits: 4);
+    _setFormattedValue(rate, result.rate);
     _setFormattedValue(finalValue, result.finalValue);
     _suppressRecompute = false;
 

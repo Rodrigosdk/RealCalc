@@ -41,10 +41,7 @@ class FinancialCalculatorsModule extends AppModule {
           BlocProvider(create: (_) => Modular.get<FinancingCubit>()),
           BlocProvider(create: (_) => Modular.get<FinancingFormCubit>()),
         ],
-        child: const CalculatorScope(
-          kind: CalculatorKind.financing,
-          child: FinancingPage(),
-        ),
+        child: const FinancingPage(),
       ),
     );
     r.child(
