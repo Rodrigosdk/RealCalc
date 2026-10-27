@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:real_calc/core/services/result_sharer.dart';
+import 'package:real_calc/core/services/share_plus_result_sharer.dart';
 import 'package:real_calc/core/themes/calculator_palette.dart';
 import 'package:real_calc/core/themes/calculator_scope.dart';
 import 'package:real_calc/core/utils/decimal_input_formatter.dart';
@@ -10,6 +12,7 @@ import '../cubit/forms/financing_form_cubit.dart';
 import '../cubit/regular_deposits/regular_deposits_cubit.dart';
 import '../utils/deposits_statement.dart';
 import '../utils/result_summaries.dart';
+import '../utils/share_texts.dart';
 import '../widgets/calculator_form_view.dart';
 
 class RegularDepositsPage extends StatelessWidget {
@@ -51,7 +54,12 @@ class RegularDepositsPage extends StatelessWidget {
     ),
   ];
 
-  const RegularDepositsPage({super.key});
+  final ResultSharer sharer;
+
+  const RegularDepositsPage({
+    super.key,
+    this.sharer = const SharePlusResultSharer(),
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +82,8 @@ class RegularDepositsPage extends StatelessWidget {
           missingMessage: depositsMissingFieldsMessage,
           summary: regularDepositsResultSummary,
           onCalculate: context.read<RegularDepositsCubit>().calculate,
+          shareText: depositsShareText,
+          sharer: sharer,
           errorMessage: state is RegularDepositsError
               ? state.message ?? 'Confira os valores.'
               : null,

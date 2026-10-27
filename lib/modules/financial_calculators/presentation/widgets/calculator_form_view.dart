@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:real_calc/core/services/result_sharer.dart';
 import 'package:real_calc/core/themes/calculator_palette.dart';
 import 'package:real_calc/core/themes/spacing.dart';
 import 'package:real_calc/core/widgets/bottom_action_bar.dart';
@@ -16,6 +17,7 @@ import 'package:real_calc/core/widgets/result_details/result_summary.dart';
 import '../../domain/entities/financial_calculation.dart';
 import '../../domain/enum/financial_calculation_target.dart';
 import '../cubit/forms/financing_form_cubit.dart';
+import '../utils/share_texts.dart';
 
 class CalculatorFieldConfig {
   final FinancialCalculationTarget target;
@@ -54,6 +56,8 @@ class CalculatorFormView extends StatelessWidget {
   final String Function(Set<FinancialCalculationTarget>) missingMessage;
   final ResultSummary Function(FinancialCalculation) summary;
   final ValueChanged<FinancialCalculation> onCalculate;
+  final ShareTextBuilder shareText;
+  final ResultSharer sharer;
   final String? errorMessage;
 
   const CalculatorFormView({
@@ -65,6 +69,8 @@ class CalculatorFormView extends StatelessWidget {
     required this.missingMessage,
     required this.summary,
     required this.onCalculate,
+    required this.shareText,
+    required this.sharer,
     this.errorMessage,
   });
 
@@ -175,6 +181,12 @@ class CalculatorFormView extends StatelessWidget {
           BottomActionBar(
             primaryLabel: 'Calcular',
             onPrimary: formState.canCalculate ? calculate : null,
+            onShare: calculatedField == null
+                ? null
+                : (origin) => sharer.share(
+                    shareText(values, calculatedField),
+                    origin: origin,
+                  ),
           ),
         ],
       ),

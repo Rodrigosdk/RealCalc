@@ -13,7 +13,7 @@ class BottomActionBar extends StatelessWidget {
   final String primaryLabel;
   final VoidCallback? onPrimary;
 
-  final VoidCallback? onShare;
+  final ValueChanged<Rect>? onShare;
 
   const BottomActionBar({
     super.key,
@@ -48,16 +48,20 @@ class BottomActionBar extends StatelessWidget {
                     label: shareLabel,
                     button: true,
                     enabled: onShare != null,
-                    child: OutlinedButton(
-                      onPressed: onShare,
-                      style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        shape: const CircleBorder(),
-                        side: BorderSide(color: colors.hairline, width: 1.5),
-                        foregroundColor: colors.textPrimary,
-                        disabledForegroundColor: colors.textPrimary,
+                    child: Builder(
+                      builder: (buttonContext) => OutlinedButton(
+                        onPressed: onShare == null
+                            ? null
+                            : () => onShare!(_globalRect(buttonContext)),
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          shape: const CircleBorder(),
+                          side: BorderSide(color: colors.hairline, width: 1.5),
+                          foregroundColor: colors.textPrimary,
+                          disabledForegroundColor: colors.textPrimary,
+                        ),
+                        child: const Icon(Icons.ios_share, size: 22),
                       ),
-                      child: const Icon(Icons.ios_share, size: 22),
                     ),
                   ),
                 ),
@@ -103,4 +107,9 @@ showFieldsClearedSnackBar(
       action: SnackBarAction(label: 'Desfazer', onPressed: onUndo),
     ),
   );
+}
+
+Rect _globalRect(BuildContext context) {
+  final box = context.findRenderObject()! as RenderBox;
+  return box.localToGlobal(Offset.zero) & box.size;
 }

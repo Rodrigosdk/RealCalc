@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:real_calc/core/services/result_sharer.dart';
 import 'package:real_calc/core/themes/app_theme.dart';
 import 'package:real_calc/core/widgets/bottom_action_bar.dart';
 import 'package:real_calc/core/widgets/calculator_band/calculator_band.dart';
@@ -13,11 +14,21 @@ import 'package:real_calc/modules/financial_calculators/presentation/cubit/forms
 import 'package:real_calc/modules/financial_calculators/presentation/pages/financing_page.dart';
 import 'package:real_calc/modules/financial_calculators/use_case/financing/calculate_financing.dart';
 
+class _FakeSharer implements ResultSharer {
+  final shared = <(String, Rect?)>[];
+
+  @override
+  Future<void> share(String text, {Rect? origin}) async =>
+      shared.add((text, origin));
+}
+
 void main() {
+  late _FakeSharer sharer;
   late FinancingCubit financingCubit;
   late FinancingFormCubit formCubit;
 
   setUp(() {
+    sharer = _FakeSharer();
     financingCubit = FinancingCubit(CalculateFinancing());
     formCubit = FinancingFormCubit();
   });
@@ -49,7 +60,7 @@ void main() {
             BlocProvider.value(value: financingCubit),
             BlocProvider.value(value: formCubit),
           ],
-          child: const FinancingPage(),
+          child: FinancingPage(sharer: sharer),
         ),
       ),
     );
@@ -207,6 +218,25 @@ void main() {
       expect(formCubit.initialValue.text, '2.500,00');
       expect(inBand('236,40'), findsOneWidget);
       expect(find.byType(ResultDetails), findsOneWidget);
+    });
+
+    testWidgets('compartilhar fica desabilitado sem resultado e envia o '
+        'texto ancorado no botão depois de calcular', (tester) async {
+      await pump(tester);
+      await fillExample(tester);
+
+      final share = find.byType(OutlinedButton);
+      expect(tester.widget<OutlinedButton>(share).onPressed, isNull);
+
+      await tester.tap(find.text('Calcular'));
+      await tester.pumpAndSettle();
+      await tester.tap(share);
+
+      expect(sharer.shared, hasLength(1));
+      final (text, origin) = sharer.shared.single;
+      expect(text, startsWith('RealCalc · Financiamento\n'));
+      expect(text, contains('Total pago: R\$ 2.836,80'));
+      expect(origin, tester.getRect(share));
     });
 
     testWidgets('"?" abre a ajuda', (tester) async {

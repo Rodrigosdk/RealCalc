@@ -9,15 +9,12 @@ import 'package:real_calc/modules/value_correction/domain/entites/value_correcti
 import 'package:real_calc/modules/value_correction/domain/enum/correction_index.dart';
 import 'package:real_calc/modules/value_correction/presentation/utils/value_correction_share_text.dart';
 
-import '../../domain/services/value_correction_sharer.dart';
+import 'package:real_calc/core/services/result_sharer.dart';
 
 class ValueCorrectionResultPage extends StatelessWidget {
   final ValueCorrection result;
 
-  const ValueCorrectionResultPage({
-    super.key,
-    required this.result,
-  });
+  const ValueCorrectionResultPage({super.key, required this.result});
 
   @override
   Widget build(BuildContext context) {
@@ -99,9 +96,8 @@ class ValueCorrectionResultPage extends StatelessWidget {
                 ),
               ),
               OptionsBottomForms(
-                onCalculate: () => Modular.get<ValueCorrectionSharer>().share(
-                  buildShareText(result),
-                ),
+                onCalculate: () =>
+                    Modular.get<ResultSharer>().share(buildShareText(result)),
                 onClear: () => Modular.to.pop(),
                 calculateLabel: 'Compartilhar',
                 clearLabel: 'Editar Dados',

@@ -70,12 +70,16 @@ void main() {
 
     testWidgets('com resultado, compartilhar fica ativo', (tester) async {
       var shared = 0;
+      Rect? sharedFrom;
       await pump(
         tester,
         BottomActionBar(
           primaryLabel: 'Calcular',
           onPrimary: () {},
-          onShare: () => shared++,
+          onShare: (origin) {
+            shared++;
+            sharedFrom = origin;
+          },
         ),
       );
 
@@ -88,6 +92,7 @@ void main() {
       expect(opacity.opacity, 1);
       await tester.tap(find.bySemanticsLabel(BottomActionBar.shareLabel));
       expect(shared, 1);
+      expect(sharedFrom, tester.getRect(find.byType(OutlinedButton)));
     });
 
     testWidgets('botões de 56px, principal em pílula na cor da calculadora '

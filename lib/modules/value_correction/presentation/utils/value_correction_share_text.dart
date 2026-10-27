@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:real_calc/core/utils/share_text.dart';
 
 import '../../domain/entites/value_correction.dart';
 import '../../domain/enum/correction_index.dart';
@@ -47,6 +48,6 @@ String buildShareText(ValueCorrection correction) {
     );
   }
 
-  lines.addAll(['', 'Simulação feita no RealCalc, sem valor oficial.']);
+  lines.addAll(['', shareDisclaimer]);
   return lines.join('\n');
 }
