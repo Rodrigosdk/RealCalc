@@ -1,120 +1,81 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:real_calc/core/themes/spacing.dart';
-import 'package:real_calc/core/widgets/page_header.dart';
-import 'package:real_calc/core/widgets/title_widget.dart';
-import 'package:real_calc/modules/financial_calculators/presentation/models/field_spec.dart';
-import 'package:real_calc/core/widgets/help_card.dart';
+import 'package:real_calc/core/themes/calculator_palette.dart';
+import 'package:real_calc/core/themes/calculator_scope.dart';
+import 'package:real_calc/core/utils/decimal_input_formatter.dart';
 
-import '../../../../core/utils/decimal_input_formatter.dart';
 import '../../domain/enum/financial_calculation_target.dart';
-import '../../../../core/widgets/types/input_field_state.dart';
 import '../cubit/forms/financing_form_cubit.dart';
 import '../cubit/future_value/future_value_cubit.dart';
-import '../widgets/forms_view.dart';
+import '../utils/future_value_statement.dart';
+import '../utils/result_summaries.dart';
+import '../widgets/calculator_form_view.dart';
 
 class FutureValuePage extends StatelessWidget {
-  static final List<FieldSpec<FinancialCalculationTarget>> _fieldSpecs = [
-    FieldSpec(
-      field: FinancialCalculationTarget.initialValue,
-      label: 'Capital (R\$)',
+  static const title = 'Valor Futuro';
+
+  static final fields = [
+    CalculatorFieldConfig(
+      target: FinancialCalculationTarget.initialValue,
+      label: 'Valor aplicado',
+      prefix: 'R\$',
       hint: '0,00',
-      icon: Icons.attach_money,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
       formatters: [DecimalInputFormatter()],
     ),
-    FieldSpec(
-      field: FinancialCalculationTarget.periods,
-      label: 'Prazo (meses)',
+    CalculatorFieldConfig(
+      target: FinancialCalculationTarget.periods,
+      label: 'Prazo',
+      unit: 'meses',
       hint: '0',
-      icon: Icons.calendar_today,
+      keyboardType: TextInputType.number,
       formatters: [FilteringTextInputFormatter.digitsOnly],
     ),
-    FieldSpec(
-      field: FinancialCalculationTarget.interestRate,
-      label: 'Taxa de juros (% ao mês)',
+    CalculatorFieldConfig(
+      target: FinancialCalculationTarget.interestRate,
+      label: 'Taxa de juros',
+      unit: '% a.m.',
       hint: '0,00',
-      icon: Icons.percent,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
       formatters: [DecimalInputFormatter()],
     ),
-    FieldSpec(
-      field: FinancialCalculationTarget.finalValue,
-      label: 'Valor final',
+    CalculatorFieldConfig(
+      target: FinancialCalculationTarget.finalValue,
+      label: 'Valor futuro',
+      prefix: 'R\$',
       hint: '0,00',
-      icon: Icons.payments,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
       formatters: [DecimalInputFormatter()],
     ),
   ];
 
   const FutureValuePage({super.key});
 
-  BlocListener<FutureValueCubit, FutureValueState> _buildForms() {
-    return BlocListener<FutureValueCubit, FutureValueState>(
-      listener: (context, state) {
-        final formCubit = context.read<FinancingFormCubit>();
-        if (state is FutureValueCalculated) {
-          formCubit.applyResult(state.value, state.calculatedField);
-        } else if (state is FutureValueError) {
-          formCubit.invalidateCalculatedField();
-        }
-      },
-      child: BlocBuilder<FutureValueCubit, FutureValueState>(
-        builder: (context, financingState) {
-          final formCubit = context.watch<FinancingFormCubit>();
-          final formState = formCubit.state;
-
-          void calculate() {
-            if (formState.canCalculate) {
-              context.read<FutureValueCubit>().calculate(formCubit.financing);
-            }
-          }
-
-          return FormsView<FinancialCalculationTarget>(
-            fieldSpecs: _fieldSpecs,
-            controllerFor: formCubit.controllerFor,
-            stateOf: formState.stateOf,
-            isLoading: financingState is FutureValueLoading,
-            errorMessage: financingState is FutureValueError
-                ? financingState.message ?? 'Erro ao calcular.'
-                : null,
-            onCalculate: calculate,
-            onClear: formCubit.clear,
-            onFieldTap: (field) {
-              if (formState.stateOf(field) == InputFieldState.unknown) {
-                calculate();
-              }
-            },
-          );
-        },
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: PageHeader(title: 'Valor Futuro'),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md + 4,
-            vertical: AppSpacing.md + 4,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: AppSpacing.lg,
-            children: [
-              const TitleWidget(
-                title: 'Valor Futuro',
-                subtitle: 'Calcule o valor futuro do seu capital.',
-              ),
-              const HelpCard(
-                message:
-                    'Preencha 3 campos e toque no 4° para calcular automaticamente',
-              ),
-              _buildForms(),
-            ],
-          ),
+    return CalculatorScope(
+      kind: CalculatorKind.futureValue,
+      child: BlocConsumer<FutureValueCubit, FutureValueState>(
+        listener: (context, state) {
+          final formCubit = context.read<FinancingFormCubit>();
+          if (state is FutureValueCalculated) {
+            formCubit.applyResult(state.value, state.calculatedField);
+          } else if (state is FutureValueError) {
+            formCubit.invalidateCalculatedField();
+          }
+        },
+        builder: (context, state) => CalculatorFormView(
+          kind: CalculatorKind.futureValue,
+          title: title,
+          fields: fields,
+          statement: futureValueStatement,
+          missingMessage: futureValueMissingFieldsMessage,
+          summary: futureValueResultSummary,
+          onCalculate: context.read<FutureValueCubit>().calculate,
+          errorMessage: state is FutureValueError
+              ? state.message ?? 'Confira os valores.'
+              : null,
         ),
       ),
     );

@@ -81,18 +81,21 @@ class HelpContent {
   static const futureValue = HelpContent(
     intro:
         'Veja quanto um valor aplicado hoje rende com juros compostos, ou '
-        'descubra o capital, o prazo ou a taxa.',
+        'descubra o valor aplicado, o prazo ou a taxa.',
     fields: [
-      HelpField('Capital', 'O valor aplicado hoje, uma única vez.'),
+      HelpField('Valor aplicado', 'O valor aplicado hoje, uma única vez.'),
       HelpField('Prazo', 'Por quantos meses o dinheiro fica aplicado.'),
       _rate,
-      HelpField('Valor final', 'Quanto o capital vale no fim do prazo.'),
+      HelpField(
+        'Valor futuro',
+        'Quanto o valor aplicado vale no fim do prazo.',
+      ),
     ],
     example: 'R\$ 1.000,00 a 1% ao mês, durante 12 meses, viram',
     exampleResult: 'R\$ 1.126,83',
     methodology:
         'Juros compostos: os juros de cada mês também passam a render. VP '
-        'é o capital, i a taxa mensal e n o prazo.',
+        'é o valor aplicado, i a taxa mensal e n o prazo.',
     formula: 'VF = VP × (1 + i)ⁿ',
   );
 

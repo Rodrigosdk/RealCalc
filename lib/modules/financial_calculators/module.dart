@@ -1,8 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:real_calc/modules/app_module.dart';
-import 'package:real_calc/core/themes/calculator_scope.dart';
-import 'package:real_calc/core/themes/calculator_palette.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/pages/future_value_page.dart';
 import 'package:real_calc/modules/financial_calculators/use_case/future_value/i_calculate_future_value.dart';
 import 'package:real_calc/modules/financial_calculators/use_case/regular_deposits/i_calculate_deposit.dart';
@@ -61,10 +59,7 @@ class FinancialCalculatorsModule extends AppModule {
           BlocProvider(create: (_) => Modular.get<FutureValueCubit>()),
           BlocProvider(create: (_) => Modular.get<FinancingFormCubit>()),
         ],
-        child: const CalculatorScope(
-          kind: CalculatorKind.futureValue,
-          child: FutureValuePage(),
-        ),
+        child: const FutureValuePage(),
       ),
     );
   }

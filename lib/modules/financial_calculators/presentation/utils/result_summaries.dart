@@ -51,22 +51,22 @@ ResultSummary regularDepositsResultSummary(FinancialCalculation calculation) {
   );
 }
 
-/// Valor Futuro: [FinancialCalculation.initialValue] é o capital e
+/// Valor Futuro: [FinancialCalculation.initialValue] é o valor aplicado e
 /// [FinancialCalculation.finalValue], o valor final.
 ResultSummary futureValueResultSummary(FinancialCalculation calculation) {
-  final capital = toCents(calculation.initialValue);
-  final yield_ = toCents(calculation.finalValue) - capital;
+  final applied = toCents(calculation.initialValue);
+  final yield_ = toCents(calculation.finalValue) - applied;
 
   return ResultSummary(
-    title: 'Do valor final',
+    title: 'Do valor futuro',
     composition: ResultComposition.fromCents(
-      ownLabel: 'Capital',
-      ownCents: capital,
+      ownLabel: 'Valor aplicado',
+      ownCents: applied,
       otherLabel: 'Rendimento',
       otherCents: yield_,
     ),
     lines: [
-      ResultDetailLine('Capital investido', formatCents(capital)),
+      ResultDetailLine('Valor aplicado', formatCents(applied)),
       ResultDetailLine('Rendimento', formatCents(yield_)),
       _annualRateLine(calculation.rate),
     ],

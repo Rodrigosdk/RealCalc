@@ -67,11 +67,14 @@ void main() {
       );
 
       expect(summary.lines, const [
-        ResultDetailLine('Capital investido', 'R\$\u00A01.000,00'),
+        ResultDetailLine('Valor aplicado', 'R\$\u00A01.000,00'),
         ResultDetailLine('Rendimento', 'R\$\u00A0126,83'),
         ResultDetailLine('Taxa anual equivalente', '12,68% a.a.'),
       ]);
-      expect(summary.composition!.own, const ResultSegment('Capital', 89));
+      expect(
+        summary.composition!.own,
+        const ResultSegment('Valor aplicado', 89),
+      );
       expect(summary.composition!.other, const ResultSegment('Rendimento', 11));
     });
 
