@@ -51,26 +51,37 @@ class SelicUseCase implements ISelicUseCase {
     final anualRate = double.tryParse(data.last.valor ?? '') ?? 0.0;
     final variationPercent = _calculateVariation(data);
     final sparklineData = data.map((e) => double.parse(e.valor!)).toList();
+    final dates = data.map((e) => _parseDate(e.data)).toList();
 
     return Metric(
       anualRate: anualRate,
       variationPercent: variationPercent,
       sparklineData: sparklineData,
+      sparklineDates: dates.contains(null) ? const [] : dates.cast<DateTime>(),
+      lastDate: dates.isEmpty ? null : dates.last,
     );
+  }
+
+  DateTime? _parseDate(String? value) {
+    final parts = value?.split('/');
+    if (parts == null || parts.length != 3) return null;
+    final [day, month, year] = parts.map(int.tryParse).toList();
+    if (day == null || month == null || year == null) return null;
+    return DateTime(year, month, day);
   }
 
   double _calculateVariation(List<SelicBcResponseNetwork> values) {
     if (values.length < 2) return 0.0;
- 
-    final currentValue =  double.tryParse(values.last.valor!) ?? 0.0;
- 
+
+    final currentValue = double.tryParse(values.last.valor!) ?? 0.0;
+
     for (int i = values.length - 2; i >= 0; i--) {
       final previousValue = double.tryParse(values[i].valor!) ?? 0.0;
       if (previousValue != currentValue) {
         return double.parse((currentValue - previousValue).toStringAsFixed(2));
       }
     }
- 
+
     return 0.0;
   }
 }

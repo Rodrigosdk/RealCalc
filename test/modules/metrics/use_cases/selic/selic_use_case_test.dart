@@ -9,8 +9,7 @@ import 'package:real_calc/modules/metrics/use_cases/selic/selic_use_case.dart';
 import 'package:real_calc/modules/metrics/use_cases/selic/selic_validation.dart';
 import 'package:real_calc/shared/network/response/selic_bc_response_network.dart';
 
-class MockSelicRepository extends Mock
-    implements ISelicNetworkOnlyRepository {}
+class MockSelicRepository extends Mock implements ISelicNetworkOnlyRepository {}
 
 void main() {
   late MockSelicRepository repository;
@@ -36,6 +35,23 @@ void main() {
     expect(metric!.anualRate, 10.5);
     expect(metric.variationPercent, closeTo(0.5, 0.0001));
     expect(metric.sparklineData, [10.0, 10.5]);
+  });
+
+  test('guarda as datas dos pontos e a data da última atualização', () async {
+    when(() => repository.getSelicRate()).thenAnswer(
+      (_) async => SuccessResult<ErrorMessages, List<SelicBcResponseNetwork>>([
+        const SelicBcResponseNetwork(data: '30/10/2026', valor: '15.00'),
+        const SelicBcResponseNetwork(data: '03/11/2026', valor: '14.75'),
+      ]),
+    );
+
+    final metric = (await useCase.getSelicRate()).getOrNull()!;
+
+    expect(metric.sparklineDates, [
+      DateTime(2026, 10, 30),
+      DateTime(2026, 11, 3),
+    ]);
+    expect(metric.lastDate, DateTime(2026, 11, 3));
   });
 
   test('não consulta o repository quando o período é inválido', () async {
