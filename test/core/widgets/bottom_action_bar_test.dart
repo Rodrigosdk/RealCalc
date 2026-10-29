@@ -121,6 +121,23 @@ void main() {
       expect(calculated, 1);
     });
 
+    testWidgets('carregando: indicador no botão e sem toque', (tester) async {
+      var calculated = 0;
+      await pump(
+        tester,
+        BottomActionBar(
+          primaryLabel: 'Corrigir valor',
+          onPrimary: () => calculated++,
+          isLoading: true,
+        ),
+      );
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.text('Corrigir valor'), findsNothing);
+      await tester.tap(find.byType(FilledButton));
+      expect(calculated, 0);
+    });
+
     testWidgets('fundo background e padding 12/24/30', (tester) async {
       await pump(
         tester,

@@ -12,6 +12,7 @@ class BottomActionBar extends StatelessWidget {
 
   final String primaryLabel;
   final VoidCallback? onPrimary;
+  final bool isLoading;
 
   final ValueChanged<Rect>? onShare;
 
@@ -20,6 +21,7 @@ class BottomActionBar extends StatelessWidget {
     required this.primaryLabel,
     required this.onPrimary,
     this.onShare,
+    this.isLoading = false,
   });
 
   @override
@@ -72,16 +74,29 @@ class BottomActionBar extends StatelessWidget {
               child: SizedBox(
                 height: buttonHeight,
                 child: FilledButton(
-                  onPressed: onPrimary,
+                  onPressed: isLoading ? null : onPrimary,
                   style: FilledButton.styleFrom(
                     backgroundColor: solid,
                     foregroundColor: onSolid,
-                    disabledBackgroundColor: solid.withValues(alpha: 0.4),
+                    disabledBackgroundColor: isLoading
+                        ? solid
+                        : solid.withValues(alpha: 0.4),
                     disabledForegroundColor: onSolid,
                     shape: const StadiumBorder(),
                     textStyle: AppTextStyles.button,
                   ),
-                  child: Text(primaryLabel),
+                  child: isLoading
+                      ? Semantics(
+                          label: primaryLabel,
+                          child: SizedBox.square(
+                            dimension: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.4,
+                              color: onSolid,
+                            ),
+                          ),
+                        )
+                      : Text(primaryLabel),
                 ),
               ),
             ),

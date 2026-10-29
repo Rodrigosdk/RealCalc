@@ -89,10 +89,7 @@ class ValueCorrectionModule extends Module {
           ),
           BlocProvider(create: (_) => Modular.get<ValueCorrectionCubit>()),
         ],
-        child: const CalculatorScope(
-          kind: CalculatorKind.correction,
-          child: ValueCorrectionPage(),
-        ),
+        child: const ValueCorrectionPage(),
       ),
     );
     r.child(

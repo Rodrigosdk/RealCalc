@@ -21,7 +21,7 @@ ValueCorrection correctionOf({
 void main() {
   group('correctionResultSummary', () {
     test('valor original 81%, correção 19%', () {
-      final summary = correctionResultSummary(correctionOf())!;
+      final summary = correctionResultSummary(correctionOf());
 
       expect(summary.title, 'Do valor corrigido');
       expect(
@@ -32,7 +32,7 @@ void main() {
     });
 
     test('a correção sai dos valores arredondados', () {
-      final summary = correctionResultSummary(correctionOf())!;
+      final summary = correctionResultSummary(correctionOf());
 
       expect(summary.lines, const [
         ResultDetailLine('Valor original', 'R\$\u00A01.000,00'),
@@ -44,17 +44,23 @@ void main() {
     test('com deflação, mostra as linhas mas omite a barra', () {
       final summary = correctionResultSummary(
         correctionOf(adjusted: 990, factor: 0.99),
-      )!;
+      );
 
       expect(summary.composition, isNull);
       expect(summary.lines[1].value, '-R\$\u00A010,00');
     });
 
-    test('sem valor original, não há detalhes', () {
-      expect(
-        correctionResultSummary(correctionOf(original: null, adjusted: null)),
-        isNull,
+    test('sem valor original, mostra só a variação e o fator', () {
+      final summary = correctionResultSummary(
+        correctionOf(original: null, adjusted: null),
       );
+
+      expect(summary.title, 'Da correção no período');
+      expect(summary.composition, isNull);
+      expect(summary.lines, const [
+        ResultDetailLine('Variação', '+23,46%'),
+        ResultDetailLine('Fator de correção', '1,2345678'),
+      ]);
     });
   });
 }

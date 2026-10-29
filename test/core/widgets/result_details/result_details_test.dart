@@ -32,7 +32,7 @@ final correction = correctionResultSummary(
     adjustedValue: 1234.5678,
     variation: 23.45678,
   ),
-)!;
+);
 
 /// Carrega a Manrope para os goldens mostrarem o texto de verdade, e não os
 /// blocos da fonte padrão de teste.
