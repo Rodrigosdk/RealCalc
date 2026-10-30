@@ -6,6 +6,7 @@ import 'package:real_calc/modules/home/presentation/components/selic_band.dart';
 import 'package:real_calc/modules/home/presentation/components/sparkline_painter.dart';
 import 'package:real_calc/modules/home/presentation/cubit/selic_cubit.dart';
 import 'package:real_calc/modules/metrics/domain/entites/metric.dart';
+import 'package:real_calc/modules/metrics/domain/enum/selic_period.dart';
 
 final today = DateTime(2026, 11, 3);
 
@@ -24,8 +25,12 @@ Metric fakeMetric({double variation = 0.25}) {
 
 void main() {
   late int retries;
+  late List<SelicPeriod> periods;
 
-  setUp(() => retries = 0);
+  setUp(() {
+    retries = 0;
+    periods = [];
+  });
 
   Future<void> pump(
     WidgetTester tester,
@@ -55,6 +60,7 @@ void main() {
               child: SelicBand(
                 state: state,
                 onRetry: () => retries++,
+                onPeriodChanged: periods.add,
                 now: () => now ?? today,
               ),
             ),
@@ -112,11 +118,21 @@ void main() {
       );
     });
 
-    testWidgets('troca entre 12 meses e 5 anos', (tester) async {
-      final handle = tester.ensureSemantics();
+    testWidgets('a fonte usa a data em que o valor foi salvo', (tester) async {
+      await pump(
+        tester,
+        SelicLoaded(fakeMetric().copyWith(updatedAt: DateTime(2026, 10, 21))),
+      );
+
+      expect(
+        find.text('Fonte: Banco Central, atualizada em 21/10.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('tocar no período avisa quem controla a faixa', (tester) async {
       await pump(tester, SelicLoaded(fakeMetric()));
 
-      expect(painter(tester).data, hasLength(13));
       expect(
         find.bySemanticsLabel(
           'Gráfico da Selic nos últimos 12 meses, valor atual 13,75% ao ano',
@@ -125,7 +141,12 @@ void main() {
       );
 
       await tester.tap(find.text('5 anos'));
-      await tester.pump();
+      expect(periods, [SelicPeriod.years5]);
+    });
+
+    testWidgets('desenha a série do período recebido', (tester) async {
+      final handle = tester.ensureSemantics();
+      await pump(tester, SelicLoaded(fakeMetric(), SelicPeriod.years5));
 
       expect(painter(tester).data, hasLength(61));
       expect(
@@ -163,8 +184,8 @@ void main() {
 
       expect(find.text('sem conexão'), findsOneWidget);
       expect(find.byIcon(Icons.wifi_off), findsOneWidget);
-      expect(find.text('12 meses'), findsNothing);
-      expect(find.text('Mostrando o último valor salvo.'), findsOneWidget);
+      expect(find.text('12 meses'), findsOneWidget);
+      expect(find.text('Último valor salvo, atualizada hoje.'), findsOneWidget);
       final opacity = tester.widget<Opacity>(
         find.ancestor(of: find.text('13,75%'), matching: find.byType(Opacity)),
       );
@@ -172,6 +193,57 @@ void main() {
 
       await tester.tap(find.text('Atualizar'));
       expect(retries, 1);
+    });
+
+    testWidgets('valor do cache aparece como sem conexão, com a data', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        SelicLoaded(
+          fakeMetric().copyWith(
+            offline: true,
+            updatedAt: DateTime(2026, 10, 21),
+          ),
+        ),
+      );
+
+      expect(find.text('sem conexão'), findsOneWidget);
+      expect(
+        find.text('Último valor salvo, atualizada em 21/10.'),
+        findsOneWidget,
+      );
+      expect(find.byType(CustomPaint), findsWidgets);
+    });
+
+    testWidgets('5 anos sem cache: só o gráfico fica indisponível', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        SelicError(
+          ServerErrorMessages.connectionError,
+          fakeMetric(),
+          SelicPeriod.years5,
+          true,
+        ),
+      );
+
+      expect(find.text('13,75%'), findsOneWidget);
+      expect(
+        find.text('Gráfico de 5 anos indisponível sem conexão.'),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(SelicBand),
+          matching: find.byWidgetPredicate(
+            (w) => w is CustomPaint && w.painter is SparklinePainter,
+          ),
+        ),
+        findsNothing,
+      );
+      expect(find.text('Selic indisponível'), findsNothing);
     });
 
     testWidgets('sem conexão e sem dados', (tester) async {

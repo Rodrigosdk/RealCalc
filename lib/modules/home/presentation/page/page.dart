@@ -87,6 +87,9 @@ class HomePage extends StatelessWidget {
                           builder: (context, state) => SelicBand(
                             state: state,
                             onRetry: BlocProvider.of<SelicCubit>(context).retry,
+                            onPeriodChanged: BlocProvider.of<SelicCubit>(
+                              context,
+                            ).changePeriod,
                           ),
                         ),
                       ),

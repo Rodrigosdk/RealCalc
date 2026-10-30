@@ -15,7 +15,7 @@ class SelicRepository implements ISelicNetworkOnlyRepository {
   getSelicRate() async {
     final dataFinal = DateTime.now();
     final dataInicial = DateTime(
-      dataFinal.year - 5,
+      dataFinal.year - 1,
       dataFinal.month,
       dataFinal.day,
     );

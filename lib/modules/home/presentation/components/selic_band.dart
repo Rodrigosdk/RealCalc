@@ -4,69 +4,62 @@ import 'package:real_calc/core/themes/app_colors.dart';
 import 'package:real_calc/core/themes/spacing.dart';
 import 'package:real_calc/core/themes/text_styles.dart';
 import 'package:real_calc/modules/metrics/domain/entites/metric.dart';
+import 'package:real_calc/modules/metrics/domain/enum/selic_period.dart';
 
 import '../cubit/selic_cubit.dart';
 import 'sparkline_painter.dart';
 
-enum SelicPeriod {
-  months12('12 meses', 12),
-  years5('5 anos', 60);
-
-  final String label;
-  final int months;
-
-  const SelicPeriod(this.label, this.months);
-}
-
 final _rateFormat = NumberFormat('#,##0.00', 'pt_BR');
 
-class SelicBand extends StatefulWidget {
+class SelicBand extends StatelessWidget {
   static const chartHeight = 40.0;
 
   final SelicState state;
   final VoidCallback onRetry;
+  final ValueChanged<SelicPeriod> onPeriodChanged;
   final DateTime Function() now;
 
   const SelicBand({
     super.key,
     required this.state,
     required this.onRetry,
+    required this.onPeriodChanged,
     this.now = DateTime.now,
   });
 
   @override
-  State<SelicBand> createState() => _SelicBandState();
-}
-
-class _SelicBandState extends State<SelicBand> {
-  SelicPeriod _period = SelicPeriod.months12;
-
-  @override
   Widget build(BuildContext context) {
-    final state = widget.state;
     final metric = state.metric;
 
     if (metric == null) {
       return state is SelicError
-          ? _Unavailable(onRetry: widget.onRetry)
+          ? _Unavailable(onRetry: onRetry)
           : const _Skeleton();
     }
 
     return _MetricView(
       metric: metric,
-      period: _period,
-      offline: state is SelicError,
-      today: widget.now(),
-      onPeriodChanged: (period) => setState(() => _period = period),
-      onRetry: widget.onRetry,
+      period: state.period,
+      offline: state.offline,
+      chart: !state.chartUnavailable
+          ? _ChartState.ready
+          : state is SelicLoading
+          ? _ChartState.loading
+          : _ChartState.unavailable,
+      today: now(),
+      onPeriodChanged: onPeriodChanged,
+      onRetry: onRetry,
     );
   }
 }
+
+enum _ChartState { ready, loading, unavailable }
 
 class _MetricView extends StatelessWidget {
   final Metric metric;
   final SelicPeriod period;
   final bool offline;
+  final _ChartState chart;
   final DateTime today;
   final ValueChanged<SelicPeriod> onPeriodChanged;
   final VoidCallback onRetry;
@@ -75,27 +68,11 @@ class _MetricView extends StatelessWidget {
     required this.metric,
     required this.period,
     required this.offline,
+    required this.chart,
     required this.today,
     required this.onPeriodChanged,
     required this.onRetry,
   });
-
-  List<double> get _points {
-    final dates = metric.sparklineDates;
-    final lastDate = metric.lastDate;
-    if (dates.length != metric.sparklineData.length || lastDate == null) {
-      return metric.sparklineData;
-    }
-    final from = DateTime(
-      lastDate.year,
-      lastDate.month - period.months,
-      lastDate.day,
-    );
-    return [
-      for (var i = 0; i < dates.length; i++)
-        if (!dates[i].isBefore(from)) metric.sparklineData[i],
-    ];
-  }
 
   String get _rate => '${_rateFormat.format(metric.anualRate)}%';
 
@@ -107,13 +84,12 @@ class _MetricView extends StatelessWidget {
   }
 
   String get _updated {
-    final lastDate = metric.lastDate;
-    if (lastDate == null || DateUtils.isSameDay(lastDate, today)) {
-      return 'Fonte: Banco Central, atualizada hoje.';
+    final date = metric.updatedAt ?? metric.lastDate;
+    if (date == null || DateUtils.isSameDay(date, today)) {
+      return 'atualizada hoje';
     }
     String two(int value) => value.toString().padLeft(2, '0');
-    return 'Fonte: Banco Central, atualizada em '
-        '${two(lastDate.day)}/${two(lastDate.month)}.';
+    return 'atualizada em ${two(date.day)}/${two(date.month)}';
   }
 
   @override
@@ -135,10 +111,7 @@ class _MetricView extends StatelessWidget {
               'Taxa Selic hoje',
               style: AppTextStyles.bandKicker.copyWith(color: Colors.white),
             ),
-            if (offline)
-              _OfflineTag(color: soft)
-            else
-              _PeriodSelector(selected: period, onChanged: onPeriodChanged),
+            _PeriodSelector(selected: period, onChanged: onPeriodChanged),
           ],
         ),
         const SizedBox(height: AppSpacing.xs),
@@ -185,22 +158,37 @@ class _MetricView extends StatelessWidget {
           ],
         ),
         const SizedBox(height: AppSpacing.md),
-        Semantics(
-          image: true,
-          label:
-              'Gráfico da Selic nos últimos ${period.label}, '
-              'valor atual $_rate ao ano',
-          child: SizedBox(
-            height: SelicBand.chartHeight,
-            width: double.infinity,
-            child: CustomPaint(
-              painter: SparklinePainter(
-                data: _points,
-                color: Colors.white.withValues(alpha: offline ? 0.5 : 1),
-                strokeWidth: 1.75,
+        SizedBox(
+          height: SelicBand.chartHeight,
+          width: double.infinity,
+          child: switch (chart) {
+            _ChartState.ready => Semantics(
+              image: true,
+              label:
+                  'Gráfico da Selic nos últimos ${period.label}, '
+                  'valor atual $_rate ao ano',
+              child: CustomPaint(
+                painter: SparklinePainter(
+                  data: metric.sparklineData,
+                  color: Colors.white.withValues(alpha: offline ? 0.5 : 1),
+                  strokeWidth: 1.75,
+                ),
               ),
             ),
-          ),
+            _ChartState.loading => DecoratedBox(
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+            _ChartState.unavailable => Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Gráfico de ${period.label} indisponível sem conexão.',
+                style: AppTextStyles.caption.copyWith(color: soft),
+              ),
+            ),
+          },
         ),
         const SizedBox(height: AppSpacing.md),
         if (offline)
@@ -208,15 +196,19 @@ class _MetricView extends StatelessWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: AppSpacing.sm,
             children: [
+              _OfflineTag(color: soft),
               Text(
-                'Mostrando o último valor salvo.',
+                'Último valor salvo, $_updated.',
                 style: AppTextStyles.caption.copyWith(color: soft),
               ),
               _Link(label: 'Atualizar', onTap: onRetry),
             ],
           )
         else
-          Text(_updated, style: AppTextStyles.caption.copyWith(color: soft)),
+          Text(
+            'Fonte: Banco Central, $_updated.',
+            style: AppTextStyles.caption.copyWith(color: soft),
+          ),
       ],
     );
   }

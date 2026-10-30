@@ -16,6 +16,7 @@ import 'package:real_calc/modules/home/presentation/components/calculator_list_i
 import 'package:real_calc/modules/home/presentation/components/selic_band.dart';
 import 'package:real_calc/modules/home/presentation/cubit/greeting_cubit.dart';
 import 'package:real_calc/modules/home/presentation/cubit/selic_cubit.dart';
+import 'package:real_calc/modules/metrics/domain/enum/selic_period.dart';
 import 'package:real_calc/modules/home/presentation/page/page.dart';
 import 'package:real_calc/modules/metrics/domain/entites/metric.dart';
 
@@ -26,6 +27,8 @@ class MockSelicCubit extends MockCubit<SelicState> implements SelicCubit {}
 class MockGreetingCubit extends MockCubit<String> implements GreetingCubit {}
 
 void main() {
+  setUpAll(() => registerFallbackValue(SelicPeriod.months12));
+
   late MockNavigator navigator;
   late MockSelicCubit selicCubit;
   late MockGreetingCubit greetingCubit;
@@ -207,6 +210,14 @@ void main() {
 
       await tester.tap(find.text('Tentar de novo'));
       verify(() => selicCubit.retry()).called(1);
+    });
+
+    testWidgets('"5 anos" na Selic chama o changePeriod', (tester) async {
+      when(() => selicCubit.changePeriod(any())).thenAnswer((_) async {});
+      await pump(tester);
+
+      await tester.tap(find.text('5 anos'));
+      verify(() => selicCubit.changePeriod(SelicPeriod.years5)).called(1);
     });
 
     for (final themeMode in [ThemeMode.light, ThemeMode.dark]) {
