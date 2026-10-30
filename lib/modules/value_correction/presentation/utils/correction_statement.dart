@@ -10,8 +10,6 @@ final _money = NumberFormat('#,##0.00', 'pt_BR');
 final _factor = NumberFormat('#,##0.0000000', 'pt_BR');
 
 extension CorrectionIndexText on CorrectionIndex {
-  String get shortName => label.split(' (').first;
-
   bool get _isFeminine => switch (this) {
     CorrectionIndex.selic ||
     CorrectionIndex.tr ||
@@ -26,10 +24,10 @@ extension CorrectionIndexText on CorrectionIndex {
   String get by => _isFeminine ? 'pela' : 'pelo';
 
   String get availabilitySentence =>
-      '$article $shortName tem dados a partir de $availableFromInputLabel.';
+      '$article $label tem dados a partir de $availableFromInputLabel.';
 
   String get sinceSentence =>
-      '$article $shortName tem dados desde $availableFromInputLabel.';
+      '$article $label tem dados desde $availableFromInputLabel.';
 
   String formatDate(DateTime date) {
     String two(int value) => value.toString().padLeft(2, '0');
@@ -83,7 +81,7 @@ BandStatement correctionStatement({
 
   if (outOfRange) {
     return BandStatement(
-      kicker: 'Para corrigir ${index.by} ${index.shortName},',
+      kicker: 'Para corrigir ${index.by} ${index.label},',
       value: 'ajuste a data',
       sub: index.availabilitySentence,
     );
@@ -101,7 +99,7 @@ BandStatement correctionStatement({
   final period =
       'de ${resultIndex.formatDate(result.period.initial)} '
       'a ${resultIndex.formatDate(result.period.end)}';
-  final by = '${resultIndex.by} ${resultIndex.shortName}';
+  final by = '${resultIndex.by} ${resultIndex.label}';
   final original = result.originalValue;
   final adjusted = result.adjustedValue;
 

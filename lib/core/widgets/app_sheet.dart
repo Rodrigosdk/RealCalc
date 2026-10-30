@@ -12,6 +12,7 @@ Future<T?> showAppSheet<T>({
   required WidgetBuilder bodyBuilder,
   WidgetBuilder? footerBuilder,
   CalculatorKind? kind,
+  bool scrollable = true,
 }) {
   final colors = AppColors.of(context);
 
@@ -34,6 +35,7 @@ Future<T?> showAppSheet<T>({
         title: title,
         body: Builder(builder: bodyBuilder),
         footer: footerBuilder == null ? null : Builder(builder: footerBuilder),
+        scrollable: scrollable,
       );
       return kind == null ? sheet : CalculatorScope(kind: kind, child: sheet);
     },
@@ -48,19 +50,24 @@ class AppSheet extends StatelessWidget {
   final Widget body;
   final Widget? footer;
 
+  /// Com `false`, o corpo cuida da própria rolagem e do respiro inferior.
+  final bool scrollable;
+
   const AppSheet({
     super.key,
     required this.title,
     required this.body,
     this.footer,
+    this.scrollable = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
 
-    return Column(
+    final sheet = Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -110,15 +117,19 @@ class AppSheet extends StatelessWidget {
           ),
         ),
         Flexible(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(
-              AppSpacing.screen,
-              AppSpacing.sm,
-              AppSpacing.screen,
-              footer == null ? AppSpacing.lg + bottomInset : AppSpacing.md,
-            ),
-            child: body,
-          ),
+          child: scrollable
+              ? SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(
+                    AppSpacing.screen,
+                    AppSpacing.sm,
+                    AppSpacing.screen,
+                    footer == null
+                        ? AppSpacing.lg + bottomInset
+                        : AppSpacing.md,
+                  ),
+                  child: body,
+                )
+              : body,
         ),
         if (footer != null)
           Padding(
@@ -131,6 +142,11 @@ class AppSheet extends StatelessWidget {
             child: footer,
           ),
       ],
+    );
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: keyboard),
+      child: sheet,
     );
   }
 }

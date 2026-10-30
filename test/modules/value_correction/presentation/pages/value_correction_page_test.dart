@@ -424,7 +424,7 @@ void main() {
 
       expect(find.text('INFLAÇÃO'), findsOneWidget);
 
-      await tester.tap(find.text('IGP-M (FGV)'));
+      await tester.tap(find.text('IGP-M'));
       await tester.pumpAndSettle();
       expect(formCubit.state.index, CorrectionIndex.igpM);
     });

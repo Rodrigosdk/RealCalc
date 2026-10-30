@@ -113,15 +113,10 @@ class _ValueCorrectionPageState extends State<ValueCorrectionPage> {
   }
 
   void _openIndexPicker(CorrectionIndex? selected) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => CorrectionIndexPicker(
-        selectedIndex: selected,
-        onSelected: _form.setIndex,
-      ),
+    showCorrectionIndexPicker(
+      context,
+      selectedIndex: selected,
+      onSelected: _form.setIndex,
     );
   }
 
@@ -246,7 +241,7 @@ class _ValueCorrectionPageState extends State<ValueCorrectionPage> {
                             ValueCorrectionField.selectedIndex,
                           ),
                           label: 'Índice',
-                          value: index.shortName,
+                          value: index.label,
                           onTap: () => _openIndexPicker(formState.index),
                         ),
                         dateRow(
