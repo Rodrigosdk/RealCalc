@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:real_calc/core/widgets/app_icon.dart';
 import 'package:real_calc/core/themes/app_colors.dart';
 import 'package:real_calc/core/themes/calculator_palette.dart';
 import 'package:real_calc/core/themes/calculator_scope.dart';
@@ -108,7 +109,7 @@ class AppSheet extends StatelessWidget {
                       onPressed: () => Navigator.of(context).maybePop(),
                       padding: EdgeInsets.zero,
                       color: colors.textSecondary,
-                      icon: const Icon(Icons.close, size: 22),
+                      icon: const AppIcon(AppIcons.close, size: 22),
                     ),
                   ),
                 ),

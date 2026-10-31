@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:real_calc/core/widgets/app_icon.dart';
 import 'package:real_calc/core/themes/app_colors.dart';
 import 'package:real_calc/core/themes/text_styles.dart';
 
@@ -25,11 +26,7 @@ class FormNotice extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 1),
-            child: Icon(
-              isError ? Icons.error_outline : Icons.info_outline,
-              size: 20,
-              color: accent,
-            ),
+            child: AppIcon(AppIcons.alert, size: 20, color: accent),
           ),
           const SizedBox(width: 10),
           Expanded(

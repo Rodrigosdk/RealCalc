@@ -3,11 +3,8 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:real_calc/core/module.dart';
 import 'package:real_calc/core/services/result_sharer.dart';
 import 'package:real_calc/core/services/share_plus_result_sharer.dart';
-import 'package:real_calc/core/themes/calculator_palette.dart';
-import 'package:real_calc/core/themes/calculator_scope.dart';
 
 import '../../core/routes/app_routes.dart';
-import 'domain/entites/value_correction.dart';
 import 'domain/enum/correction_index.dart';
 import 'domain/repositories/i_correction_series_repository.dart';
 import 'domain/validation/i_value_correction_validation.dart';
@@ -26,7 +23,6 @@ import 'presentation/cubit/forms/validation/correction_form_validator.dart';
 import 'presentation/cubit/forms/validation/i_correction_form_validator.dart';
 import 'presentation/cubit/forms/value_correction_form_cubit.dart';
 import 'presentation/pages/value_correction_page.dart';
-import 'presentation/pages/value_correction_result_page.dart';
 import 'use_cases/calculate_value_correction.dart';
 import 'use_cases/correction/data_preparation/correction_data_preparer.dart';
 import 'use_cases/correction/data_preparation/i_correction_data_preparer.dart';
@@ -91,16 +87,6 @@ class ValueCorrectionModule extends Module {
         ],
         child: const ValueCorrectionPage(),
       ),
-    );
-    r.child(
-      '/${AppRoutes.correctionResultSegment}',
-      child: (_) {
-        final result = Modular.args.data as ValueCorrection;
-        return CalculatorScope(
-          kind: CalculatorKind.correction,
-          child: ValueCorrectionResultPage(result: result),
-        );
-      },
     );
   }
 }

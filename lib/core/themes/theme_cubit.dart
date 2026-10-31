@@ -6,9 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ThemeCubit extends Cubit<ThemeMode> {
   static const storageKey = 'theme_mode';
 
-  /// Usado enquanto as telas são migradas para os dois temas. A #125 troca
-  /// para [ThemeMode.system] quando todas estiverem prontas.
-  static const initialMode = ThemeMode.dark;
+  static const initialMode = ThemeMode.system;
 
   final SharedPreferences _preferences;
 

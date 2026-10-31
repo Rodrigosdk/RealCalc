@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:real_calc/core/widgets/app_icon.dart';
+
+import '../../../app_icon_finder.dart';
 import 'package:real_calc/core/themes/app_theme.dart';
 import 'package:real_calc/core/themes/calculator_palette.dart';
 import 'package:real_calc/core/themes/calculator_scope.dart';
@@ -185,7 +188,7 @@ void main() {
       await pump(tester);
 
       expect(find.byType(IconButton), findsOneWidget);
-      expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+      expect(findAppIcon(AppIcons.back), findsOneWidget);
     });
 
     testWidgets('valor curto fica em 48px', (tester) async {

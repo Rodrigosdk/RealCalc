@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:real_calc/core/widgets/app_icon.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:real_calc/core/themes/theme_cubit.dart';
 
@@ -30,10 +31,7 @@ class ThemeToggleButton extends StatelessWidget {
             onPressed: () => context.read<ThemeCubit>().toggle(brightness),
             padding: EdgeInsets.zero,
             color: color,
-            icon: Icon(
-              isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
-              size: 22,
-            ),
+            icon: AppIcon(isDark ? AppIcons.sun : AppIcons.moon, size: 22),
           ),
         ),
       ),

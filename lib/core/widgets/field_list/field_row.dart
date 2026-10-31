@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:real_calc/core/widgets/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:real_calc/core/themes/app_colors.dart';
 import 'package:real_calc/core/themes/calculator_palette.dart';
@@ -297,7 +298,7 @@ class _FieldRowState extends State<FieldRow> {
             ),
           ),
           const SizedBox(width: AppSpacing.xs),
-          Icon(Icons.chevron_right, size: 20, color: colors.textSecondary),
+          AppIcon(AppIcons.chevronRight, size: 20, color: colors.textSecondary),
         ],
       );
     }
@@ -334,7 +335,7 @@ class _FieldRowState extends State<FieldRow> {
       textBaseline: TextBaseline.alphabetic,
       children: [
         if (_isCalculated) ...[
-          Icon(Icons.check, size: 16, color: palette.text),
+          AppIcon(AppIcons.check, size: 16, color: palette.text),
           const SizedBox(width: 6),
         ],
         if (widget.prefix != null) ...[

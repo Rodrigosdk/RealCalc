@@ -2,6 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:real_calc/core/widgets/app_icon.dart';
+
+import '../../../app_icon_finder.dart';
 import 'package:real_calc/core/themes/app_theme.dart';
 import 'package:real_calc/core/themes/calculator_palette.dart';
 import 'package:real_calc/core/themes/calculator_scope.dart';
@@ -45,7 +48,7 @@ void main() {
   }
 
   Future<void> open(WidgetTester tester) async {
-    await tester.tap(find.byIcon(Icons.help_outline));
+    await tester.tap(findAppIcon(AppIcons.help));
     await tester.pumpAndSettle();
   }
 
@@ -179,9 +182,7 @@ void main() {
 
     testWidgets('devolve o foco ao "?" ao fechar', (tester) async {
       await pump(tester);
-      final helpFocus = Focus.of(
-        tester.element(find.byIcon(Icons.help_outline)),
-      );
+      final helpFocus = Focus.of(tester.element(findAppIcon(AppIcons.help)));
       helpFocus.requestFocus();
       await tester.pump();
 

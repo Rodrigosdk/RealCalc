@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:real_calc/core/widgets/app_icon.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:real_calc/core/themes/app_colors.dart';
 import 'package:real_calc/core/themes/calculator_palette.dart';
@@ -89,8 +90,8 @@ class CalculatorListItem extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 ExcludeSemantics(
-                  child: Icon(
-                    Icons.chevron_right,
+                  child: AppIcon(
+                    AppIcons.chevronRight,
                     size: 20,
                     color: colors.textHint,
                   ),

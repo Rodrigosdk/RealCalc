@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:real_calc/core/widgets/app_icon.dart';
 import 'package:intl/intl.dart';
 import 'package:real_calc/core/themes/app_colors.dart';
 import 'package:real_calc/core/themes/spacing.dart';
@@ -142,8 +143,8 @@ class _MetricView extends StatelessWidget {
         Row(
           children: [
             if (change != 0) ...[
-              Icon(
-                change > 0 ? Icons.arrow_upward : Icons.arrow_downward,
+              AppIcon(
+                change > 0 ? AppIcons.arrowUp : AppIcons.arrowDown,
                 size: 16,
                 color: Colors.white,
               ),
@@ -280,7 +281,7 @@ class _OfflineTag extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.wifi_off, size: 14, color: color),
+        AppIcon(AppIcons.wifiOff, size: 14, color: color),
         const SizedBox(width: 6),
         Text(
           'sem conexão',
@@ -340,7 +341,7 @@ class _Unavailable extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.wifi_off, size: 22, color: soft),
+        AppIcon(AppIcons.wifiOff, size: 22, color: soft),
         const SizedBox(height: AppSpacing.sm),
         Text(
           'Selic indisponível',

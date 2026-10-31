@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:real_calc/core/widgets/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -23,28 +24,28 @@ class HomePage extends StatelessWidget {
   static const calculators = [
     (
       kind: CalculatorKind.financing,
-      icon: 'assets/icons/bank.svg',
+      icon: AppIcons.bank,
       title: 'Financiamento',
       description: 'Prestação, prazo ou taxa',
       route: AppRoutes.financing,
     ),
     (
       kind: CalculatorKind.deposits,
-      icon: 'assets/icons/piggy_bank.svg',
+      icon: AppIcons.piggyBank,
       title: 'Depósitos Regulares',
       description: 'Quanto você acumula todo mês',
       route: AppRoutes.deposits,
     ),
     (
       kind: CalculatorKind.futureValue,
-      icon: 'assets/icons/trending_up.svg',
+      icon: AppIcons.trendingUp,
       title: 'Valor Futuro',
       description: 'Quanto rende um valor aplicado',
       route: AppRoutes.futureValue,
     ),
     (
       kind: CalculatorKind.correction,
-      icon: 'assets/icons/cycle.svg',
+      icon: AppIcons.cycle,
       title: 'Correção de Valores',
       description: 'Pela inflação, juros ou poupança',
       route: AppRoutes.correction,

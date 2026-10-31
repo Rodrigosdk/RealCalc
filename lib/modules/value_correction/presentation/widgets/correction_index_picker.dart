@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:real_calc/core/widgets/app_icon.dart';
 import 'package:real_calc/core/themes/app_colors.dart';
 import 'package:real_calc/core/themes/calculator_palette.dart';
 import 'package:real_calc/core/themes/calculator_scope.dart';
@@ -222,14 +223,18 @@ class _SearchField extends StatelessWidget {
         decoration: InputDecoration(
           hintText: correctionIndexSearchHint,
           hintStyle: AppTextStyles.rowLabel.copyWith(color: colors.textHint),
-          prefixIcon: Icon(Icons.search, color: colors.textHint, size: 22),
+          prefixIcon: AppIcon(
+            AppIcons.search,
+            color: colors.textHint,
+            size: 22,
+          ),
           suffixIcon: controller.text.isEmpty
               ? null
               : IconButton(
                   tooltip: 'Limpar busca',
                   onPressed: controller.clear,
                   color: colors.textSecondary,
-                  icon: const Icon(Icons.close, size: 20),
+                  icon: const AppIcon(AppIcons.close, size: 20),
                 ),
           border: InputBorder.none,
           enabledBorder: InputBorder.none,
@@ -419,7 +424,11 @@ class _IndexRow extends StatelessWidget {
                 if (selected)
                   Padding(
                     padding: const EdgeInsets.only(left: AppSpacing.sm),
-                    child: Icon(Icons.check, color: palette.text, size: 22),
+                    child: AppIcon(
+                      AppIcons.check,
+                      color: palette.text,
+                      size: 22,
+                    ),
                   ),
               ],
             ),

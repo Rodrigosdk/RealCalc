@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:real_calc/core/widgets/app_icon.dart';
 import 'package:real_calc/core/themes/app_colors.dart';
 import 'package:real_calc/core/themes/calculator_scope.dart';
 import 'package:real_calc/core/themes/text_styles.dart';
@@ -62,7 +63,7 @@ class BottomActionBar extends StatelessWidget {
                           foregroundColor: colors.textPrimary,
                           disabledForegroundColor: colors.textPrimary,
                         ),
-                        child: const Icon(Icons.ios_share, size: 22),
+                        child: const AppIcon(AppIcons.share, size: 22),
                       ),
                     ),
                   ),

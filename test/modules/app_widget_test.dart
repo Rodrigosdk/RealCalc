@@ -41,7 +41,7 @@ void main() {
         ThemeMode appThemeMode() =>
             tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode!;
 
-        expect(appThemeMode(), ThemeMode.dark);
+        expect(appThemeMode(), ThemeMode.system);
 
         await themeCubit.setMode(ThemeMode.light);
         await tester.pumpAndSettle();

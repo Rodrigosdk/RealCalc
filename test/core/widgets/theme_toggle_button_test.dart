@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:real_calc/core/widgets/app_icon.dart';
+
+import '../../app_icon_finder.dart';
 import 'package:real_calc/core/themes/theme_cubit.dart';
 import 'package:real_calc/core/widgets/theme_toggle_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,7 +12,7 @@ void main() {
   late ThemeCubit cubit;
 
   setUp(() async {
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({ThemeCubit.storageKey: 'dark'});
     cubit = ThemeCubit(await SharedPreferences.getInstance());
   });
 
@@ -34,7 +37,7 @@ void main() {
       final semantics = tester.ensureSemantics();
       await tester.pumpWidget(app());
 
-      expect(find.byIcon(Icons.light_mode_outlined), findsOneWidget);
+      expect(findAppIcon(AppIcons.sun), findsOneWidget);
       expect(
         tester.getSemantics(find.byType(ThemeToggleButton)),
         isSemantics(
@@ -59,7 +62,7 @@ void main() {
         Theme.of(tester.element(find.byType(IconButton))).brightness,
         Brightness.light,
       );
-      expect(find.byIcon(Icons.dark_mode_outlined), findsOneWidget);
+      expect(findAppIcon(AppIcons.moon), findsOneWidget);
       expect(find.bySemanticsLabel('Mudar para o modo escuro'), findsOneWidget);
 
       final preferences = await SharedPreferences.getInstance();

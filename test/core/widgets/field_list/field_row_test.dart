@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:real_calc/core/widgets/app_icon.dart';
+
+import '../../../app_icon_finder.dart';
 import 'package:real_calc/core/themes/app_colors.dart';
 import 'package:real_calc/core/themes/app_theme.dart';
 import 'package:real_calc/core/themes/calculator_palette.dart';
@@ -85,7 +88,7 @@ void main() {
       expect(bottomLine(tester).color, colors.hairline);
       expect(bottomLine(tester).width, 1);
       expect(valueStyle(tester).color, colors.textPrimary);
-      expect(find.byIcon(Icons.check), findsNothing);
+      expect(findAppIcon(AppIcons.check), findsNothing);
       expect(
         tester.getSize(find.byType(FieldRow)).height,
         greaterThanOrEqualTo(64),
@@ -180,7 +183,10 @@ void main() {
         tester.widget<Text>(find.text(FieldRow.calculatedText)).style!.color,
         palette.text,
       );
-      expect(tester.widget<Icon>(find.byIcon(Icons.check)).color, palette.text);
+      expect(
+        tester.widget<AppIcon>(findAppIcon(AppIcons.check)).color,
+        palette.text,
+      );
       expect(valueStyle(tester).color, palette.text);
       expect(valueStyle(tester).fontWeight, FontWeight.w800);
       expect(bottomLine(tester).color, colors.hairline);
@@ -224,7 +230,7 @@ void main() {
       );
 
       expect(find.text('IPCA'), findsOneWidget);
-      expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+      expect(findAppIcon(AppIcons.chevronRight), findsOneWidget);
       expect(find.byType(TextField), findsNothing);
 
       await tester.tap(find.text('Índice'));

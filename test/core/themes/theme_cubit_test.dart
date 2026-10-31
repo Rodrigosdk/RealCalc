@@ -11,11 +11,11 @@ void main() {
   }
 
   group('ThemeCubit', () {
-    test('sem escolha gravada, começa no valor inicial (escuro)', () async {
+    test('sem escolha gravada, segue o tema do sistema', () async {
       final cubit = ThemeCubit(await preferencesWith({}));
 
       expect(cubit.state, ThemeCubit.initialMode);
-      expect(cubit.state, ThemeMode.dark);
+      expect(cubit.state, ThemeMode.system);
     });
 
     test('lê a escolha gravada', () async {

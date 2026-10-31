@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:real_calc/core/widgets/app_icon.dart';
 import 'package:flutter/services.dart';
 import 'package:real_calc/core/themes/calculator_palette.dart';
 import 'package:real_calc/core/themes/calculator_scope.dart';
@@ -65,7 +66,7 @@ class CalculatorBand extends StatelessWidget {
                 child: Row(
                   children: [
                     _BandIconButton(
-                      icon: Icons.arrow_back,
+                      icon: AppIcons.back,
                       label: backLabel,
                       color: onSolid,
                       onPressed:
@@ -84,14 +85,14 @@ class CalculatorBand extends StatelessWidget {
                     ),
                     if (onHelp != null)
                       _BandIconButton(
-                        icon: Icons.help_outline,
+                        icon: AppIcons.help,
                         label: helpLabel,
                         color: onSolid,
                         onPressed: onHelp!,
                       ),
                     if (onClear != null)
                       _BandIconButton(
-                        icon: Icons.refresh,
+                        icon: AppIcons.reset,
                         label: clearLabel,
                         color: onSolid,
                         onPressed: onClear!,
@@ -222,7 +223,7 @@ class _StatementValue extends StatelessWidget {
 }
 
 class _BandIconButton extends StatelessWidget {
-  final IconData icon;
+  final String icon;
   final String label;
   final Color color;
   final VoidCallback onPressed;
@@ -245,7 +246,7 @@ class _BandIconButton extends StatelessWidget {
             onPressed: onPressed,
             padding: EdgeInsets.zero,
             color: color,
-            icon: Icon(icon, size: 22),
+            icon: AppIcon(icon, size: 22),
           ),
         ),
       ),

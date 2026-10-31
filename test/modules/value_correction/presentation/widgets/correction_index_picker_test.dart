@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:real_calc/core/widgets/app_icon.dart';
+
+import '../../../../app_icon_finder.dart';
 import 'package:real_calc/core/themes/app_theme.dart';
 import 'package:real_calc/core/themes/calculator_palette.dart';
 import 'package:real_calc/core/widgets/app_sheet.dart';
@@ -89,11 +92,11 @@ void main() {
     testWidgets('o índice atual fica em negrito e com ✓', (tester) async {
       await open(tester);
 
-      expect(find.byIcon(Icons.check), findsOneWidget);
+      expect(findAppIcon(AppIcons.check), findsOneWidget);
       expect(
         find.descendant(
           of: row(CorrectionIndex.ipca),
-          matching: find.byIcon(Icons.check),
+          matching: findAppIcon(AppIcons.check),
         ),
         findsOneWidget,
       );

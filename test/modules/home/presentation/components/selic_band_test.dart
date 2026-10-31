@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:real_calc/core/widgets/app_icon.dart';
+
+import '../../../../app_icon_finder.dart';
 import 'package:real_calc/core/errors/messages.dart';
 import 'package:real_calc/core/themes/app_theme.dart';
 import 'package:real_calc/modules/home/presentation/components/selic_band.dart';
@@ -89,7 +92,7 @@ void main() {
       expect(find.text('13,75%'), findsOneWidget);
       expect(find.text('ao ano'), findsOneWidget);
       expect(find.text('0,25 ponto em relação à anterior'), findsOneWidget);
-      expect(find.byIcon(Icons.arrow_upward), findsOneWidget);
+      expect(findAppIcon(AppIcons.arrowUp), findsOneWidget);
       expect(
         find.text('Fonte: Banco Central, atualizada hoje.'),
         findsOneWidget,
@@ -105,7 +108,7 @@ void main() {
     testWidgets('queda mostra a seta para baixo', (tester) async {
       await pump(tester, SelicLoaded(fakeMetric(variation: -0.5)));
 
-      expect(find.byIcon(Icons.arrow_downward), findsOneWidget);
+      expect(findAppIcon(AppIcons.arrowDown), findsOneWidget);
       expect(find.text('0,50 ponto em relação à anterior'), findsOneWidget);
     });
 
@@ -183,7 +186,7 @@ void main() {
       );
 
       expect(find.text('sem conexão'), findsOneWidget);
-      expect(find.byIcon(Icons.wifi_off), findsOneWidget);
+      expect(findAppIcon(AppIcons.wifiOff), findsOneWidget);
       expect(find.text('12 meses'), findsOneWidget);
       expect(find.text('Último valor salvo, atualizada hoje.'), findsOneWidget);
       final opacity = tester.widget<Opacity>(
@@ -251,7 +254,7 @@ void main() {
 
       expect(find.text('Selic indisponível'), findsOneWidget);
       expect(find.text('Sem conexão com o Banco Central.'), findsOneWidget);
-      expect(find.byIcon(Icons.wifi_off), findsOneWidget);
+      expect(findAppIcon(AppIcons.wifiOff), findsOneWidget);
 
       await tester.tap(find.text('Tentar de novo'));
       expect(retries, 1);
