@@ -118,7 +118,7 @@ void main() {
     );
 
     test(
-      'Deve retornar taxa ZERO quando o valor final for exatamente igual à soma linear dos depósitos',
+      'valor final igual à soma dos depósitos não tem taxa: devolve erro',
       () {
         final paramsSemJuros = buildEntity(
           rateParam: 0.0,
@@ -127,13 +127,15 @@ void main() {
 
         final sut = useCase.calculate(paramsSemJuros);
 
-        expect(sut.isSuccess, true);
-        expect(sut.getOrNull()?.rate, 0.0);
+        expect(
+          sut.getErrorOrNull()!.message.single,
+          RegularDepositsValidationMessage.noPositiveRate,
+        );
       },
     );
 
     test(
-      'Deve retornar taxa ZERO quando o valor final for menor do que a soma linear dos depósitos',
+      'valor final menor que a soma dos depósitos não tem taxa: devolve erro',
       () {
         final paramsComPerda = buildEntity(
           rateParam: 0.0,
@@ -142,8 +144,10 @@ void main() {
 
         final sut = useCase.calculate(paramsComPerda);
 
-        expect(sut.isSuccess, true);
-        expect(sut.getOrNull()?.rate, 0.0);
+        expect(
+          sut.getErrorOrNull()!.message.single,
+          RegularDepositsValidationMessage.noPositiveRate,
+        );
       },
     );
   });
@@ -160,7 +164,7 @@ void main() {
       );
     });
 
-    test('taxa que vira NaN devolve erro em vez de sucesso', () {
+    test('taxa abaixo de 0,01% devolve erro em vez de 0,00', () {
       final result = useCase.calculate(
         FinancialCalculation(
           initialValue: 0.01,
@@ -171,7 +175,39 @@ void main() {
 
       expect(
         result.getErrorOrNull()!.message.single,
-        FinancialCalculationValidationMessage.resultOutOfRange,
+        FinancialCalculationValidationMessage.resultTooSmall,
+      );
+    });
+  });
+
+  group('CalculateDeposit - taxa e prazo', () {
+    test('taxa com prazo longo converge para o valor certo', () {
+      final finalValue = useCase
+          .calculate(
+            FinancialCalculation(initialValue: 10, rate: 0.01, periods: 1200),
+          )
+          .getOrNull()!
+          .finalValue;
+
+      final result = useCase.calculate(
+        FinancialCalculation(
+          initialValue: 10,
+          periods: 1200,
+          finalValue: finalValue,
+        ),
+      );
+
+      expect(result.getOrNull()!.rate, closeTo(0.01, 1e-9));
+    });
+
+    test('valor final abaixo do primeiro mês não tem prazo', () {
+      final result = useCase.calculate(
+        FinancialCalculation(initialValue: 100, rate: 1, finalValue: 50),
+      );
+
+      expect(
+        result.getErrorOrNull()!.message.single,
+        RegularDepositsValidationMessage.finalBelowFirstMonth,
       );
     });
   });

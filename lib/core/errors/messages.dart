@@ -47,6 +47,10 @@ enum FinancialCalculationValidationMessage implements ErrorMessages {
   resultOutOfRange(
     'Com esses valores, o resultado passa de R\$ 1 trilhão ou não pode ser '
     'calculado. Confira os campos.',
+  ),
+  resultTooSmall(
+    'Com esses valores, o resultado fica abaixo de 0,01 e não pode ser '
+    'mostrado. Confira os campos.',
   );
 
   @override
@@ -62,6 +66,14 @@ enum FinancingValidationMessage implements ErrorMessages {
   positiveMonths('A quantidade de meses deve ser maior que zero'),
   unableToDetermineCalculationType(
     'Não foi possível determinar o tipo de cálculo. Verifique os parâmetros informados.',
+  ),
+  noPositiveRate(
+    'As prestações somam menos que o valor financiado, então não existe uma '
+    'taxa de juros para essa conta.',
+  ),
+  paymentAboveDebt(
+    'A prestação já quita o valor financiado com os juros na primeira '
+    'parcela. Confira os valores.',
   );
 
   @override
@@ -77,6 +89,14 @@ enum RegularDepositsValidationMessage implements ErrorMessages {
   positiveMonths('A quantidade de meses deve ser maior que zero'),
   unableToDetermineCalculationType(
     'Não foi possível determinar o tipo de cálculo. Verifique os parâmetros informados.',
+  ),
+  noPositiveRate(
+    'O valor final não passa da soma dos depósitos, então não há rendimento '
+    'nem taxa de juros para calcular.',
+  ),
+  finalBelowFirstMonth(
+    'O valor final é menor que o primeiro depósito com o rendimento do mês. '
+    'Confira os valores.',
   );
 
   @override
@@ -92,6 +112,9 @@ enum FutureValueValidationMessage implements ErrorMessages {
   positiveMonths('A quantidade de meses deve ser maior que zero'),
   unableToDetermineCalculationType(
     'Não foi possível determinar o tipo de cálculo. Verifique os parâmetros informados.',
+  ),
+  finalNotAboveInitial(
+    'O valor futuro precisa ser maior que o valor aplicado. Confira os valores.',
   );
 
   @override
@@ -148,4 +171,16 @@ class PaymentBelowInterestError implements ErrorMessages {
       'Com essa prestação, a dívida nunca é quitada: ela precisa ser maior '
       'que os juros do primeiro mês, de '
       '${formatCents(toCents(firstMonthInterest))}.';
+}
+
+class AmbiguousPeriodsError implements ErrorMessages {
+  const AmbiguousPeriodsError(this.from);
+
+  final int from;
+
+  @override
+  String get message =>
+      'Com esses valores, qualquer prazo a partir de $from meses dá o mesmo '
+      'resultado em centavos, então não dá para descobrir o prazo. Informe o '
+      'prazo para descobrir outro campo.';
 }

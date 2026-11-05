@@ -1,10 +1,12 @@
 import 'dart:math';
 
 import 'package:real_calc/core/errors/failures.dart';
+import 'package:real_calc/core/errors/messages.dart';
 import 'package:real_calc/core/seed_works/result.dart';
 
 import '../../domain/entities/financial_calculation.dart';
 import '../../domain/validation/calculation_limits.dart';
+import '../../domain/validation/solving.dart';
 import '../../domain/enum/financial_calculation_target.dart';
 import '../../domain/validation/compound_interest_validator.dart';
 import 'i_calculate_future_value.dart';
@@ -15,7 +17,10 @@ class CalculateFutureValue implements ICalculateFutureValue {
     FinancialCalculation params,
   ) => _calculate(params).fold(
     (failure) => FailureResult<Failure, FinancialCalculation>(failure),
-    ensureWithinLimits,
+    (result) => ensureWithinLimits(
+      result,
+      calculated: detectCompoundInterestTarget(params).getOrNull(),
+    ),
   );
 
   Result<Failure, FinancialCalculation> _calculate(
@@ -58,6 +63,14 @@ class CalculateFutureValue implements ICalculateFutureValue {
   }
 
   Result<Failure, double> _calculateRate(FinancialCalculation params) {
+    if (params.finalValue <= params.initialValue) {
+      return FailureResult<Failure, double>(
+        const ValidationFailure(
+          message: [FutureValueValidationMessage.finalNotAboveInitial],
+        ),
+      );
+    }
+
     final result =
         (pow(
               params.finalValue / params.initialValue,
@@ -70,12 +83,23 @@ class CalculateFutureValue implements ICalculateFutureValue {
   }
 
   Result<Failure, int> _calculatePeriods(FinancialCalculation params) {
-    final result =
-        (log(params.finalValue / params.initialValue) /
-                log(1 + params.rate / 100))
-            .round();
+    final growth = log(1 + params.rate / 100);
+    double periodsFor(double value) =>
+        log(value / params.initialValue) / growth;
 
-    return SuccessResult<Failure, int>(result);
+    return periodsFromMoney(
+      value: params.finalValue,
+      periodsFor: periodsFor,
+    ).fold(
+      (failure) => FailureResult<Failure, int>(failure),
+      (periods) => periods < 1
+          ? FailureResult<Failure, int>(
+              const ValidationFailure(
+                message: [FutureValueValidationMessage.finalNotAboveInitial],
+              ),
+            )
+          : SuccessResult<Failure, int>(periods),
+    );
   }
 
   Result<Failure, double> _calculateInitialValue(FinancialCalculation params) {

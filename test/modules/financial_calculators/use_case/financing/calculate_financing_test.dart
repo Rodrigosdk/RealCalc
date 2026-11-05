@@ -124,12 +124,66 @@ void main() {
       );
     });
 
-    test('prestação igual aos juros do primeiro mês também devolve erro', () {
-      final result = useCase.calculate(withoutTerm(200));
+    test(
+      'prestação igual aos juros em centavos: qualquer prazo longo serve',
+      () {
+        final result = useCase.calculate(withoutTerm(200));
+
+        final error = result.getErrorOrNull()!.message.single;
+        expect(error, isA<AmbiguousPeriodsError>());
+        expect((error as AmbiguousPeriodsError).from, 536);
+      },
+    );
+
+    test('prestação um centavo abaixo dos juros nunca quita a dívida', () {
+      final result = useCase.calculate(withoutTerm(199.99));
 
       expect(
         result.getErrorOrNull()!.message.single,
         isA<PaymentBelowInterestError>(),
+      );
+    });
+
+    test('prestação maior que a dívida com os juros não tem prazo', () {
+      final result = useCase.calculate(
+        FinancialCalculation(initialValue: 1000, rate: 1, finalValue: 5000),
+      );
+
+      expect(
+        result.getErrorOrNull()!.message.single,
+        FinancingValidationMessage.paymentAboveDebt,
+      );
+    });
+
+    test('10.000 em 70 meses a 999,99%: refazer o prazo pela prestação '
+        'mostrada explica que o prazo não pode ser descoberto', () {
+      final payment = useCase
+          .calculate(
+            FinancialCalculation(
+              initialValue: 10000,
+              periods: 70,
+              rate: 999.99,
+            ),
+          )
+          .getOrNull()!
+          .finalValue;
+      final shown = (payment * 100).round() / 100;
+      expect(shown, 99999.0);
+
+      final result = useCase.calculate(
+        FinancialCalculation(
+          initialValue: 10000,
+          rate: 999.99,
+          finalValue: shown,
+        ),
+      );
+
+      final error = result.getErrorOrNull()!.message.single;
+      expect(error, isA<AmbiguousPeriodsError>());
+      expect((error as AmbiguousPeriodsError).from, lessThanOrEqualTo(70));
+      expect(
+        error.message,
+        contains('qualquer prazo a partir de ${error.from} meses'),
       );
     });
 
@@ -142,15 +196,34 @@ void main() {
   });
 
   group('CalculateFinancing - limites do resultado', () {
-    test('taxa que não converge (NaN) devolve erro em vez de sucesso', () {
+    test('prestações que somam o valor financiado não têm taxa', () {
       final result = useCase.calculate(
         FinancialCalculation(initialValue: 0.01, periods: 1, finalValue: 0.01),
       );
 
       expect(
         result.getErrorOrNull()!.message.single,
-        FinancialCalculationValidationMessage.resultOutOfRange,
+        FinancingValidationMessage.noPositiveRate,
       );
+    });
+
+    test('taxa com prazo longo converge para o valor certo', () {
+      final payment = useCase
+          .calculate(
+            FinancialCalculation(initialValue: 10000, periods: 1200, rate: 0.5),
+          )
+          .getOrNull()!
+          .finalValue;
+
+      final result = useCase.calculate(
+        FinancialCalculation(
+          initialValue: 10000,
+          periods: 1200,
+          finalValue: payment,
+        ),
+      );
+
+      expect(result.getOrNull()!.rate, closeTo(0.5, 1e-9));
     });
 
     test('prestação acima de R\$ 1 trilhão devolve erro', () {

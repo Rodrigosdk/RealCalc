@@ -106,4 +106,28 @@ void main() {
       },
     );
   });
+
+  group('CalculateFutureValue - valor futuro abaixo do aplicado', () {
+    test('taxa: devolve erro', () {
+      final result = useCase.calculate(
+        FinancialCalculation(initialValue: 1000, periods: 12, finalValue: 500),
+      );
+
+      expect(
+        result.getErrorOrNull()!.message.single,
+        FutureValueValidationMessage.finalNotAboveInitial,
+      );
+    });
+
+    test('prazo: devolve erro em vez de prazo negativo', () {
+      final result = useCase.calculate(
+        FinancialCalculation(initialValue: 1000, rate: 1, finalValue: 500),
+      );
+
+      expect(
+        result.getErrorOrNull()!.message.single,
+        FutureValueValidationMessage.finalNotAboveInitial,
+      );
+    });
+  });
 }
