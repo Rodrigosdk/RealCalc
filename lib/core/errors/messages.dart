@@ -43,6 +43,10 @@ enum FinancialCalculationValidationMessage implements ErrorMessages {
   allParametersNull('Informe os parâmetros do cálculo'),
   invalidParameterCount(
     'Informe exatamente três parâmetros para realizar o cálculo',
+  ),
+  resultOutOfRange(
+    'Com esses valores, o resultado passa de R\$ 1 trilhão ou não pode ser '
+    'calculado. Confira os campos.',
   );
 
   @override
@@ -108,6 +112,10 @@ enum ValueCorrectionValidationMessage implements ErrorMessages {
   ),
   invalidValue(
     "O valor inserido deve ser maior que zero. Certifique-se de preencher o campo corretamente",
+  ),
+  resultOutOfRange(
+    'Com esse valor, o resultado passa de R\$ 1 trilhão. Confira o valor '
+    'informado.',
   );
 
   @override

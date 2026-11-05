@@ -141,6 +141,30 @@ void main() {
     });
   });
 
+  group('CalculateFinancing - limites do resultado', () {
+    test('taxa que não converge (NaN) devolve erro em vez de sucesso', () {
+      final result = useCase.calculate(
+        FinancialCalculation(initialValue: 0.01, periods: 1, finalValue: 0.01),
+      );
+
+      expect(
+        result.getErrorOrNull()!.message.single,
+        FinancialCalculationValidationMessage.resultOutOfRange,
+      );
+    });
+
+    test('prestação acima de R\$ 1 trilhão devolve erro', () {
+      final result = useCase.calculate(
+        FinancialCalculation(initialValue: 1e12, periods: 1, rate: 50),
+      );
+
+      expect(
+        result.getErrorOrNull()!.message.single,
+        FinancialCalculationValidationMessage.resultOutOfRange,
+      );
+    });
+  });
+
   group('CalculateFinancing - Imprecisão de Ponto Flutuante', () {
     test(
       'Deve mitigar a dízima do double e retornar o número exato de meses (25) mesmo com centavos aproximados',

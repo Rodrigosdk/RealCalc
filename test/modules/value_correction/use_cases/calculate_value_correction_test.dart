@@ -55,6 +55,43 @@ void main() {
   }
 
   group('CalculateValueCorrection', () {
+    test('valor corrigido acima de R\$ 1 trilhão devolve erro', () {
+      final useCase = CalculateValueCorrection(
+        buildDataPreparer(),
+        buildRateCalculator(),
+      );
+      final result = useCase.call(
+        params: buildValueCorrection(originalValue: 9.9e11),
+        series: [
+          SeriesPoint(date: DateTime(2024, 1, 1), value: 2),
+          SeriesPoint(date: DateTime(2024, 2, 1), value: 3),
+        ],
+        type: SeriesKind.monthlyVariation,
+      );
+
+      expect(
+        result.getErrorOrNull()!.message.single,
+        ValueCorrectionValidationMessage.resultOutOfRange,
+      );
+    });
+
+    test('valor corrigido até R\$ 1 trilhão continua calculando', () {
+      final useCase = CalculateValueCorrection(
+        buildDataPreparer(),
+        buildRateCalculator(),
+      );
+      final result = useCase.call(
+        params: buildValueCorrection(originalValue: 9.5e11),
+        series: [
+          SeriesPoint(date: DateTime(2024, 1, 1), value: 2),
+          SeriesPoint(date: DateTime(2024, 2, 1), value: 3),
+        ],
+        type: SeriesKind.monthlyVariation,
+      );
+
+      expect(result.isSuccess, isTrue);
+    });
+
     test('calcula o fator para variação mensal', () {
       final params = buildValueCorrection();
       final useCase = CalculateValueCorrection(

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:real_calc/core/errors/messages.dart';
 import 'package:real_calc/modules/financial_calculators/domain/entities/financial_calculation.dart';
 import 'package:real_calc/modules/financial_calculators/use_case/future_value/calculate_future_value.dart';
 
@@ -49,9 +50,7 @@ void main() {
     });
 
     test('calcula a taxa de juros', () {
-      final result = useCase.calculate(
-        buildFutureValue(interestRateParam: 0),
-      );
+      final result = useCase.calculate(buildFutureValue(interestRateParam: 0));
 
       expect(result.isSuccess, isTrue);
       expect(result.getOrNull()?.rate, closeTo(interestRate, 0.01));
@@ -62,6 +61,30 @@ void main() {
 
       expect(result.isSuccess, isTrue);
       expect(result.getOrNull()?.periods, equals(months));
+    });
+  });
+
+  group('CalculateFutureValue - limites do resultado', () {
+    test('valor futuro infinito devolve erro em vez de sucesso', () {
+      final result = useCase.calculate(
+        FinancialCalculation(initialValue: 0.01, periods: 9999, rate: 100),
+      );
+
+      expect(
+        result.getErrorOrNull()!.message.single,
+        FinancialCalculationValidationMessage.resultOutOfRange,
+      );
+    });
+
+    test('valor futuro acima de R\$ 1 trilhão devolve erro', () {
+      final result = useCase.calculate(
+        FinancialCalculation(initialValue: 1000, periods: 999, rate: 10),
+      );
+
+      expect(
+        result.getErrorOrNull()!.message.single,
+        FinancialCalculationValidationMessage.resultOutOfRange,
+      );
     });
   });
 

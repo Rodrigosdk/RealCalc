@@ -147,6 +147,25 @@ void main() {
       expect(inBand('25 meses'), findsOneWidget);
     });
 
+    testWidgets('resultado acima do limite: aviso de erro, sem quebrar', (
+      tester,
+    ) async {
+      await pump(tester);
+      await type(tester, FinancialCalculationTarget.initialValue, '1');
+      await type(tester, FinancialCalculationTarget.periods, '9999');
+      await type(tester, FinancialCalculationTarget.interestRate, '10000');
+
+      await tester.tap(find.text('Calcular'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(futureValueCubit.state, isA<FutureValueError>());
+      expect(find.text('Não foi possível calcular'), findsOneWidget);
+      expect(find.textContaining('passa de R\$ 1 trilhão'), findsOneWidget);
+      expect(find.byType(ResultDetails), findsNothing);
+      expect(formCubit.finalValue.text, isEmpty);
+    });
+
     testWidgets('com menos de três campos, mostra o aviso', (tester) async {
       await pump(tester);
       await type(tester, FinancialCalculationTarget.initialValue, '255555');

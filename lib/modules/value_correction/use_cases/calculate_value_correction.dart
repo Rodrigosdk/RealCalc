@@ -1,6 +1,7 @@
 import 'package:real_calc/core/seed_works/result.dart';
 
 import '../../../core/errors/failures.dart';
+import '../../../core/errors/messages.dart';
 import '../domain/entites/correction_calculation_data.dart';
 import '../domain/entites/series_point.dart';
 import '../domain/entites/value_correction.dart';
@@ -8,6 +9,9 @@ import '../domain/enum/series_kind.dart';
 import 'correction/data_preparation/i_correction_data_preparer.dart';
 import 'correction/rate_calculation/i_correction_rate_calculator.dart';
 import 'i_calculate_value_correction.dart';
+
+/// R\$ 1 trilhão, o mesmo limite das calculadoras financeiras.
+const maxCorrectedValue = 1e12;
 
 class CalculateValueCorrection implements ICalculateValueCorrection {
   final ICorrectionDataPreparer _dataPreparer;
@@ -39,6 +43,17 @@ class CalculateValueCorrection implements ICalculateValueCorrection {
       calculationData: calculationData,
     );
 
+    final adjustedValue = _calculateAdjustedValue(params.originalValue, factor);
+    if (!factor.isFinite ||
+        (adjustedValue != null &&
+            (!adjustedValue.isFinite || adjustedValue > maxCorrectedValue))) {
+      return FailureResult(
+        const ValidationFailure(
+          message: [ValueCorrectionValidationMessage.resultOutOfRange],
+        ),
+      );
+    }
+
     return SuccessResult(
       ValueCorrection(
         index: params.index,
@@ -46,7 +61,7 @@ class CalculateValueCorrection implements ICalculateValueCorrection {
         percentage: params.percentage,
         originalValue: params.originalValue,
         factor: factor,
-        adjustedValue: _calculateAdjustedValue(params.originalValue, factor),
+        adjustedValue: adjustedValue,
         variation: _calculateVariation(factor),
       ),
     );

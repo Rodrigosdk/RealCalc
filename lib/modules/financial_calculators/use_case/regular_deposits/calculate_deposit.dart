@@ -5,17 +5,26 @@ import 'package:real_calc/core/seed_works/result.dart';
 import 'package:real_calc/modules/financial_calculators/domain/validation/compound_interest_validator.dart';
 
 import '../../domain/entities/financial_calculation.dart';
+import '../../domain/validation/calculation_limits.dart';
 import '../../domain/enum/financial_calculation_target.dart';
 import 'i_calculate_deposit.dart';
 
 class CalculateDeposit implements ICalculateDeposit {
-
   @override
-  Result<Failure, FinancialCalculation> calculate(FinancialCalculation params) {
+  Result<Failure, FinancialCalculation> calculate(
+    FinancialCalculation params,
+  ) => _calculate(params).fold(
+    (failure) => FailureResult<Failure, FinancialCalculation>(failure),
+    ensureWithinLimits,
+  );
+
+  Result<Failure, FinancialCalculation> _calculate(
+    FinancialCalculation params,
+  ) {
     return detectCompoundInterestTarget(params).fold(
       (failure) => FailureResult<Failure, FinancialCalculation>(failure),
       (target) {
-             switch (target) {
+        switch (target) {
           case FinancialCalculationTarget.finalValue:
             return _calculateFinalValue(
               params,
@@ -36,6 +45,7 @@ class CalculateDeposit implements ICalculateDeposit {
       },
     );
   }
+
   Result<Failure, double> _calculateFinalValue(FinancialCalculation params) {
     final rate = params.rate / 100;
 
@@ -46,7 +56,7 @@ class CalculateDeposit implements ICalculateDeposit {
     }
 
     final result =
-      params.initialValue *
+        params.initialValue *
         ((pow(1 + rate, params.periods) - 1) / rate) *
         (1 + rate);
 
@@ -81,7 +91,7 @@ class CalculateDeposit implements ICalculateDeposit {
     final adjustedFinalValue = params.finalValue / (1 + rate);
 
     final result =
-      (log(adjustedFinalValue * rate / params.initialValue + 1) /
+        (log(adjustedFinalValue * rate / params.initialValue + 1) /
                 log(1 + rate))
             .round();
 
@@ -123,5 +133,5 @@ class CalculateDeposit implements ICalculateDeposit {
     }
 
     return SuccessResult<Failure, double>(rate * 100);
-  }  
+  }
 }

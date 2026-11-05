@@ -5,6 +5,7 @@ import 'package:real_calc/core/errors/messages.dart';
 import 'package:real_calc/core/seed_works/result.dart';
 
 import '../../domain/entities/financial_calculation.dart';
+import '../../domain/validation/calculation_limits.dart';
 import '../../domain/enum/financial_calculation_target.dart';
 import '../../domain/validation/compound_interest_validator.dart';
 
@@ -12,7 +13,16 @@ import 'i_calculate_financing.dart';
 
 class CalculateFinancing implements ICalculateFinancing {
   @override
-  Result<Failure, FinancialCalculation> calculate(FinancialCalculation params) {
+  Result<Failure, FinancialCalculation> calculate(
+    FinancialCalculation params,
+  ) => _calculate(params).fold(
+    (failure) => FailureResult<Failure, FinancialCalculation>(failure),
+    ensureWithinLimits,
+  );
+
+  Result<Failure, FinancialCalculation> _calculate(
+    FinancialCalculation params,
+  ) {
     if (params.initialValue <= 0 && params.rate <= 0) {
       return FailureResult<Failure, FinancialCalculation>(
         ValidationFailure(
