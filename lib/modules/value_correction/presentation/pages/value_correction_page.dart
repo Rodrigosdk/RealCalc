@@ -263,7 +263,7 @@ class _ValueCorrectionPageState extends State<ValueCorrectionPage> {
                             unit: '% do CDI',
                             hint: '100,00',
                             controller: _form.percentage,
-                            inputFormatters: [DecimalInputFormatter()],
+                            inputFormatters: [DecimalInputFormatter.percent()],
                             state:
                                 formState.fieldErrors[ValueCorrectionField
                                         .percentage] ==
@@ -280,7 +280,7 @@ class _ValueCorrectionPageState extends State<ValueCorrectionPage> {
                           secondLine: 'opcional',
                           hint: '0,00',
                           controller: _form.value,
-                          inputFormatters: [DecimalInputFormatter()],
+                          inputFormatters: [DecimalInputFormatter.money()],
                         ),
                       ],
                     ),

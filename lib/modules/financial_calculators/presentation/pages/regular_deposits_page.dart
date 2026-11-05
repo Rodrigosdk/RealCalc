@@ -26,7 +26,7 @@ class RegularDepositsPage extends StatelessWidget {
       secondLine: 'todo mês',
       hint: '0,00',
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      formatters: [DecimalInputFormatter()],
+      formatters: [DecimalInputFormatter.money()],
     ),
     CalculatorFieldConfig(
       target: FinancialCalculationTarget.periods,
@@ -34,7 +34,10 @@ class RegularDepositsPage extends StatelessWidget {
       unit: 'meses',
       hint: '0',
       keyboardType: TextInputType.number,
-      formatters: [FilteringTextInputFormatter.digitsOnly],
+      formatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        LengthLimitingTextInputFormatter(4),
+      ],
     ),
     CalculatorFieldConfig(
       target: FinancialCalculationTarget.interestRate,
@@ -42,7 +45,7 @@ class RegularDepositsPage extends StatelessWidget {
       unit: '% a.m.',
       hint: '0,00',
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      formatters: [DecimalInputFormatter()],
+      formatters: [DecimalInputFormatter.percent()],
     ),
     CalculatorFieldConfig(
       target: FinancialCalculationTarget.finalValue,
@@ -50,7 +53,7 @@ class RegularDepositsPage extends StatelessWidget {
       prefix: 'R\$',
       hint: '0,00',
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      formatters: [DecimalInputFormatter()],
+      formatters: [DecimalInputFormatter.money()],
     ),
   ];
 

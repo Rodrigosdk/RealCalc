@@ -2,8 +2,22 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 class DecimalInputFormatter extends TextInputFormatter {
+  /// Dígitos aceitos, contando os centavos; `null` aceita qualquer tamanho.
+  final int? maxDigits;
+
+  DecimalInputFormatter({this.maxDigits});
+
+  /// Até 999.999.999.999,99, dentro do limite de R\$ 1 trilhão dos cálculos.
+  DecimalInputFormatter.money() : maxDigits = 14;
+
+  /// Até 999,99.
+  DecimalInputFormatter.percent() : maxDigits = 5;
+
   @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     if (newValue.text.isEmpty) {
       return newValue.copyWith(text: '');
     }
@@ -21,6 +35,10 @@ class DecimalInputFormatter extends TextInputFormatter {
         text: '',
         selection: const TextSelection.collapsed(offset: 0),
       );
+    }
+
+    if (maxDigits != null && trimmedDigits.length > maxDigits!) {
+      return oldValue;
     }
 
     double value = double.parse(onlyDigits) / 100;
