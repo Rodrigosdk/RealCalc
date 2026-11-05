@@ -4,7 +4,8 @@ import 'series_kind.dart';
 
 enum CorrectionIndex {
   ipca(
-    label: 'IPCA (IBGE)',
+    label: 'IPCA',
+    source: 'IBGE',
     group: CorrectionGroup.inflation,
     sgsCode: 433,
     kind: SeriesKind.monthlyVariation,
@@ -13,16 +14,18 @@ enum CorrectionIndex {
     fromMonth: 1,
   ),
   inpc(
-    label: 'INPC (IBGE)',
-    sgsCode: 188,
+    label: 'INPC',
+    source: 'IBGE',
     group: CorrectionGroup.inflation,
+    sgsCode: 188,
     kind: SeriesKind.monthlyVariation,
     granularity: DateGranularity.month,
     fromYear: 1979,
     fromMonth: 7,
   ),
   ipcaE(
-    label: 'IPCA-E (IBGE)',
+    label: 'IPCA-E',
+    source: 'IBGE',
     sgsCode: 10764,
     group: CorrectionGroup.inflation,
     kind: SeriesKind.monthlyVariation,
@@ -31,7 +34,8 @@ enum CorrectionIndex {
     fromMonth: 1,
   ),
   igpDi(
-    label: 'IGP-DI (FGV)',
+    label: 'IGP-DI',
+    source: 'FGV',
     sgsCode: 190,
     group: CorrectionGroup.inflation,
     kind: SeriesKind.monthlyVariation,
@@ -40,17 +44,18 @@ enum CorrectionIndex {
     fromMonth: 2,
   ),
   igpM(
-    label: 'IGP-M (FGV)',
+    label: 'IGP-M',
+    source: 'FGV',
     sgsCode: 28655,
     group: CorrectionGroup.inflation,
     kind: SeriesKind.monthlyVariation,
     granularity: DateGranularity.month,
-    fromYear: 2021,
-    fromMonth: 4,
-    fromDay: 12,
+    fromYear: 1989,
+    fromMonth: 6,
   ),
   ipcBrasil(
-    label: 'IPC-Brasil (FGV)',
+    label: 'IPC-Brasil',
+    source: 'FGV',
     sgsCode: 191,
     group: CorrectionGroup.inflation,
     kind: SeriesKind.monthlyVariation,
@@ -59,7 +64,8 @@ enum CorrectionIndex {
     fromMonth: 1,
   ),
   ipcSp(
-    label: 'IPC-SP (FIPE)',
+    label: 'IPC-SP',
+    source: 'FIPE',
     sgsCode: 193,
     group: CorrectionGroup.inflation,
     kind: SeriesKind.monthlyVariation,
@@ -69,6 +75,7 @@ enum CorrectionIndex {
   ),
   cdi(
     label: 'CDI',
+    source: 'B3',
     sgsCode: 12,
     group: CorrectionGroup.interest,
     kind: SeriesKind.dailyRate,
@@ -78,6 +85,7 @@ enum CorrectionIndex {
   ),
   selic(
     label: 'Selic',
+    source: 'Banco Central',
     sgsCode: 11,
     group: CorrectionGroup.interest,
     kind: SeriesKind.dailyRate,
@@ -88,6 +96,7 @@ enum CorrectionIndex {
   ),
   tr(
     label: 'TR',
+    source: 'Banco Central',
     sgsCode: 226,
     group: CorrectionGroup.interest,
     kind: SeriesKind.periodRate,
@@ -97,6 +106,7 @@ enum CorrectionIndex {
   ),
   poupancaNova(
     label: 'Poupança Nova',
+    source: 'Banco Central',
     sgsCode: 195,
     group: CorrectionGroup.savings,
     kind: SeriesKind.periodRate,
@@ -107,6 +117,7 @@ enum CorrectionIndex {
   ),
   poupancaVelha(
     label: 'Poupança Velha',
+    source: 'Banco Central',
     sgsCode: 25,
     group: CorrectionGroup.savings,
     kind: SeriesKind.periodRate,
@@ -116,6 +127,7 @@ enum CorrectionIndex {
   ),
   taxaLegal(
     label: 'Taxa Legal',
+    source: 'Banco Central',
     sgsCode: 29543,
     group: CorrectionGroup.interest,
     kind: SeriesKind.simpleMonthlyRate,
@@ -127,6 +139,7 @@ enum CorrectionIndex {
 
   const CorrectionIndex({
     required this.label,
+    required this.source,
     required this.group,
     required this.sgsCode,
     required this.kind,
@@ -137,6 +150,7 @@ enum CorrectionIndex {
   });
 
   final String label;
+  final String source;
   final CorrectionGroup group;
   final int sgsCode;
   final SeriesKind kind;
@@ -153,6 +167,9 @@ enum CorrectionIndex {
       ? '${fromMonth.toString().padLeft(2, '0')}/$fromYear'
       : '${fromDay.toString().padLeft(2, '0')}/'
             '${fromMonth.toString().padLeft(2, '0')}/$fromYear';
+
+  String get sinceMonthLabel =>
+      '${fromMonth.toString().padLeft(2, '0')}/$fromYear';
 
   String get availabilityMessage =>
       'O índice $label possui dados a partir de $availableFromInputLabel.';

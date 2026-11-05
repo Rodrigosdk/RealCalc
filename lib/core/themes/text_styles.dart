@@ -1,120 +1,123 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'color_tokens.dart';
 
 class AppTextStyles {
-  static final TextStyle _base = GoogleFonts.manrope();
-  static final TextStyle _baseWhite = _base.copyWith(color: Colors.white);
+  static const String manropeFamily = 'Manrope';
+  static const String bricolageGrotesqueFamily = 'Bricolage Grotesque';
 
-  // Headlines — mantidos, ainda usados pela TextTheme padrão do Material
-  // (dialogs, snackbars etc.) mesmo com o header customizado nas telas.
-  static final TextStyle headlineLarge = _base.copyWith(
-    fontSize: 32,
-    fontWeight: FontWeight.bold,
+  // Estilos de destaque e componentes da direção Vibrante minimalista.
+  // As cores são definidas pelo componente ou tema que utiliza cada estilo.
+  static final TextStyle bandStatement = const TextStyle(
+    fontFamily: bricolageGrotesqueFamily,
+    fontSize: 48,
+    fontWeight: FontWeight.w800,
+    letterSpacing: -1.8,
+  );
+  static final TextStyle screenTitle = const TextStyle(
+    fontFamily: bricolageGrotesqueFamily,
+    fontSize: 28,
+    fontWeight: FontWeight.w800,
+    letterSpacing: -0.9,
+  );
+  static final TextStyle sheetTitle = const TextStyle(
+    fontFamily: bricolageGrotesqueFamily,
+    fontSize: 28,
+    fontWeight: FontWeight.w800,
+    letterSpacing: -0.8,
+  );
+  static final TextStyle exampleValue = const TextStyle(
+    fontFamily: bricolageGrotesqueFamily,
+    fontSize: 30,
+    fontWeight: FontWeight.w800,
+    letterSpacing: -0.8,
+  );
+  static final TextStyle wordmark = const TextStyle(
+    fontFamily: bricolageGrotesqueFamily,
+    fontSize: 21,
+    fontWeight: FontWeight.w800,
     letterSpacing: -0.5,
   );
-  static final TextStyle headlineMedium = _baseWhite.copyWith(
-    fontSize: 18,
-    fontWeight: FontWeight.bold,
-  );
 
-  // Body — mantidos sem alteração, `bodyLarge` já é o tamanho correto
-  // usado nos valores de input pelo InputForms.
-  static final TextStyle bodyLarge = _base.copyWith(fontSize: 16);
-  static final TextStyle bodyMedium = _base.copyWith(fontSize: 14);
-  static final TextStyle labelLarge = _base.copyWith(
-    fontSize: 14,
+  static final TextStyle bandKicker = const TextStyle(
+    fontFamily: manropeFamily,
+    fontSize: 15,
+    fontWeight: FontWeight.w600,
+  );
+  static final TextStyle bandSub = const TextStyle(
+    fontFamily: manropeFamily,
+    fontSize: 15,
     fontWeight: FontWeight.w500,
-    letterSpacing: 0.5,
   );
-
-  // Componentes gerais — mantidos. errorBannerText já usa ColorTokens.error,
-  // só depende da cor em si ser atualizada (ColorTokens), não do estilo.
-  static final TextStyle helpCardMessage = _base.copyWith(
-    fontSize: 14,
-    color: ColorTokens.textPrimary,
-    fontWeight: FontWeight.w400,
+  static final TextStyle headerTitle = const TextStyle(
+    fontFamily: manropeFamily,
+    fontSize: 16,
+    fontWeight: FontWeight.w700,
   );
-  static final TextStyle inputHelperText = _base.copyWith(
-    fontSize: 12,
-    color: ColorTokens.textHint,
-  );
-  static final TextStyle errorBannerText = _base.copyWith(
-    fontSize: 13,
+  static final TextStyle rowLabel = const TextStyle(
+    fontFamily: manropeFamily,
+    fontSize: 16,
     fontWeight: FontWeight.w500,
-    color: ColorTokens.error,
   );
-
-  // Card de métrica (Selic) — NOVO. Substitui highlightCardTitle/
-  // highlightCardSubtitle/highlightCardButton, que eram específicos do
-  // HighlightCard antigo (removido). Cor não é fixada aqui porque muda
-  // conforme o estado (amber padrão, verde/vermelho em variação futura);
-  // aplicar via .copyWith(color: ...) no componente.
-  static final TextStyle metricLabel = _base.copyWith(
-    fontSize: 12,
-    color: ColorTokens.textSecondary,
-  );
-  static final TextStyle metricValue = _base.copyWith(
-    fontSize: 30,
-    fontWeight: FontWeight.w500,
-    letterSpacing: -0.6,
+  static final TextStyle rowValue = TextStyle(
+    fontFamily: manropeFamily,
+    fontSize: 17,
+    fontWeight: FontWeight.w700,
     fontFeatures: const [FontFeature.tabularFigures()],
   );
-  static final TextStyle metricCaption = _base.copyWith(
-    fontSize: 11,
-    color: ColorTokens.textHint,
-  );
-
-  // Badge de estado do campo ("vazio" / "calculado" / "resultado") — NOVO.
-  // Sem cor fixa: cada estado (amber/verde/vermelho) aplica a própria cor.
-  static final TextStyle stateBadge = _base.copyWith(
-    fontSize: 11,
+  static final TextStyle rowUnit = const TextStyle(
+    fontFamily: manropeFamily,
+    fontSize: 14,
     fontWeight: FontWeight.w500,
   );
-
-  // MenuCard
-  static final TextStyle menuCardTitle = _baseWhite.copyWith(
+  static final TextStyle rowState = const TextStyle(
+    fontFamily: manropeFamily,
+    fontSize: 12,
+    fontWeight: FontWeight.w700,
+  );
+  static final TextStyle listTitle = const TextStyle(
+    fontFamily: manropeFamily,
+    fontSize: 17,
+    fontWeight: FontWeight.w700,
+  );
+  static final TextStyle listDesc = const TextStyle(
+    fontFamily: manropeFamily,
     fontSize: 13,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w500,
   );
-  static final TextStyle menuCardTitleCompact = _baseWhite.copyWith(
-    fontSize: 11,
-    fontWeight: FontWeight.bold,
+  static final TextStyle sectionLabel = const TextStyle(
+    fontFamily: manropeFamily,
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
   );
-  static final TextStyle menuCardDescription = _baseWhite.copyWith(
-    fontSize: 10,
-    height: 1.1,
-  );
-  // Corrigido: estava em 9px, abaixo do mínimo legível (11px).
-  static final TextStyle menuCardDescriptionCompact = _baseWhite.copyWith(
-    fontSize: 11,
-    height: 1.1,
-  );
-
-  // MenuCard — variante featured (tile full-width, texto um pouco maior
-  // por ter mais espaço horizontal disponível). NOVO.
-  static final TextStyle menuCardTitleFeatured = _baseWhite.copyWith(
+  static final TextStyle detailLabel = const TextStyle(
+    fontFamily: manropeFamily,
     fontSize: 14,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w500,
   );
-  static final TextStyle menuCardDescriptionFeatured = _base.copyWith(
+  static final TextStyle detailValue = TextStyle(
+    fontFamily: manropeFamily,
+    fontSize: 15,
+    fontWeight: FontWeight.w700,
+    fontFeatures: const [FontFeature.tabularFigures()],
+  );
+  static final TextStyle button = const TextStyle(
+    fontFamily: manropeFamily,
+    fontSize: 16,
+    fontWeight: FontWeight.w800,
+  );
+  static final TextStyle pill = const TextStyle(
+    fontFamily: manropeFamily,
+    fontSize: 13,
+    fontWeight: FontWeight.w800,
+  );
+  static final TextStyle body = const TextStyle(
+    fontFamily: manropeFamily,
+    fontSize: 15,
+    fontWeight: FontWeight.w500,
+    height: 1.5,
+  );
+  static final TextStyle caption = const TextStyle(
+    fontFamily: manropeFamily,
     fontSize: 12,
-    color: ColorTokens.textSecondary,
+    fontWeight: FontWeight.w500,
   );
-
-  // Home
-  static final TextStyle appName = _baseWhite.copyWith(
-    fontSize: 20,
-    fontWeight: FontWeight.bold,
-  );
-  // Cor movida pra dentro do estilo (era aplicada com .withValues(alpha: 0.4)
-  // no call site em home_page.dart) — evita repetir o ajuste de opacidade
-  // toda vez que o label for usado.
-  static final TextStyle sectionHeader = _base.copyWith(
-    fontSize: 12,
-    fontWeight: FontWeight.bold,
-    letterSpacing: 1.2,
-    color: ColorTokens.textSecondary,
-  );
-  static final TextStyle historyItem = _baseWhite.copyWith(fontSize: 14);
 }

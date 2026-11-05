@@ -1,26 +1,22 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:real_calc/core/errors/messages.dart';
 import 'package:real_calc/core/routes/app_routes.dart';
-import 'package:real_calc/core/seed_works/error.dart';
-import 'package:real_calc/core/themes/color_tokens.dart';
-import 'package:real_calc/core/themes/extensions/financing_forms_theme.dart';
-import 'package:real_calc/core/themes/extensions/help_card_theme.dart';
-import 'package:real_calc/core/themes/extensions/home_page_theme.dart';
-import 'package:real_calc/core/themes/extensions/input_forms_result_card_theme.dart';
-import 'package:real_calc/core/themes/extensions/menu_card_theme.dart';
-import 'package:real_calc/core/themes/extensions/metric_card_theme.dart';
-import 'package:real_calc/core/themes/extensions/options_bottom_forms_theme.dart';
-import 'package:real_calc/core/themes/extensions/title_widget_theme.dart';
-import 'package:real_calc/core/themes/text_styles.dart';
-import 'package:real_calc/core/widgets/title_widget.dart';
-import 'package:real_calc/modules/home/presentation/components/menu_card.dart';
-import 'package:real_calc/modules/home/presentation/components/metric_card.dart';
+import 'package:real_calc/core/themes/app_colors.dart';
+import 'package:real_calc/core/themes/app_theme.dart';
+import 'package:real_calc/core/themes/calculator_palette.dart';
+import 'package:real_calc/core/widgets/app_logo.dart';
+import 'package:real_calc/core/widgets/theme_toggle_button.dart';
+import 'package:real_calc/modules/home/presentation/components/calculator_list_item.dart';
+import 'package:real_calc/modules/home/presentation/components/selic_band.dart';
 import 'package:real_calc/modules/home/presentation/cubit/greeting_cubit.dart';
 import 'package:real_calc/modules/home/presentation/cubit/selic_cubit.dart';
+import 'package:real_calc/modules/metrics/domain/enum/selic_period.dart';
 import 'package:real_calc/modules/home/presentation/page/page.dart';
 import 'package:real_calc/modules/metrics/domain/entites/metric.dart';
 
@@ -31,125 +27,60 @@ class MockSelicCubit extends MockCubit<SelicState> implements SelicCubit {}
 class MockGreetingCubit extends MockCubit<String> implements GreetingCubit {}
 
 void main() {
-  late MockNavigator mockNavigator;
-  late MockSelicCubit mockSelicCubit;
-  late MockGreetingCubit mockGreetingCubit;
+  setUpAll(() => registerFallbackValue(SelicPeriod.months12));
 
-  setUpAll(() {
-    registerFallbackValue(SelicInitial());
-  });
+  late MockNavigator navigator;
+  late MockSelicCubit selicCubit;
+  late MockGreetingCubit greetingCubit;
+
+  final metric = Metric(
+    anualRate: 13.75,
+    variationPercent: 0.25,
+    sparklineData: const [13.5, 13.75],
+  );
 
   setUp(() {
-    mockNavigator = MockNavigator();
-    Modular.navigatorDelegate = mockNavigator;
+    navigator = MockNavigator();
+    Modular.navigatorDelegate = navigator;
+    when(() => navigator.pushNamed(any())).thenAnswer((_) async => null);
 
-    mockSelicCubit = MockSelicCubit();
+    selicCubit = MockSelicCubit();
     whenListen(
-      mockSelicCubit,
+      selicCubit,
       const Stream<SelicState>.empty(),
-      initialState: SelicLoaded(
-        Metric(
-          anualRate: 10.75,
-          variationPercent: 0.25,
-          sparklineData: const [10.5, 10.6, 10.75],
-        ),
-      ),
+      initialState: SelicLoaded(metric),
     );
+    when(() => selicCubit.retry()).thenAnswer((_) async {});
 
-    mockGreetingCubit = MockGreetingCubit();
+    greetingCubit = MockGreetingCubit();
     whenListen(
-      mockGreetingCubit,
+      greetingCubit,
       const Stream<String>.empty(),
       initialState: 'Bom dia',
     );
   });
 
-  Widget buildTestableWidget({double width = 360.0, double height = 800.0}) {
-    return MaterialApp(
-      theme: ThemeData(
-        extensions: [
-          OptionsBottomFormsTheme(
-            calculateButtonBackground: ColorTokens.accentAmber,
-            calculateButtonForeground: Colors.white,
-            actionButtonBackground: ColorTokens.surface,
-            actionButtonForeground: ColorTokens.textSecondary,
-            borderButtonColor: ColorTokens.successContainerBorder,
-          ),
-          TitleWidgetTheme(
-            titleStyle: AppTextStyles.headlineMedium,
-            subtitleStyle: AppTextStyles.bodyMedium,
-          ),
-          HelpCardTheme(
-            messageStyle: AppTextStyles.helpCardMessage,
-            backgroundColor: ColorTokens.surface,
-            borderColor: ColorTokens.accentAmber,
-            iconBackgroundColor: ColorTokens.accentAmber,
-            iconColor: Colors.white,
-          ),
-          InputFormsResultCardTheme(
-            neutralBorderColor: ColorTokens.border,
-            neutralLabelColor: ColorTokens.textSecondary,
-            neutralIconColor: ColorTokens.textSecondary,
-            highlightedColor: ColorTokens.accentAmber,
-            calculatedColor: ColorTokens.success,
-            errorColor: ColorTokens.error,
-            badgeStyle: AppTextStyles.stateBadge,
-          ),
-          HomePageTheme(
-            scaffoldBackgroundColor: ColorTokens.background,
-            cardColor: ColorTokens.surface,
-            // ColorTokens.iconColor não existe no ColorTokens redefinido —
-            // confirme o nome certo do token no seu projeto (ex: textSecondary).
-            iconContainerColor: ColorTokens.textSecondary,
-            appNameStyle: AppTextStyles.appName,
-            sectionHeaderStyle: AppTextStyles.sectionHeader,
-            historyItemStyle: AppTextStyles.historyItem,
-            historyItemIconColor: Colors.white,
-            historyItemArrowColor: Colors.white,
-            bottomNavBackgroundColor: ColorTokens.surface,
-            bottomNavSelectedColor: ColorTokens.accentAmber,
-            bottomNavUnselectedColor: Colors.white,
-            lineColor: ColorTokens.surface,
-          ),
-          FinancingFormsTheme(
-            iconColor: ColorTokens.accentAmber,
-            progressIndicatorColor: ColorTokens.accentAmber,
-            errorBackgroundColor: ColorTokens.errorContainerBg,
-            errorBorderColor: ColorTokens.errorContainerBorder,
-            errorTextStyle: AppTextStyles.errorBannerText,
-          ),
-          MetricCardTheme(
-            backgroundColor: ColorTokens.surface,
-            borderColor: ColorTokens.accentAmber,
-            labelStyle: AppTextStyles.metricLabel,
-            valueStyle: AppTextStyles.metricValue,
-            valueUnitStyle: AppTextStyles.metricLabel,
-            captionStyle: AppTextStyles.metricCaption,
-            variationTextStyle: AppTextStyles.stateBadge,
-            variationPositiveColor: ColorTokens.success,
-            variationNegativeColor: ColorTokens.error,
-            variationNeutralColor: ColorTokens.textSecondary,
-            skeletonColor: ColorTokens.surfaceVariant,
-          ),
-          MenuCardTheme(
-            titleStyle: AppTextStyles.menuCardTitle,
-            descriptionStyle: AppTextStyles.menuCardDescription,
-            titleStyleCompact: AppTextStyles.menuCardTitleCompact,
-            descriptionStyleCompact: AppTextStyles.menuCardDescriptionCompact,
-            titleStyleFeatured: AppTextStyles.menuCardTitleFeatured,
-            descriptionStyleFeatured: AppTextStyles.menuCardDescriptionFeatured,
-            featuredBorderColor: ColorTokens.accentAmber,
-            disabledLabelColor: ColorTokens.textHint,
-            disabledTextStyle: AppTextStyles.menuCardDescription,
-          ),
-        ],
-      ),
-      home: MediaQuery(
-        data: MediaQueryData(size: Size(width, height)),
-        child: MultiBlocProvider(
+  Future<void> pump(
+    WidgetTester tester, {
+    ThemeMode themeMode = ThemeMode.light,
+    Size size = const Size(400, 900),
+    double textScale = 1,
+  }) async {
+    tester.view.physicalSize = size;
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = textScale;
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: themeMode,
+        home: MultiBlocProvider(
           providers: [
-            BlocProvider<SelicCubit>.value(value: mockSelicCubit),
-            BlocProvider<GreetingCubit>.value(value: mockGreetingCubit),
+            BlocProvider<SelicCubit>.value(value: selicCubit),
+            BlocProvider<GreetingCubit>.value(value: greetingCubit),
           ],
           child: const HomePage(),
         ),
@@ -157,151 +88,162 @@ void main() {
     );
   }
 
-  group('HomePage Widget Tests', () {
-    testWidgets(
-      'Deve renderizar os componentes base estruturais e textos principais',
-      (tester) async {
-        await tester.pumpWidget(buildTestableWidget());
+  group('HomePage', () {
+    testWidgets('faixa com logo, tema e Selic, e ícones claros na barra de '
+        'status', (tester) async {
+      await pump(tester);
 
-        expect(find.byType(TitleWidget), findsOneWidget);
-        expect(find.byType(MetricCard), findsOneWidget);
-        expect(find.byType(MenuCard), findsNWidgets(4));
-      },
-    );
+      expect(find.byType(AppLogo), findsOneWidget);
+      expect(find.byType(ThemeToggleButton), findsOneWidget);
+      expect(find.byType(SelicBand), findsOneWidget);
+      expect(find.text('13,75%'), findsOneWidget);
 
-    testWidgets(
-      'Deve navegar para a tela de depósitos regulares ao clicar no card correspondente',
-      (tester) async {
-        when(() => mockNavigator.pushNamed(any())).thenAnswer((_) async => null);
-        await tester.pumpWidget(buildTestableWidget());
-
-        final cardFinanciamento =
-            find.widgetWithText(MenuCard, 'Depósitos Regulares');
-        expect(cardFinanciamento, findsOneWidget);
-
-        await tester.tap(cardFinanciamento);
-        await tester.pumpAndSettle();
-
-        verify(() => mockNavigator.pushNamed(AppRoutes.deposits)).called(1);
-      },
-    );
-
-    testWidgets(
-      'Deve navegar para a tela de valor futuro ao clicar no card correspondente',
-      (tester) async {
-        when(() => mockNavigator.pushNamed(any())).thenAnswer((_) async => null);
-        await tester.pumpWidget(buildTestableWidget());
-
-        final cardValorFuturo = find.widgetWithText(MenuCard, 'Valor Futuro');
-        expect(cardValorFuturo, findsOneWidget);
-
-        await tester.tap(cardValorFuturo);
-        await tester.pumpAndSettle();
-
-        verify(() => mockNavigator.pushNamed(AppRoutes.futureValue)).called(1);
-      },
-    );
-
-    testWidgets(
-      'Deve navegar para a tela de financiamento ao clicar no card correspondente',
-      (tester) async {
-        when(() => mockNavigator.pushNamed(any())).thenAnswer((_) async => null);
-        await tester.pumpWidget(buildTestableWidget());
-
-        final cardFinanciamento = find.widgetWithText(MenuCard, 'Financiamento');
-        expect(cardFinanciamento, findsOneWidget);
-
-        await tester.tap(cardFinanciamento);
-        await tester.pumpAndSettle();
-
-        verify(() => mockNavigator.pushNamed(AppRoutes.financing)).called(1);
-      },
-    );
-
-    testWidgets(
-      'Deve renderizar o divisor e os cards em duas colunas no mobile',
-      (tester) async {
-        await tester.pumpWidget(buildTestableWidget(width: 360.0));
-
-        expect(find.byType(VerticalDivider), findsOneWidget);
-        expect(find.byType(MenuCard), findsNWidgets(4));
-        expect(tester.takeException(), isNull);
-      },
-    );
-
-    testWidgets(
-      'Deve manter os cards e o divisor em telas largas',
-      (tester) async {
-        await tester.pumpWidget(buildTestableWidget(width: 1024.0));
-
-        expect(find.byType(VerticalDivider), findsOneWidget);
-        expect(find.byType(MenuCard), findsNWidgets(4));
-        expect(tester.takeException(), isNull);
-      },
-    );
-  });
-
-  group('HomePage — estados do card de métrica (SelicCubit)', () {
-    testWidgets('mostra o skeleton quando o estado é SelicLoading', (tester) async {
-      whenListen(
-        mockSelicCubit,
-        const Stream<SelicState>.empty(),
-        initialState: SelicLoading(),
+      final band = tester.widget<ColoredBox>(
+        find
+            .ancestor(
+              of: find.byType(AppLogo),
+              matching: find.byType(ColoredBox),
+            )
+            .first,
       );
+      expect(band.color, AppColors.light.bandHome);
+      expect(tester.getTopLeft(find.byWidget(band)).dy, 0);
 
-      await tester.pumpWidget(buildTestableWidget());
-      await tester.pump(const Duration(milliseconds: 100));
-
-      expect(find.byType(MetricCard), findsOneWidget);
-      // Não afirmamos o construtor exato (.loading) aqui porque MetricCard
-      // não expõe publicamente qual variante está ativa — só confirmamos
-      // que nenhum valor numérico da Selic aparece nesse estado.
-      expect(find.textContaining('%'), findsNothing);
+      final region = tester.widget<AnnotatedRegion<SystemUiOverlayStyle>>(
+        find
+            .ancestor(
+              of: find.byType(AppLogo),
+              matching: find.byType(AnnotatedRegion<SystemUiOverlayStyle>),
+            )
+            .first,
+      );
+      expect(region.value.statusBarIconBrightness, Brightness.light);
     });
 
-    testWidgets('mostra o valor quando o estado é SelicLoaded', (tester) async {
-      final metric = Metric(
-        anualRate: 10.75,
-        variationPercent: 0.25,
-        sparklineData: const [10.5, 10.6, 10.75],
-      );
-      whenListen(
-        mockSelicCubit,
-        const Stream<SelicState>.empty(),
-        initialState: SelicLoaded(metric),
-      );
+    testWidgets('saudação, título, lista e rodapé', (tester) async {
+      await pump(tester);
 
-      await tester.pumpWidget(buildTestableWidget());
-      await tester.pump();
-
-      expect(find.textContaining('10,75'), findsOneWidget);
+      expect(find.text('Bom dia'), findsOneWidget);
+      expect(find.text('O que vamos calcular hoje?'), findsOneWidget);
+      expect(find.byType(CalculatorListItem), findsNWidgets(4));
+      for (final (title, description) in [
+        ('Financiamento', 'Prestação, prazo ou taxa'),
+        ('Depósitos Regulares', 'Quanto você acumula todo mês'),
+        ('Valor Futuro', 'Quanto rende um valor aplicado'),
+        ('Correção de Valores', 'Pela inflação, juros ou poupança'),
+      ]) {
+        expect(find.text(title), findsOneWidget);
+        expect(find.text(description), findsOneWidget);
+      }
+      expect(find.text(HomePage.footer), findsOneWidget);
     });
 
-    testWidgets(
-      'mostra a mensagem de erro quando o estado é SelicError',
-      (tester) async {
-        whenListen(
-          mockSelicCubit,
-          const Stream<SelicState>.empty(),
-          initialState: const SelicError(
-             _FakeErrorMessage.noConnection,
+    testWidgets('itens de 72px com o quadrado na cor de cada calculadora', (
+      tester,
+    ) async {
+      await pump(tester);
+
+      for (final item in tester.widgetList<CalculatorListItem>(
+        find.byType(CalculatorListItem),
+      )) {
+        final finder = find.byWidget(item);
+        expect(tester.getSize(finder).height, greaterThanOrEqualTo(72));
+        final tile = tester.widget<Container>(
+          find.descendant(of: finder, matching: find.byType(Container)).at(1),
+        );
+        expect(
+          (tile.decoration! as BoxDecoration).color,
+          CalculatorPalette.of(item.kind).solid,
+        );
+      }
+    });
+
+    for (final (title, route) in [
+      ('Financiamento', AppRoutes.financing),
+      ('Depósitos Regulares', AppRoutes.deposits),
+      ('Valor Futuro', AppRoutes.futureValue),
+      ('Correção de Valores', AppRoutes.correction),
+    ]) {
+      testWidgets('tocar em qualquer parte de "$title" abre a calculadora', (
+        tester,
+      ) async {
+        await pump(tester);
+
+        final item = find.ancestor(
+          of: find.text(title),
+          matching: find.byType(CalculatorListItem),
+        );
+        await tester.ensureVisible(item);
+        await tester.tapAt(tester.getTopRight(item) + const Offset(-4, 4));
+
+        verify(() => navigator.pushNamed(route)).called(1);
+      });
+    }
+
+    testWidgets('o TalkBack lê nome e descrição como um botão', (tester) async {
+      final handle = tester.ensureSemantics();
+      await pump(tester);
+
+      expect(
+        tester.getSemantics(
+          find.ancestor(
+            of: find.text('Valor Futuro'),
+            matching: find.byType(CalculatorListItem),
           ),
+        ),
+        isSemantics(
+          label: 'Valor Futuro\nQuanto rende um valor aplicado',
+          isButton: true,
+          hasTapAction: true,
+        ),
+      );
+      handle.dispose();
+    });
+
+    testWidgets('"Tentar de novo" na Selic chama o retry', (tester) async {
+      whenListen(
+        selicCubit,
+        const Stream<SelicState>.empty(),
+        initialState: SelicError(ServerErrorMessages.connectionError),
+      );
+      await pump(tester);
+
+      await tester.tap(find.text('Tentar de novo'));
+      verify(() => selicCubit.retry()).called(1);
+    });
+
+    testWidgets('"5 anos" na Selic chama o changePeriod', (tester) async {
+      when(() => selicCubit.changePeriod(any())).thenAnswer((_) async {});
+      await pump(tester);
+
+      await tester.tap(find.text('5 anos'));
+      verify(() => selicCubit.changePeriod(SelicPeriod.years5)).called(1);
+    });
+
+    for (final themeMode in [ThemeMode.light, ThemeMode.dark]) {
+      testWidgets('em 360dp e fonte em 130% no tema ${themeMode.name}, as '
+          'descrições quebram sem cortar', (tester) async {
+        await pump(
+          tester,
+          themeMode: themeMode,
+          size: const Size(360, 780),
+          textScale: 1.3,
         );
 
-        await tester.pumpWidget(buildTestableWidget());
-        await tester.pump();
+        expect(tester.takeException(), isNull);
 
-        expect(find.text('Sem conexão'), findsOneWidget);
-      },
-    );
+        final description = find.text('Quanto você acumula todo mês');
+        await tester.ensureVisible(description);
+        final item = tester.getRect(
+          find.ancestor(
+            of: description,
+            matching: find.byType(CalculatorListItem),
+          ),
+        );
+        final text = tester.getRect(description);
+        expect(text.height, greaterThan(13 * 1.3 * 1.5));
+        expect(text.right, lessThanOrEqualTo(item.right));
+      });
+    }
   });
-}
-
-enum _FakeErrorMessage implements ErrorMessages {
-  noConnection('Sem conexão');
-
-  const _FakeErrorMessage(this.message);
-
-  @override
-  final String message;
 }

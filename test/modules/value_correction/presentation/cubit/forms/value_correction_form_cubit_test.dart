@@ -67,13 +67,13 @@ void main() {
       expect(cubit.state.fieldErrors[ValueCorrectionField.initialDate], isNull);
       expect(
         cubit.state.warningBannerMessage,
-        'O índice IPCA-E (IBGE) possui dados a partir de 01/1992.',
+        'O índice IPCA-E possui dados a partir de 01/1992.',
       );
       expect(cubit.state.canCalculate, isFalse);
 
       cubit.setIndex(CorrectionIndex.igpM);
-      cubit.initialDate.text = '04/2021';
-      cubit.finalDate.text = '04/2021';
+      cubit.initialDate.text = '01/2015';
+      cubit.finalDate.text = '12/2020';
 
       expect(cubit.state.fieldErrors[ValueCorrectionField.initialDate], isNull);
       expect(cubit.state.warningBannerMessage, isEmpty);

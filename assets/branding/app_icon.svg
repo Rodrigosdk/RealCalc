@@ -1,8 +1,10 @@
-<svg width="160" height="160" viewBox="0 0 380 380" xmlns="http://www.w3.org/2000/svg" role="img">
-  <title>Ícone do app com um símbolo de porcentagem estilizado</title>
-  <desc>Quadrado arredondado escuro com um traço diagonal âmbar, um anel no topo e duas barras ascendentes na base, formando um símbolo de porcentagem combinado com um gráfico de crescimento.</desc>
-  <line x1="128" y1="272" x2="252" y2="108" stroke="#D4A657" stroke-width="20" stroke-linecap="round"/>
-  <circle cx="128" cy="140" r="28" fill="none" stroke="#D4A657" stroke-width="16"/>
-  <rect x="222" y="250" width="22" height="40" rx="6" fill="#D4A657"/>
-  <rect x="252" y="215" width="22" height="75" rx="6" fill="#D4A657"/>
+<svg width="173" height="190" viewBox="0 0 173 190" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>Símbolo do RealCalc</title>
+  <desc>Símbolo de porcentagem em âmbar com duas barras ascendentes, em traço único com pontas arredondadas.</desc>
+  <g fill="none" stroke="#D4A657" stroke-width="20" stroke-linecap="round">
+    <circle cx="37" cy="37" r="27"/>
+    <line x1="161.25" y1="10" x2="38.75" y2="180"/>
+    <line x1="133" y1="152" x2="133" y2="180"/>
+    <line x1="163" y1="110" x2="163" y2="180"/>
+  </g>
 </svg>

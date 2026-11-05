@@ -41,7 +41,22 @@ void main() {
     );
     expect(
       cubit.state.stateOf(FinancialCalculationTarget.interestRate),
-      InputFieldState.highlighted,
+      InputFieldState.unknown,
     );
+  });
+
+  test('escreve a taxa calculada com duas casas', () {
+    cubit.applyResult(
+      FinancialCalculation(
+        initialValue: 2500,
+        periods: 12,
+        rate: 2.0000694603100793,
+        finalValue: 236.40,
+      ),
+      FinancialCalculationTarget.interestRate,
+    );
+
+    expect(cubit.rate.text, '2,00');
+    expect(cubit.financing.rate, 2);
   });
 }

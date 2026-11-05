@@ -1,7 +1,7 @@
 # RealCalc
 
 <p align="center">
-  <img alt="RealCalc — Financiamento, aplicações e Selic em um só lugar" src="assets/readme/banner.png" width="100%"/>
+  <img alt="RealCalc: contas de dinheiro, sem mistério. Financiamento, aplicações e correção de valores." src="assets/readme/banner.png" width="100%"/>
 </p>
 
 <p align="center">
@@ -13,8 +13,6 @@
 Uma releitura moderna da **Calculadora do Cidadão**, o app oficial do Banco Central do Brasil para cálculos financeiros. O RealCalc parte da mesma lógica de cálculo (juros compostos, depósitos regulares, financiamento), mas repensa a experiência do zero — identidade visual própria, hierarquia clara entre ações, e uma solução pro problema que o app original nunca resolveu bem: em cada calculadora, qualquer um dos campos pode ser a incógnita, e a interface original não deixa isso óbvio.
 
 > Projeto pessoal e não-oficial. Sem qualquer vínculo com o Banco Central do Brasil — construído como estudo de produto, UX e arquitetura em Flutter.
->
-> Em evolução: algumas rotas já estão previstas na navegação, mas ainda não possuem uma tela implementada.
 
 ## O problema que o projeto resolve
 
@@ -34,15 +32,31 @@ Essa lógica vive num Cubit dedicado por calculadora, reagindo em tempo real a c
 - Simulação de depósitos regulares com capitalização composta.
 - Fluxo de financiamento com os 4 estados de campo descritos acima.
 - Card de métrica com a taxa Selic atual, variação desde o último ajuste do Copom e uma sparkline de tendência — com estados de carregamento e offline (mostra o último valor salvo, ou um estado de "tentar novamente").
-- Interface com design system próprio: paleta de cores, tipografia e componentes centralizados via `ThemeExtension`, sem cor ou estilo hardcoded espalhado pelos widgets.
+- Interface com design system próprio: paleta de cores (`AppColors`, uma `ThemeExtension` com os dois temas), tipografia e ícones centralizados, sem cor ou estilo hardcoded espalhado pelos widgets.
 - Testes unitários, de widgets e de módulos (incluindo a fiação de injeção de dependência do `flutter_modular`).
 
-<p float="left" align="center">
-  <img alt="screenshot-1" width="24%" src="screenshots/screenshot-1.jpg"/>
-  <img alt="screenshot-2" width="24%" src="screenshots/screenshot-2.jpg"/>
-  <img alt="screenshot-3" width="24%" src="screenshots/screenshot-3.jpg"/>
-  <img alt="screenshot-4" width="24%" src="screenshots/screenshot-4.jpg"/>
-</p>
+### Temas claro e escuro
+
+Cada calculadora tem a própria cor, e a resposta aparece em frase no topo da tela. O app segue o tema do sistema, e o botão de sol e lua na tela inicial troca o tema. A escolha fica salva.
+
+<table>
+  <tr>
+    <th>Claro</th>
+    <td><img alt="Tela inicial, tema claro" src="screenshots/claro/01-inicio.png" width="100%"/></td>
+    <td><img alt="Financiamento, tema claro" src="screenshots/claro/02-financiamento.png" width="100%"/></td>
+    <td><img alt="Depósitos Regulares, tema claro" src="screenshots/claro/03-depositos.png" width="100%"/></td>
+    <td><img alt="Valor Futuro, tema claro" src="screenshots/claro/04-valor-futuro.png" width="100%"/></td>
+    <td><img alt="Correção de Valores, tema claro" src="screenshots/claro/05-correcao.png" width="100%"/></td>
+  </tr>
+  <tr>
+    <th>Escuro</th>
+    <td><img alt="Tela inicial, tema escuro" src="screenshots/escuro/01-inicio.png" width="100%"/></td>
+    <td><img alt="Financiamento, tema escuro" src="screenshots/escuro/02-financiamento.png" width="100%"/></td>
+    <td><img alt="Depósitos Regulares, tema escuro" src="screenshots/escuro/03-depositos.png" width="100%"/></td>
+    <td><img alt="Valor Futuro, tema escuro" src="screenshots/escuro/04-valor-futuro.png" width="100%"/></td>
+    <td><img alt="Correção de Valores, tema escuro" src="screenshots/escuro/05-correcao.png" width="100%"/></td>
+  </tr>
+</table>
 
 ## Tecnologias
 
@@ -54,7 +68,7 @@ Essa lógica vive num Cubit dedicado por calculadora, reagindo em tempo real a c
 | `Dio` | Cliente HTTP |
 | `equatable` | Comparação de estados e objetos |
 | `intl` | Formatação de valores e datas |
-| `google_fonts` | Tipografia (Manrope) |
+| Manrope e Bricolage Grotesque | Tipografia empacotada no app para uso offline |
 | `mocktail` e `bloc_test` | Testes |
 
 **API de terceiros:** [API do Banco Central do Brasil](https://dadosabertos.bcb.gov.br/), usada como fonte de dados da taxa Selic.
@@ -110,11 +124,11 @@ test/                           # Testes organizados por módulo
 
 ## Roadmap
 
-- [ ] Correção de valores por índice (IPCA, IGP-M, poupança)
+- [x] Correção de valores por índice (IPCA, IGP-M, poupança)
 - [ ] Comparação SAC vs. Price
 - [ ] Simulação de amortização extra
 - [ ] Histórico de cálculos
-- [ ] Modo claro
+- [x] Modo claro
 
 ## Contribuindo
 

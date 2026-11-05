@@ -1,0 +1,10 @@
+<svg width="173" height="190" viewBox="0 0 173 190" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>Símbolo do RealCalc para 24px ou menos</title>
+  <desc>Versão do símbolo com traço mais grosso e espaços mais abertos, para continuar legível em tamanhos pequenos.</desc>
+  <g fill="none" stroke="#D4A657" stroke-width="26" stroke-linecap="round">
+    <circle cx="43" cy="43" r="30"/>
+    <line x1="161" y1="13" x2="41" y2="177"/>
+    <line x1="116" y1="150" x2="116" y2="177"/>
+    <line x1="160" y1="108" x2="160" y2="177"/>
+  </g>
+</svg>

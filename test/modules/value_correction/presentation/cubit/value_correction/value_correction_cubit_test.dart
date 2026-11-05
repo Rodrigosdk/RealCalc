@@ -297,7 +297,7 @@ void main() {
         isA<ValueCorrectionError>().having(
           (state) => state.message,
           'message',
-          'O índice IPCA-E (IBGE) possui dados a partir de 01/1992.',
+          'O índice IPCA-E possui dados a partir de 01/1992.',
         ),
       ],
       verify: (_) {

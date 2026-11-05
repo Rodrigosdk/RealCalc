@@ -1,120 +1,89 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
-import 'package:real_calc/core/themes/spacing.dart';
-import 'package:real_calc/core/widgets/page_header.dart';
-import 'package:real_calc/core/widgets/title_widget.dart';
-import 'package:real_calc/modules/financial_calculators/presentation/models/field_spec.dart';
-import 'package:real_calc/modules/financial_calculators/presentation/widgets/forms_view.dart';
-import 'package:real_calc/core/widgets/help_card.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:real_calc/core/services/result_sharer.dart';
+import 'package:real_calc/core/services/share_plus_result_sharer.dart';
+import 'package:real_calc/core/themes/calculator_palette.dart';
+import 'package:real_calc/core/themes/calculator_scope.dart';
+import 'package:real_calc/core/utils/decimal_input_formatter.dart';
 
-import '../../../../core/utils/decimal_input_formatter.dart';
 import '../../domain/enum/financial_calculation_target.dart';
-import '../../../../core/widgets/types/input_field_state.dart';
 import '../cubit/financing/financing_cubit.dart';
 import '../cubit/forms/financing_form_cubit.dart';
+import '../utils/financing_statement.dart';
+import '../utils/result_summaries.dart';
+import '../utils/share_texts.dart';
+import '../widgets/calculator_form_view.dart';
 
 class FinancingPage extends StatelessWidget {
-  static final List<FieldSpec<FinancialCalculationTarget>> _fieldSpecs = [
-    FieldSpec(
-      field: FinancialCalculationTarget.initialValue,
-      label: 'Valor financiado (R\$)',
+  static const title = 'Financiamento';
+
+  static final fields = [
+    CalculatorFieldConfig(
+      target: FinancialCalculationTarget.initialValue,
+      label: 'Valor financiado',
+      prefix: 'R\$',
       hint: '0,00',
-      icon: Icons.attach_money,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
       formatters: [DecimalInputFormatter()],
     ),
-    FieldSpec(
-      field: FinancialCalculationTarget.periods,
-      label: 'Prazo (meses)',
+    CalculatorFieldConfig(
+      target: FinancialCalculationTarget.periods,
+      label: 'Prazo',
+      unit: 'meses',
       hint: '0',
-      icon: Icons.calendar_today,
+      keyboardType: TextInputType.number,
       formatters: [FilteringTextInputFormatter.digitsOnly],
     ),
-    FieldSpec(
-      field: FinancialCalculationTarget.interestRate,
-      label: 'Taxa de juros (% ao mês)',
+    CalculatorFieldConfig(
+      target: FinancialCalculationTarget.interestRate,
+      label: 'Taxa de juros',
+      unit: '% a.m.',
       hint: '0,00',
-      icon: Icons.percent,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
       formatters: [DecimalInputFormatter()],
     ),
-    FieldSpec(
-      field: FinancialCalculationTarget.finalValue,
-      label: 'Valor da prestação',
+    CalculatorFieldConfig(
+      target: FinancialCalculationTarget.finalValue,
+      label: 'Prestação',
+      prefix: 'R\$',
+      secondLine: 'todo mês',
       hint: '0,00',
-      icon: Icons.payments,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
       formatters: [DecimalInputFormatter()],
     ),
   ];
 
-  const FinancingPage({super.key});
+  final ResultSharer sharer;
 
-  BlocListener<FinancingCubit, FinancingState> _buildForms() {
-    return BlocListener<FinancingCubit, FinancingState>(
-      listener: (context, state) {
-        final formCubit = context.read<FinancingFormCubit>();
-        if (state is FinancingCalculated) {
-          formCubit.applyResult(state.value, state.calculatedField);
-        } else if (state is FinancingError) {
-          formCubit.invalidateCalculatedField();
-        }
-      },
-      child: BlocBuilder<FinancingCubit, FinancingState>(
-        builder: (context, financingState) {
-          final formCubit = context.watch<FinancingFormCubit>();
-          final formState = formCubit.state;
-
-          void calculate() {
-            if (formState.canCalculate) {
-              context.read<FinancingCubit>().calculate(formCubit.financing);
-            }
-          }
-
-          return FormsView<FinancialCalculationTarget>(
-            fieldSpecs: _fieldSpecs,
-            controllerFor: formCubit.controllerFor,
-            stateOf: formState.stateOf,
-            isLoading: financingState is FinancingLoading,
-            errorMessage: financingState is FinancingError
-                ? financingState.message ?? 'Erro ao calcular.'
-                : null,
-            onCalculate: calculate,
-            onClear: formCubit.clear,
-            onFieldTap: (field) {
-              if (formState.stateOf(field) == InputFieldState.highlighted) {
-                calculate();
-              }
-            },
-          );
-        },
-      ),
-    );
-  }
+  const FinancingPage({super.key, this.sharer = const SharePlusResultSharer()});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const PageHeader(title: 'Financiamento'),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md + 4,
-            vertical: AppSpacing.md + 4,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: AppSpacing.lg,
-            children: [
-              const TitleWidget(
-                title: 'Financiamento',
-                subtitle: 'Calcule o valor da prestação do seu financiamento.',
-              ),
-              const HelpCard(
-                message:
-                    'Preencha 3 campos e toque no 4° para calcular automaticamente',
-              ),
-              _buildForms(),
-            ],
-          ),
+    return CalculatorScope(
+      kind: CalculatorKind.financing,
+      child: BlocConsumer<FinancingCubit, FinancingState>(
+        listener: (context, state) {
+          final formCubit = context.read<FinancingFormCubit>();
+          if (state is FinancingCalculated) {
+            formCubit.applyResult(state.value, state.calculatedField);
+          } else if (state is FinancingError) {
+            formCubit.invalidateCalculatedField();
+          }
+        },
+        builder: (context, state) => CalculatorFormView(
+          kind: CalculatorKind.financing,
+          title: title,
+          fields: fields,
+          statement: financingStatement,
+          missingMessage: financingMissingFieldsMessage,
+          summary: financingResultSummary,
+          onCalculate: context.read<FinancingCubit>().calculate,
+          shareText: financingShareText,
+          sharer: sharer,
+          errorMessage: state is FinancingError
+              ? state.message ?? 'Confira os valores.'
+              : null,
         ),
       ),
     );

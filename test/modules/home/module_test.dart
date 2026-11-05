@@ -4,10 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:real_calc/core/themes/app_theme.dart';
 import 'package:real_calc/modules/home/module.dart';
 import 'package:real_calc/modules/home/presentation/page/page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   group('HomeModule Tests', () {
     setUp(() {
+      SharedPreferences.setMockInitialValues({});
       Modular.init(HomeModule());
     });
 

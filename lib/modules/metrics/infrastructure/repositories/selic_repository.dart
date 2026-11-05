@@ -11,10 +11,11 @@ class SelicRepository implements ISelicNetworkOnlyRepository {
   SelicRepository(this._selicDatasource);
 
   @override
-  Future<Result<ErrorMessages, List<SelicBcResponseNetwork>>> getSelicRate() async {
+  Future<Result<ErrorMessages, List<SelicBcResponseNetwork>>>
+  getSelicRate() async {
     final dataFinal = DateTime.now();
     final dataInicial = DateTime(
-      dataFinal.year - 4,
+      dataFinal.year - 1,
       dataFinal.month,
       dataFinal.day,
     );
@@ -24,7 +25,8 @@ class SelicRepository implements ISelicNetworkOnlyRepository {
     );
 
     return response.fold(
-      (error) => FailureResult<ErrorMessages, List<SelicBcResponseNetwork>>(error),
+      (error) =>
+          FailureResult<ErrorMessages, List<SelicBcResponseNetwork>>(error),
       (data) => SuccessResult<ErrorMessages, List<SelicBcResponseNetwork>>(
         data
             .whereType<Map<String, dynamic>>()
@@ -36,7 +38,8 @@ class SelicRepository implements ISelicNetworkOnlyRepository {
 
   // Método adicional para buscar por período específico
   @override
-  Future<Result<ErrorMessages, List<SelicBcResponseNetwork>>> getSelicRateByPeriod({
+  Future<Result<ErrorMessages, List<SelicBcResponseNetwork>>>
+  getSelicRateByPeriod({
     required DateTime dataInicial,
     required DateTime dataFinal,
   }) async {
@@ -45,7 +48,8 @@ class SelicRepository implements ISelicNetworkOnlyRepository {
     );
 
     return response.fold(
-      (error) => FailureResult<ErrorMessages, List<SelicBcResponseNetwork>>(error),
+      (error) =>
+          FailureResult<ErrorMessages, List<SelicBcResponseNetwork>>(error),
       (data) => SuccessResult<ErrorMessages, List<SelicBcResponseNetwork>>(
         data
             .whereType<Map<String, dynamic>>()

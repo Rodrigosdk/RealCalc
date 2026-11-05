@@ -39,7 +39,7 @@ void main() {
     expect(
       buildShareText(result()),
       'RealCalc · Correção de Valores\n'
-      'Índice: IPCA (IBGE)\n'
+      'Índice: IPCA\n'
       'Período: 01/2023 a 12/2025\n'
       'Valor original: R\$ 5.000,00\n'
       'Fator de correção: 1,1434000\n'
@@ -56,7 +56,7 @@ void main() {
     expect(
       text,
       'RealCalc · Correção de Valores\n'
-      'Índice: IPCA (IBGE)\n'
+      'Índice: IPCA\n'
       'Período: 01/2023 a 12/2025\n'
       'Fator de correção: 1,1434000\n\n'
       'Simulação feita no RealCalc, sem valor oficial.',
