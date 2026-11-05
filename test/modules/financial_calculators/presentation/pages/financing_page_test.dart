@@ -176,6 +176,25 @@ void main() {
       expect(inBand('2,00% ao mês'), findsOneWidget);
     });
 
+    testWidgets('prestação abaixo dos juros: aviso de erro, sem travar', (
+      tester,
+    ) async {
+      await pump(tester);
+      await type(tester, FinancialCalculationTarget.initialValue, '1000000');
+      await type(tester, FinancialCalculationTarget.interestRate, '200');
+      await type(tester, FinancialCalculationTarget.finalValue, '10000');
+
+      await tester.tap(find.text('Calcular'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(financingCubit.state, isA<FinancingError>());
+      expect(find.text('Não foi possível calcular'), findsOneWidget);
+      expect(find.textContaining('a dívida nunca é quitada'), findsOneWidget);
+      expect(find.byType(ResultDetails), findsNothing);
+      expect(formCubit.months.text, isEmpty);
+    });
+
     testWidgets('com menos de três campos, mostra o aviso com os campos '
         'vazios e desabilita "Calcular"', (tester) async {
       await pump(tester);

@@ -107,6 +107,40 @@ void main() {
     );
   });
 
+  group('CalculateFinancing - prazo sem solução', () {
+    FinancialCalculation withoutTerm(double payment) =>
+        FinancialCalculation(initialValue: 10000, rate: 2, finalValue: payment);
+
+    test('prestação menor que os juros do primeiro mês devolve erro', () {
+      final result = useCase.calculate(withoutTerm(100));
+
+      final error = result.getErrorOrNull()!.message.single;
+      expect(error, isA<PaymentBelowInterestError>());
+      expect((error as PaymentBelowInterestError).firstMonthInterest, 200);
+      expect(
+        error.message,
+        'Com essa prestação, a dívida nunca é quitada: ela precisa ser maior '
+        'que os juros do primeiro mês, de R\$\u00A0200,00.',
+      );
+    });
+
+    test('prestação igual aos juros do primeiro mês também devolve erro', () {
+      final result = useCase.calculate(withoutTerm(200));
+
+      expect(
+        result.getErrorOrNull()!.message.single,
+        isA<PaymentBelowInterestError>(),
+      );
+    });
+
+    test('prestação um centavo acima dos juros calcula o prazo', () {
+      final result = useCase.calculate(withoutTerm(200.01));
+
+      expect(result.isSuccess, isTrue);
+      expect(result.getOrNull()!.periods, greaterThan(0));
+    });
+  });
+
   group('CalculateFinancing - Imprecisão de Ponto Flutuante', () {
     test(
       'Deve mitigar a dízima do double e retornar o número exato de meses (25) mesmo com centavos aproximados',

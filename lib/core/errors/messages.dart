@@ -1,4 +1,5 @@
 import 'package:real_calc/core/seed_works/error.dart';
+import 'package:real_calc/core/utils/br_number_format.dart';
 
 enum CacheErrorMessages implements ErrorMessages {
   cacheError("Erro ao acessar o cache");
@@ -29,9 +30,7 @@ enum ServerErrorMessages implements ErrorMessages {
 
 enum SelicValidationMessage implements ErrorMessages {
   invalidDate('Informe datas válidas no formato dd/MM/yyyy'),
-  initialDateAfterFinalDate(
-    'A data inicial deve ser anterior à data final',
-  ),
+  initialDateAfterFinalDate('A data inicial deve ser anterior à data final'),
   periodExceedsLimit('O período consultado não pode ser maior que 10 anos');
 
   @override
@@ -39,7 +38,6 @@ enum SelicValidationMessage implements ErrorMessages {
 
   const SelicValidationMessage(this.message);
 }
-
 
 enum FinancialCalculationValidationMessage implements ErrorMessages {
   allParametersNull('Informe os parâmetros do cálculo'),
@@ -58,11 +56,13 @@ enum FinancingValidationMessage implements ErrorMessages {
   positiveFinalValue('O valor final deve ser maior que zero'),
   positiveRate('O valor da taxa deve ser maior que zero'),
   positiveMonths('A quantidade de meses deve ser maior que zero'),
-  unableToDetermineCalculationType('Não foi possível determinar o tipo de cálculo. Verifique os parâmetros informados.');
+  unableToDetermineCalculationType(
+    'Não foi possível determinar o tipo de cálculo. Verifique os parâmetros informados.',
+  );
 
   @override
   final String message;
-  
+
   const FinancingValidationMessage(this.message);
 }
 
@@ -71,11 +71,13 @@ enum RegularDepositsValidationMessage implements ErrorMessages {
   positiveFinalValue('O valor final deve ser maior que zero'),
   positiveRate('O valor da taxa deve ser maior que zero'),
   positiveMonths('A quantidade de meses deve ser maior que zero'),
-  unableToDetermineCalculationType('Não foi possível determinar o tipo de cálculo. Verifique os parâmetros informados.');
+  unableToDetermineCalculationType(
+    'Não foi possível determinar o tipo de cálculo. Verifique os parâmetros informados.',
+  );
 
   @override
   final String message;
-  
+
   const RegularDepositsValidationMessage(this.message);
 }
 
@@ -84,7 +86,9 @@ enum FutureValueValidationMessage implements ErrorMessages {
   positiveFinalValue('O valor final deve ser maior que zero'),
   positiveInterestRate('A taxa de juros deve ser maior que zero'),
   positiveMonths('A quantidade de meses deve ser maior que zero'),
-  unableToDetermineCalculationType('Não foi possível determinar o tipo de cálculo. Verifique os parâmetros informados.');
+  unableToDetermineCalculationType(
+    'Não foi possível determinar o tipo de cálculo. Verifique os parâmetros informados.',
+  );
 
   @override
   final String message;
@@ -93,11 +97,19 @@ enum FutureValueValidationMessage implements ErrorMessages {
 }
 
 enum ValueCorrectionValidationMessage implements ErrorMessages {
-  invalidPeriod("A data inicial não pode ser maior do que a data final. Por favor, corrija o intervalo selecionado."), 
-  invalidIndex("O período selecionado não possui dados disponíveis para o índice escolhido. Por favor, tente um intervalo diferente."), 
-  invalidPercentage("O percentual informado deve ser maior que zero. Por favor, insira um valor positivo"), 
-  invalidValue("O valor inserido deve ser maior que zero. Certifique-se de preencher o campo corretamente");
-  
+  invalidPeriod(
+    "A data inicial não pode ser maior do que a data final. Por favor, corrija o intervalo selecionado.",
+  ),
+  invalidIndex(
+    "O período selecionado não possui dados disponíveis para o índice escolhido. Por favor, tente um intervalo diferente.",
+  ),
+  invalidPercentage(
+    "O percentual informado deve ser maior que zero. Por favor, insira um valor positivo",
+  ),
+  invalidValue(
+    "O valor inserido deve ser maior que zero. Certifique-se de preencher o campo corretamente",
+  );
+
   @override
   final String message;
 
@@ -116,4 +128,16 @@ class SeriesUnavailableError implements ErrorMessages {
   static String _formatMonth(DateTime date) {
     return '${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
+}
+
+class PaymentBelowInterestError implements ErrorMessages {
+  const PaymentBelowInterestError(this.firstMonthInterest);
+
+  final double firstMonthInterest;
+
+  @override
+  String get message =>
+      'Com essa prestação, a dívida nunca é quitada: ela precisa ser maior '
+      'que os juros do primeiro mês, de '
+      '${formatCents(toCents(firstMonthInterest))}.';
 }

@@ -27,7 +27,8 @@ class CalculateFinancing implements ICalculateFinancing {
       (failure) => FailureResult<Failure, FinancialCalculation>(failure),
       (target) {
         switch (target) {
-          case FinancialCalculationTarget.finalValue: // Mapeado para Valor da Prestação (p)
+          case FinancialCalculationTarget
+              .finalValue: // Mapeado para Valor da Prestação (p)
             return _calculatePayment(
               params,
             ).map((value) => params.copyWith(finalValue: value));
@@ -81,8 +82,9 @@ class CalculateFinancing implements ICalculateFinancing {
       }
 
       // Derivada f'(j) em relação a j
-      final df = q0 * ((1 - factor) - j * n * pow(1 + j, -n - 1)) / pow(1 - factor, 2);
-      
+      final df =
+          q0 * ((1 - factor) - j * n * pow(1 + j, -n - 1)) / pow(1 - factor, 2);
+
       j = j - (error / df);
     }
 
@@ -96,7 +98,16 @@ class CalculateFinancing implements ICalculateFinancing {
     final q0 = params.initialValue;
     final p = params.finalValue;
 
-    final n = -log(1 - (q0 * j) / p) / log(1 + j);
+    final firstMonthInterest = q0 * j;
+    if (p <= firstMonthInterest) {
+      return FailureResult<Failure, int>(
+        ValidationFailure(
+          message: [PaymentBelowInterestError(firstMonthInterest)],
+        ),
+      );
+    }
+
+    final n = -log(1 - firstMonthInterest / p) / log(1 + j);
 
     return SuccessResult<Failure, int>(n.round());
   }
