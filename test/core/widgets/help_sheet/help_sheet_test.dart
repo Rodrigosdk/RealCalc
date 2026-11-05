@@ -14,12 +14,14 @@ import 'package:real_calc/core/widgets/calculator_band/band_statement.dart';
 import 'package:real_calc/core/widgets/calculator_band/calculator_band.dart';
 import 'package:real_calc/core/widgets/help_sheet/help_content.dart';
 import 'package:real_calc/core/widgets/help_sheet/help_sheet.dart';
+import 'package:real_calc/core/widgets/help_sheet/methodology.dart';
 
 void main() {
   Future<void> pump(
     WidgetTester tester, {
     CalculatorKind kind = CalculatorKind.financing,
     Size size = const Size(400, 800),
+    double textScale = 1,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -28,6 +30,12 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.lightTheme,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
         home: Scaffold(
           body: CalculatorScope(
             kind: kind,
@@ -192,6 +200,110 @@ void main() {
       await tester.tap(find.text('Entendi'));
       await tester.pumpAndSettle();
       expect(helpFocus.hasFocus, isTrue);
+    });
+  });
+
+  group('Metodologia da Correção', () {
+    const methodology = Methodology.correction;
+    Finder scrollable() => find.descendant(
+      of: find.byType(AppSheet),
+      matching: find.byType(Scrollable),
+    );
+
+    testWidgets('vem depois da fórmula, com título e todos os blocos', (
+      tester,
+    ) async {
+      await pump(tester, kind: CalculatorKind.correction);
+      await open(tester);
+
+      await tester.scrollUntilVisible(
+        find.text(methodology.items.last.text),
+        200,
+        scrollable: scrollable(),
+      );
+
+      expect(find.text(Methodology.title), findsOneWidget);
+      for (final item in methodology.items) {
+        expect(find.text(item.title), findsOneWidget);
+        expect(find.text(item.text), findsOneWidget);
+      }
+      final formula = tester.getRect(find.text(HelpContent.correction.formula));
+      final title = tester.getRect(find.text(Methodology.title));
+      expect(title.top, greaterThan(formula.bottom));
+      expect(
+        tester.getRect(find.text(methodology.items.last.text)).bottom,
+        lessThanOrEqualTo(tester.getRect(find.text('Entendi')).top),
+      );
+    });
+
+    testWidgets('as outras calculadoras não têm a seção', (tester) async {
+      for (final kind in [
+        CalculatorKind.financing,
+        CalculatorKind.deposits,
+        CalculatorKind.futureValue,
+      ]) {
+        await pump(tester, kind: kind);
+        await open(tester);
+        expect(find.text(Methodology.title, skipOffstage: false), findsNothing);
+        await tester.tap(find.text('Entendi'));
+        await tester.pumpAndSettle();
+      }
+    });
+
+    testWidgets('rola até o fim sem estourar em 360dp com fonte em 130%', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        kind: CalculatorKind.correction,
+        size: const Size(360, 640),
+        textScale: 1.3,
+      );
+      await open(tester);
+
+      await tester.scrollUntilVisible(
+        find.text(methodology.items.last.text),
+        200,
+        scrollable: scrollable(),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.text(methodology.items.last.text).hitTestable(), findsOne);
+      expect(
+        tester.getRect(find.text('Entendi')).bottom,
+        lessThanOrEqualTo(640),
+      );
+    });
+
+    testWidgets('os títulos são cabeçalhos, na ordem da tela', (tester) async {
+      final handle = tester.ensureSemantics();
+      await pump(
+        tester,
+        kind: CalculatorKind.correction,
+        size: const Size(400, 4000),
+      );
+      await open(tester);
+
+      final titles = [
+        Methodology.title,
+        for (final item in methodology.items) item.title,
+      ];
+      double? previous;
+      for (final title in titles) {
+        expect(
+          tester.getSemantics(find.text(title)),
+          isSemantics(label: title, isHeader: true),
+        );
+        final top = tester.getRect(find.text(title)).top;
+        if (previous != null) expect(top, greaterThan(previous));
+        previous = top;
+      }
+      handle.dispose();
+    });
+
+    test('o exemplo do fator acumulado confere', () {
+      expect(1.01 * 1.02, closeTo(1.0302, 1e-12));
+      expect(methodology.items.first.text, contains('1,0302'));
     });
   });
 

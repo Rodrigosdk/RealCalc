@@ -7,6 +7,7 @@ import 'package:real_calc/core/themes/text_styles.dart';
 
 import '../app_sheet.dart';
 import 'help_content.dart';
+import 'methodology.dart';
 
 const helpSheetTitle = 'Como funciona';
 
@@ -15,15 +16,19 @@ Future<void> showHelpSheet(BuildContext context, CalculatorKind kind) {
     context: context,
     title: helpSheetTitle,
     kind: kind,
-    bodyBuilder: (_) => HelpSheetBody(content: HelpContent.of(kind)),
+    bodyBuilder: (_) => HelpSheetBody(
+      content: HelpContent.of(kind),
+      methodology: Methodology.of(kind),
+    ),
     footerBuilder: (context) => const _UnderstoodButton(),
   );
 }
 
 class HelpSheetBody extends StatelessWidget {
   final HelpContent content;
+  final Methodology? methodology;
 
-  const HelpSheetBody({super.key, required this.content});
+  const HelpSheetBody({super.key, required this.content, this.methodology});
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +79,59 @@ class HelpSheetBody extends StatelessWidget {
             ),
           ),
         ),
+        if (methodology case final methodology?) ...[
+          _Section(title: Methodology.title, colors: colors),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: colors.hairline)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final item in methodology.items)
+                  _MethodologyItem(item: item, colors: colors),
+              ],
+            ),
+          ),
+        ],
       ],
+    );
+  }
+}
+
+class _MethodologyItem extends StatelessWidget {
+  final MethodologyItem item;
+  final AppColors colors;
+
+  const _MethodologyItem({required this.item, required this.colors});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: colors.hairline)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Semantics(
+            header: true,
+            child: Text(
+              item.title,
+              style: AppTextStyles.rowLabel.copyWith(
+                color: colors.textPrimary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            item.text,
+            style: AppTextStyles.body.copyWith(color: colors.textSecondary),
+          ),
+        ],
+      ),
     );
   }
 }
