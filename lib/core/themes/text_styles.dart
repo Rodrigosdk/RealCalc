@@ -57,11 +57,11 @@ class AppTextStyles {
     fontSize: 16,
     fontWeight: FontWeight.w500,
   );
-  static final TextStyle rowValue = TextStyle(
+  static final TextStyle rowValue = const TextStyle(
     fontFamily: manropeFamily,
     fontSize: 17,
     fontWeight: FontWeight.w700,
-    fontFeatures: const [FontFeature.tabularFigures()],
+    fontFeatures: [FontFeature.tabularFigures()],
   );
   static final TextStyle rowUnit = const TextStyle(
     fontFamily: manropeFamily,
@@ -93,11 +93,11 @@ class AppTextStyles {
     fontSize: 14,
     fontWeight: FontWeight.w500,
   );
-  static final TextStyle detailValue = TextStyle(
+  static final TextStyle detailValue = const TextStyle(
     fontFamily: manropeFamily,
     fontSize: 15,
     fontWeight: FontWeight.w700,
-    fontFeatures: const [FontFeature.tabularFigures()],
+    fontFeatures: [FontFeature.tabularFigures()],
   );
   static final TextStyle button = const TextStyle(
     fontFamily: manropeFamily,

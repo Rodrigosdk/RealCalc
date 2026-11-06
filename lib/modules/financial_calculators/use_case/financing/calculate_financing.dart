@@ -29,7 +29,7 @@ class CalculateFinancing implements ICalculateFinancing {
   ) {
     if (params.initialValue <= 0 && params.rate <= 0) {
       return FailureResult<Failure, FinancialCalculation>(
-        ValidationFailure(
+        const ValidationFailure(
           message: [
             FinancialCalculationValidationMessage.invalidParameterCount,
           ],

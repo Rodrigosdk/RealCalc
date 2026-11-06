@@ -190,10 +190,10 @@ void main() {
         content: ListView(
           children: [
             const SizedBox(height: 600),
-            TextField(
-              key: const Key('campo'),
+            const TextField(
+              key: Key('campo'),
               autofocus: true,
-              scrollPadding: const EdgeInsets.only(bottom: 120),
+              scrollPadding: EdgeInsets.only(bottom: 120),
             ),
           ],
         ),

@@ -38,7 +38,7 @@ void main() {
           () => mockUseCase.calculate(futureWithInvalidParameters),
         ).thenReturn(
           FailureResult<Failure, FinancialCalculation>(
-            ValidationFailure(
+            const ValidationFailure(
               message: [
                 FutureValueValidationMessage.unableToDetermineCalculationType,
               ],
@@ -72,7 +72,7 @@ void main() {
           () => mockUseCase.calculate(futureWithMissingParameters),
         ).thenReturn(
           FailureResult<Failure, FinancialCalculation>(
-            ValidationFailure(
+            const ValidationFailure(
               message: [
                 FutureValueValidationMessage.unableToDetermineCalculationType,
               ],
@@ -153,7 +153,7 @@ void main() {
       setUp: () {
         when(() => mockUseCase.calculate(futureForFinalValue)).thenReturn(
           FailureResult<Failure, FinancialCalculation>(
-            ValidationFailure(
+            const ValidationFailure(
               message: [
                 FutureValueValidationMessage.unableToDetermineCalculationType,
               ],

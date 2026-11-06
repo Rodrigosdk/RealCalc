@@ -36,7 +36,7 @@ void main() {
       setUp: () {
         when(() => mockUseCase.calculate(invalidParameters)).thenReturn(
           FailureResult<Failure, FinancialCalculation>(
-            ValidationFailure(
+            const ValidationFailure(
               message: [
                 RegularDepositsValidationMessage
                     .unableToDetermineCalculationType,
@@ -92,7 +92,7 @@ void main() {
       setUp: () {
         when(() => mockUseCase.calculate(paramsForFinalValue)).thenReturn(
           FailureResult<Failure, FinancialCalculation>(
-            ValidationFailure(
+            const ValidationFailure(
               message: [
                 RegularDepositsValidationMessage
                     .unableToDetermineCalculationType,

@@ -22,12 +22,12 @@ class DecimalInputFormatter extends TextInputFormatter {
       return newValue.copyWith(text: '');
     }
 
-    String onlyDigits = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
+    final String onlyDigits = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
 
     // Dígitos "reais" (sem zeros à esquerda) — ajuda a saber se o valor já é zero
-    String trimmedDigits = onlyDigits.replaceFirst(RegExp(r'^0+'), '');
+    final String trimmedDigits = onlyDigits.replaceFirst(RegExp(r'^0+'), '');
 
-    bool isDeleting = newValue.text.length < oldValue.text.length;
+    final bool isDeleting = newValue.text.length < oldValue.text.length;
 
     // Se o usuário está apagando e só sobraram zeros, limpa o campo
     if (onlyDigits.isEmpty || (isDeleting && trimmedDigits.isEmpty)) {
@@ -41,10 +41,10 @@ class DecimalInputFormatter extends TextInputFormatter {
       return oldValue;
     }
 
-    double value = double.parse(onlyDigits) / 100;
+    final double value = double.parse(onlyDigits) / 100;
 
     final formatter = NumberFormat.currency(locale: 'pt_BR', symbol: '');
-    String formattedText = formatter.format(value).trim();
+    final String formattedText = formatter.format(value).trim();
 
     return newValue.copyWith(
       text: formattedText,

@@ -28,7 +28,7 @@ Result<Failure, FinancialCalculationTarget> detectCompoundInterestTarget(
 
   if (emptyFields.length != 1) {
     return FailureResult<Failure, FinancialCalculationTarget>(
-      ValidationFailure(
+      const ValidationFailure(
         message: [FinancialCalculationValidationMessage.invalidParameterCount],
       ),
     );

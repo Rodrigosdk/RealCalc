@@ -39,7 +39,7 @@ void main() {
           () => mockUseCase.calculate(financingWithInvalidParameters),
         ).thenReturn(
           FailureResult<Failure, FinancialCalculation>(
-            ValidationFailure(
+            const ValidationFailure(
               message: [
                 FinancingValidationMessage.unableToDetermineCalculationType,
               ],
@@ -73,7 +73,7 @@ void main() {
           () => mockUseCase.calculate(financingWithMissingParameters),
         ).thenReturn(
           FailureResult<Failure, FinancialCalculation>(
-            ValidationFailure(
+            const ValidationFailure(
               message: [
                 FinancingValidationMessage.unableToDetermineCalculationType,
               ],
@@ -162,7 +162,7 @@ void main() {
       setUp: () {
         when(() => mockUseCase.calculate(financingForFinalValue)).thenReturn(
           FailureResult<Failure, FinancialCalculation>(
-            ValidationFailure(
+            const ValidationFailure(
               message: [
                 FinancingValidationMessage.unableToDetermineCalculationType,
               ],
