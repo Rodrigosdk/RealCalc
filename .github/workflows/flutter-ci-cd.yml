@@ -6,63 +6,147 @@ on:
     tags: ['v*']
   pull_request:
     branches: [main, develop]
+  workflow_dispatch:
+
+# Um push novo na mesma branch cancela a execução anterior; tags de release nunca são canceladas.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: '3.47.2'
+  JAVA_VERSION: '17'
 
 jobs:
-  analyze_and_test:
-    name: Analyze & Test
+  quality:
+    name: Formatação e análise
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.47.2'
-          channel: 'stable'
-      - run: flutter pub get
-      - run: dart format --output=none --set-exit-if-changed lib test
-      - run: flutter analyze
-      - run: flutter test --coverage
+      - name: Checkout
+        uses: actions/checkout@v5
 
-  deploy_production:
-    name: Deploy to Play Store
-    needs: analyze_and_test
+      - name: Instalar Flutter ${{ env.FLUTTER_VERSION }}
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Instalar dependências
+        run: flutter pub get --enforce-lockfile
+
+      - name: Verificar formatação
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: Analisar código
+        run: flutter analyze --fatal-infos
+
+  test:
+    name: Testes
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Instalar Flutter ${{ env.FLUTTER_VERSION }}
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Instalar dependências
+        run: flutter pub get --enforce-lockfile
+
+      - name: Rodar testes com cobertura
+        run: flutter test --coverage
+
+      - name: Publicar relatório de cobertura
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: coverage-lcov
+          path: coverage/lcov.info
+          retention-days: 14
+          if-no-files-found: ignore
+
+  deploy:
+    name: Publicar na Play Store (internal)
+    needs: [quality, test]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v5
 
-      - uses: subosito/flutter-action@v2
+      - name: Conferir tag com a versão do pubspec.yaml
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          version="$(grep -E '^version:' pubspec.yaml | awk '{print $2}' | cut -d+ -f1)"
+          if [ "$tag" != "$version" ]; then
+            echo "::error::A tag v$tag não bate com a versão $version do pubspec.yaml."
+            exit 1
+          fi
+
+      - name: Instalar Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v5
         with:
-          flutter-version: '3.42.2'
-          channel: 'stable'
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: gradle
 
-      - name: Reconstruir o keystore a partir do Secret
-        run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
+      - name: Instalar Flutter ${{ env.FLUTTER_VERSION }}
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
 
-      - name: Criar key.properties
+      - name: Configurar assinatura
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
-          cat <<EOF > android/key.properties
-          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
-          keyPassword=${{ secrets.KEY_PASSWORD }}
-          keyAlias=${{ secrets.KEY_ALIAS }}
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+          cat > android/key.properties <<EOF
+          storePassword=$KEYSTORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
           storeFile=upload-keystore.jks
           EOF
 
-      - name: Criar credencial do Play Store
-        run: |
-          echo '${{ secrets.PLAY_STORE_JSON_KEY }}' > android/fastlane/play-store-credentials.json
+      - name: Instalar dependências
+        run: flutter pub get --enforce-lockfile
 
-      - run: flutter pub get
-
-      - name: Build do App Bundle assinado
+      - name: Gerar App Bundle assinado
         run: flutter build appbundle --release
 
-      - name: Instalar Fastlane
-        run: |
-          cd android
-          bundle install
+      - name: Guardar App Bundle
+        uses: actions/upload-artifact@v5
+        with:
+          name: app-release-${{ github.ref_name }}
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 30
 
-      - name: Deploy via Fastlane
-        run: |
-          cd android
-          bundle exec fastlane deploy
+      - name: Enviar para a Play Store
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_JSON_KEY }}
+          packageName: br.com.rodrigosdk.realcalc
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          releaseName: ${{ github.ref_name }}
+          track: internal
+          status: completed
+
+      - name: Apagar credenciais
+        if: always()
+        run: rm -f android/app/upload-keystore.jks android/key.properties
