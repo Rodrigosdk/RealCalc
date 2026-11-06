@@ -34,8 +34,9 @@ void main() {
     blocTest<FutureValueCubit, FutureValueState>(
       'Deve emitir [FutureValueLoading, FutureValueError] quando o useCase retornar uma falha de validação',
       setUp: () {
-        when(() => mockUseCase.calculate(futureWithInvalidParameters))
-            .thenReturn(
+        when(
+          () => mockUseCase.calculate(futureWithInvalidParameters),
+        ).thenReturn(
           FailureResult<Failure, FinancialCalculation>(
             ValidationFailure(
               message: [
@@ -67,8 +68,9 @@ void main() {
     blocTest<FutureValueCubit, FutureValueState>(
       'Deve emitir [FutureValueLoading, FutureValueError] quando faltarem parâmetros para o cálculo',
       setUp: () {
-        when(() => mockUseCase.calculate(futureWithMissingParameters))
-            .thenReturn(
+        when(
+          () => mockUseCase.calculate(futureWithMissingParameters),
+        ).thenReturn(
           FailureResult<Failure, FinancialCalculation>(
             ValidationFailure(
               message: [
@@ -90,37 +92,59 @@ void main() {
       ],
     );
 
-    final futureForFinalValue = FinancialCalculation(initialValue: 10000, periods: 12, rate: 1.5, finalValue: 0);
+    final futureForFinalValue = FinancialCalculation(
+      initialValue: 10000,
+      periods: 12,
+      rate: 1.5,
+      finalValue: 0,
+    );
 
     blocTest<FutureValueCubit, FutureValueState>(
       'Deve emitir [FutureValueLoading, FutureValueCalculated] com o finalValue atualizado quando o useCase calcular com sucesso',
       setUp: () {
         when(() => mockUseCase.calculate(futureForFinalValue)).thenReturn(
-          SuccessResult<Failure, FinancialCalculation>(futureForFinalValue.copyWith(finalValue: 1180.50)),
+          SuccessResult<Failure, FinancialCalculation>(
+            futureForFinalValue.copyWith(finalValue: 1180.50),
+          ),
         );
       },
       build: () => cubit,
       act: (cubit) => cubit.calculate(futureForFinalValue),
       expect: () => [
         isA<FutureValueLoading>(),
-        isA<FutureValueCalculated>().having((s) => s.value.finalValue, 'finalValue', 1180.50),
+        isA<FutureValueCalculated>().having(
+          (s) => s.value.finalValue,
+          'finalValue',
+          1180.50,
+        ),
       ],
     );
 
-    final futureForMonths = FinancialCalculation(initialValue: 5000, periods: 0, rate: 2.0, finalValue: 6000);
+    final futureForMonths = FinancialCalculation(
+      initialValue: 5000,
+      periods: 0,
+      rate: 2.0,
+      finalValue: 6000,
+    );
 
     blocTest<FutureValueCubit, FutureValueState>(
       'Deve emitir [FutureValueLoading, FutureValueCalculated] convertendo o retorno double do UseCase para int quando calcular meses',
       setUp: () {
         when(() => mockUseCase.calculate(futureForMonths)).thenReturn(
-          SuccessResult<Failure, FinancialCalculation>(futureForMonths.copyWith(periods: 9)),
+          SuccessResult<Failure, FinancialCalculation>(
+            futureForMonths.copyWith(periods: 9),
+          ),
         );
       },
       build: () => cubit,
       act: (cubit) => cubit.calculate(futureForMonths),
       expect: () => [
         isA<FutureValueLoading>(),
-        isA<FutureValueCalculated>().having((s) => s.value.periods, 'periods', 9),
+        isA<FutureValueCalculated>().having(
+          (s) => s.value.periods,
+          'periods',
+          9,
+        ),
       ],
     );
 
@@ -129,16 +153,17 @@ void main() {
       setUp: () {
         when(() => mockUseCase.calculate(futureForFinalValue)).thenReturn(
           FailureResult<Failure, FinancialCalculation>(
-            ValidationFailure(message: [FutureValueValidationMessage.unableToDetermineCalculationType]),
+            ValidationFailure(
+              message: [
+                FutureValueValidationMessage.unableToDetermineCalculationType,
+              ],
+            ),
           ),
         );
       },
       build: () => cubit,
       act: (cubit) => cubit.calculate(futureForFinalValue),
-      expect: () => [
-        isA<FutureValueLoading>(),
-        isA<FutureValueError>(),
-      ],
+      expect: () => [isA<FutureValueLoading>(), isA<FutureValueError>()],
     );
   });
 }

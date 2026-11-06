@@ -29,7 +29,7 @@ class OrSpecification<T, E> extends Specification<T, E> {
     final leftErrors = _left.validate(candidate);
     // Se o lado esquerdo passou (sem erros), ignora o direito
     if (leftErrors.isEmpty) return [];
-    
+
     final rightErrors = _right.validate(candidate);
     if (rightErrors.isEmpty) return [];
 
@@ -68,10 +68,12 @@ class CompositeSpecification<T, E> implements Specification<T, E> {
   }
 
   @override
-  Specification<T, E> and(Specification<T, E> other) => AndSpecification(this, other);
+  Specification<T, E> and(Specification<T, E> other) =>
+      AndSpecification(this, other);
 
   @override
-  Specification<T, E> or(Specification<T, E> other) => OrSpecification(this, other);
+  Specification<T, E> or(Specification<T, E> other) =>
+      OrSpecification(this, other);
 
   @override
   Specification<T, E> not(E errorIfTrue) => NotSpecification(this, errorIfTrue);

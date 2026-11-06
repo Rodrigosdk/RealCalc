@@ -10,9 +10,12 @@ class FutureValueCubit extends Cubit<FutureValueState> {
   final ICalculateFutureValue useCase;
 
   FutureValueCubit(this.useCase) : super(FutureValueInitial());
-  
-  FinancialCalculationTarget _detectCalculatedField(FinancialCalculation params) {
-    if (params.initialValue <= 0) return FinancialCalculationTarget.initialValue;
+
+  FinancialCalculationTarget _detectCalculatedField(
+    FinancialCalculation params,
+  ) {
+    if (params.initialValue <= 0)
+      return FinancialCalculationTarget.initialValue;
     if (params.finalValue <= 0) return FinancialCalculationTarget.finalValue;
     if (params.periods <= 0) return FinancialCalculationTarget.periods;
     if (params.rate <= 0) return FinancialCalculationTarget.interestRate;

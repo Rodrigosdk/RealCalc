@@ -11,8 +11,6 @@ class CoreModule extends Module {
 
   @override
   void exportedBinds(Injector i) {
-    i.addLazySingleton<Network>(
-      () => DioNetworkAdapter(i.get<Dio>()),
-    );
+    i.addLazySingleton<Network>(() => DioNetworkAdapter(i.get<Dio>()));
   }
 }

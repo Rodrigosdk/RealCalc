@@ -5,8 +5,6 @@ import 'package:real_calc/modules/financial_calculators/domain/enum/financial_ca
 
 import 'fake_financing.dart';
 
-
-
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   registerFallbackValue(FinancialCalculationTarget.initialValue);
   registerFallbackValue(FakeFinancing());

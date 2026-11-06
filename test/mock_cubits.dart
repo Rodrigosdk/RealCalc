@@ -7,14 +7,18 @@ import 'package:real_calc/modules/financial_calculators/presentation/cubit/regul
 import 'package:real_calc/modules/home/presentation/cubit/greeting_cubit.dart';
 import 'package:real_calc/modules/home/presentation/cubit/selic_cubit.dart';
 
-class MockFinancingCubit extends MockCubit<FinancingState> implements FinancingCubit {}
+class MockFinancingCubit extends MockCubit<FinancingState>
+    implements FinancingCubit {}
 
-class MockFutureValueCubit extends MockCubit<FutureValueState> implements FutureValueCubit {}
+class MockFutureValueCubit extends MockCubit<FutureValueState>
+    implements FutureValueCubit {}
 
 class MockSelicCubit extends MockCubit<SelicState> implements SelicCubit {}
 
 class MockGreetingCubit extends MockCubit<String> implements GreetingCubit {}
 
-class MockFinancingFormCubit extends MockCubit<FinancingFormState> implements FinancingFormCubit {}
+class MockFinancingFormCubit extends MockCubit<FinancingFormState>
+    implements FinancingFormCubit {}
 
-class MockRegularDepositsCubit extends MockCubit<RegularDepositsState> implements RegularDepositsCubit {}
+class MockRegularDepositsCubit extends MockCubit<RegularDepositsState>
+    implements RegularDepositsCubit {}

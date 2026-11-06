@@ -38,7 +38,8 @@ void main() {
           FailureResult<Failure, FinancialCalculation>(
             ValidationFailure(
               message: [
-                RegularDepositsValidationMessage.unableToDetermineCalculationType,
+                RegularDepositsValidationMessage
+                    .unableToDetermineCalculationType,
               ],
             ),
           ),
@@ -51,7 +52,9 @@ void main() {
         isA<RegularDepositsError>().having(
           (e) => e.message,
           'message',
-          RegularDepositsValidationMessage.unableToDetermineCalculationType.message,
+          RegularDepositsValidationMessage
+              .unableToDetermineCalculationType
+              .message,
         ),
       ],
     );
@@ -67,7 +70,9 @@ void main() {
       'Deve emitir [RegularDepositsLoading, RegularDepositsCalculated] ao calcular o valor final com sucesso',
       setUp: () {
         when(() => mockUseCase.calculate(paramsForFinalValue)).thenReturn(
-          SuccessResult<Failure, FinancialCalculation>(paramsForFinalValue.copyWith(finalValue: 1580.50)),
+          SuccessResult<Failure, FinancialCalculation>(
+            paramsForFinalValue.copyWith(finalValue: 1580.50),
+          ),
         );
       },
       build: () => cubit,
@@ -87,7 +92,12 @@ void main() {
       setUp: () {
         when(() => mockUseCase.calculate(paramsForFinalValue)).thenReturn(
           FailureResult<Failure, FinancialCalculation>(
-            ValidationFailure(message: [RegularDepositsValidationMessage.unableToDetermineCalculationType]),
+            ValidationFailure(
+              message: [
+                RegularDepositsValidationMessage
+                    .unableToDetermineCalculationType,
+              ],
+            ),
           ),
         );
       },

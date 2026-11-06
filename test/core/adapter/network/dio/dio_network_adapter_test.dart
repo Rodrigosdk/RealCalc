@@ -33,9 +33,9 @@ void main() {
   });
 
   test('get converte exceção em erro de servidor', () async {
-    when(() => dio.get<dynamic>('/selic')).thenThrow(
-      DioException(requestOptions: RequestOptions(path: '/selic')),
-    );
+    when(
+      () => dio.get<dynamic>('/selic'),
+    ).thenThrow(DioException(requestOptions: RequestOptions(path: '/selic')));
 
     final result = await adapter.get<Map<String, dynamic>>('/selic');
 
@@ -59,13 +59,13 @@ void main() {
   });
 
   test('post converte exceção em erro de servidor', () async {
-    when(() => dio.post<dynamic>('/selic', data: any(named: 'data')))
-        .thenThrow(DioException(requestOptions: RequestOptions(path: '/selic')));
+    when(
+      () => dio.post<dynamic>('/selic', data: any(named: 'data')),
+    ).thenThrow(DioException(requestOptions: RequestOptions(path: '/selic')));
 
-    final result = await adapter.post<Map<String, dynamic>>(
-      '/selic',
-      {'value': 10.5},
-    );
+    final result = await adapter.post<Map<String, dynamic>>('/selic', {
+      'value': 10.5,
+    });
 
     expect(result.isError, isTrue);
     expect(result.getErrorOrNull(), ServerErrorMessages.connectionError);
@@ -88,13 +88,13 @@ void main() {
   });
 
   test('put converte exceção em erro de servidor', () async {
-    when(() => dio.put<dynamic>('/selic', data: any(named: 'data')))
-        .thenThrow(DioException(requestOptions: RequestOptions(path: '/selic')));
+    when(
+      () => dio.put<dynamic>('/selic', data: any(named: 'data')),
+    ).thenThrow(DioException(requestOptions: RequestOptions(path: '/selic')));
 
-    final result = await adapter.put<Map<String, dynamic>>(
-      '/selic',
-      {'value': 10.75},
-    );
+    final result = await adapter.put<Map<String, dynamic>>('/selic', {
+      'value': 10.75,
+    });
 
     expect(result.isError, isTrue);
     expect(result.getErrorOrNull(), ServerErrorMessages.connectionError);
@@ -116,9 +116,9 @@ void main() {
   });
 
   test('delete converte exceção em erro de servidor', () async {
-    when(() => dio.delete<dynamic>('/selic')).thenThrow(
-      DioException(requestOptions: RequestOptions(path: '/selic')),
-    );
+    when(
+      () => dio.delete<dynamic>('/selic'),
+    ).thenThrow(DioException(requestOptions: RequestOptions(path: '/selic')));
 
     final result = await adapter.delete<Map<String, dynamic>>('/selic');
 

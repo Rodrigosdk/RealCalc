@@ -21,17 +21,20 @@ void main() {
       expect(Modular.to, isNotNull);
     });
 
-    testWidgets('Deve conseguir resolver e renderizar a HomePage através da rota base', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp.router(
-          theme: AppTheme.darkTheme,
-          routerConfig: Modular.routerConfig,
-        ),
-      );
+    testWidgets(
+      'Deve conseguir resolver e renderizar a HomePage através da rota base',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp.router(
+            theme: AppTheme.darkTheme,
+            routerConfig: Modular.routerConfig,
+          ),
+        );
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      expect(find.byType(HomePage), findsOneWidget);
-    });
+        expect(find.byType(HomePage), findsOneWidget);
+      },
+    );
   });
 }

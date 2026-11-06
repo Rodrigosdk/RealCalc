@@ -11,8 +11,7 @@ class FinancingCalculated extends FinancingState {
   FinancingCalculated(this.value, this.calculatedField);
 }
 
-class FinancingLoading extends FinancingState {
-}
+class FinancingLoading extends FinancingState {}
 
 class FinancingError extends FinancingState {
   final String? message;

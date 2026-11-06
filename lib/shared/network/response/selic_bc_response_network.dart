@@ -5,10 +5,7 @@ class SelicBcResponseNetwork {
   final String? data;
   final String? valor;
 
-  const SelicBcResponseNetwork({
-    this.data,
-    this.valor,
-  });
+  const SelicBcResponseNetwork({this.data, this.valor});
 
   factory SelicBcResponseNetwork.fromJson(Map<String, dynamic> json) {
     return SelicBcResponseNetwork(
@@ -18,16 +15,10 @@ class SelicBcResponseNetwork {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      _data: data,
-      _valor: valor,
-    };
+    return {_data: data, _valor: valor};
   }
 
-  SelicBcResponseNetwork copyWith({
-    String? data,
-    String? valor,
-  }) {
+  SelicBcResponseNetwork copyWith({String? data, String? valor}) {
     return SelicBcResponseNetwork(
       data: data ?? this.data,
       valor: valor ?? this.valor,

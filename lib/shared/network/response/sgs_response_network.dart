@@ -5,10 +5,7 @@ class SgsResponseNetwork {
   final String? data;
   final String? valor;
 
-  const SgsResponseNetwork({
-    this.data,
-    this.valor,
-  });
+  const SgsResponseNetwork({this.data, this.valor});
 
   factory SgsResponseNetwork.fromJson(Map<String, dynamic> json) {
     return SgsResponseNetwork(
@@ -18,16 +15,10 @@ class SgsResponseNetwork {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      _data: data,
-      _valor: valor,
-    };
+    return {_data: data, _valor: valor};
   }
 
-  SgsResponseNetwork copyWith({
-    String? data,
-    String? valor,
-  }) {
+  SgsResponseNetwork copyWith({String? data, String? valor}) {
     return SgsResponseNetwork(
       data: data ?? this.data,
       valor: valor ?? this.valor,

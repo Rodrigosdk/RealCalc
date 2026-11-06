@@ -1,4 +1,1 @@
-enum FinancialOperationType {
-  compoundInterest,
-  regularDeposit,
-}
+enum FinancialOperationType { compoundInterest, regularDeposit }

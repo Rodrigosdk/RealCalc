@@ -9,7 +9,7 @@ class DioNetworkAdapter implements Network {
   final Dio _dio;
 
   DioNetworkAdapter(this._dio);
-  
+
   @override
   Future<Result<ErrorMessages, T>> delete<T>(String url) async {
     try {
@@ -21,7 +21,7 @@ class DioNetworkAdapter implements Network {
       );
     }
   }
-  
+
   @override
   Future<Result<ErrorMessages, T>> get<T>(String url) async {
     try {
@@ -33,9 +33,12 @@ class DioNetworkAdapter implements Network {
       );
     }
   }
-  
+
   @override
-  Future<Result<ErrorMessages, T>> post<T>(String url, Map<String, dynamic> body) async {
+  Future<Result<ErrorMessages, T>> post<T>(
+    String url,
+    Map<String, dynamic> body,
+  ) async {
     try {
       final response = await _dio.post(url, data: body);
       return SuccessResult<ErrorMessages, T>(response.data as T);
@@ -45,9 +48,12 @@ class DioNetworkAdapter implements Network {
       );
     }
   }
-  
+
   @override
-  Future<Result<ErrorMessages, T>> put<T>(String url, Map<String, dynamic> body) async {
+  Future<Result<ErrorMessages, T>> put<T>(
+    String url,
+    Map<String, dynamic> body,
+  ) async {
     try {
       final response = await _dio.put(url, data: body);
       return SuccessResult<ErrorMessages, T>(response.data as T);
@@ -57,6 +63,4 @@ class DioNetworkAdapter implements Network {
       );
     }
   }
-
- 
 }
