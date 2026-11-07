@@ -1,0 +1,188 @@
+name: Atualização de dependências
+
+# Toda segunda às 9h (Brasília) procura pacotes desatualizados. Se houver atualização
+# compatível (dentro do ^ atual), abre a issue no formato do template dependency_update,
+# cria a branch, valida e abre o PR para a develop no formato do template chore.md.
+# Versões major só são listadas, porque podem exigir mudança de código.
+on:
+  schedule:
+    - cron: '0 12 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+env:
+  FLUTTER_VERSION: '3.47.2'
+  JAVA_VERSION: '17'
+  BASE_BRANCH: develop
+  LABEL: dependencies
+
+jobs:
+  update:
+    name: Atualizar pacotes
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      GH_TOKEN: ${{ github.token }}
+      OUT: ${{ runner.temp }}/deps
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ env.BASE_BRANCH }}
+
+      - name: Instalar Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: gradle
+
+      - name: Instalar Flutter ${{ env.FLUTTER_VERSION }}
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Instalar dependências atuais
+        run: flutter pub get --enforce-lockfile
+
+      - name: Procurar e aplicar atualizações compatíveis
+        id: upgrade
+        run: |
+          scripts/update_dependencies.sh "$OUT"
+          echo "changed=$(cat "$OUT/changed")" >> "$GITHUB_OUTPUT"
+
+      - name: Nada para atualizar
+        if: steps.upgrade.outputs.changed != 'true'
+        run: |
+          {
+            echo "## Nenhuma atualização compatível"
+            if [ -s "$OUT/majors.md" ]; then
+              echo
+              echo "Versões major disponíveis (exigem mudança manual):"
+              echo
+              cat "$OUT/majors.md"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Validar (formatação, análise, testes e build)
+        id: validate
+        if: steps.upgrade.outputs.changed == 'true'
+        run: |
+          check() {
+            local name="$1"; shift
+            if "$@"; then echo "$name=x" >> "$GITHUB_OUTPUT"; else echo "$name= " >> "$GITHUB_OUTPUT"; echo "failed=true" >> "$GITHUB_OUTPUT"; fi
+          }
+          check format dart format --output=none --set-exit-if-changed lib test
+          check analyze flutter analyze --fatal-infos
+          check test flutter test
+          check build flutter build apk --debug
+
+      - name: Abrir ou atualizar issue e PR
+        if: steps.upgrade.outputs.changed == 'true'
+        env:
+          FORMAT_OK: ${{ steps.validate.outputs.format }}
+          ANALYZE_OK: ${{ steps.validate.outputs.analyze }}
+          TEST_OK: ${{ steps.validate.outputs.test }}
+          BUILD_OK: ${{ steps.validate.outputs.build }}
+          FAILED: ${{ steps.validate.outputs.failed }}
+        run: |
+          set -euo pipefail
+          reason="$(cat "$OUT/reason.txt")"
+          direct="$(cat "$OUT/direct.txt")"
+          [ -n "$direct" ] || direct="Somente dependências transitivas (ver tabela)."
+
+          gh label create "$LABEL" --color 0366d6 --description "Atualização de dependências" --force
+
+          # Reaproveita o PR do bot que ainda estiver aberto em vez de abrir outro.
+          existing="$(gh pr list --state open --base "$BASE_BRANCH" --label "$LABEL" --author 'app/github-actions' \
+            --json number,headRefName --jq '.[0] // empty')"
+
+          issue_body="$OUT/issue.md"
+          {
+            echo "### Pacote"; echo
+            echo "$direct" | cut -d: -f1; echo
+            echo "### Versão atual → versão desejada"; echo
+            echo "$direct"; echo
+            echo "### Motivo"; echo
+            echo "$reason"; echo
+            echo "### Changelog relevante"; echo
+            cat "$OUT/changes.md"
+            if [ -s "$OUT/majors.md" ]; then
+              echo; echo "**Versões major disponíveis (não aplicadas, exigem mudança manual):**"; echo
+              cat "$OUT/majors.md"
+            fi
+          } > "$issue_body"
+
+          if [ -n "$existing" ]; then
+            pr="$(jq -r .number <<<"$existing")"
+            branch="$(jq -r .headRefName <<<"$existing")"
+            issue="${branch##*issue}"
+            gh issue edit "$issue" --body-file "$issue_body"
+          else
+            url="$(gh issue create --title "[CHORE] Atualizar dependências" --label chore --label "$LABEL" --body-file "$issue_body")"
+            issue="${url##*/}"
+            branch="${{ github.repository_owner }}/issue$issue"
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -C "$branch"
+          git add pubspec.yaml pubspec.lock
+          git commit -m "chore: atualizar dependências (#$issue)"
+          git push --force origin "$branch"
+
+          mark() { [ "$reason" = "$1" ] && echo x || echo " "; }
+          # Os campos *_OK valem "x" (passou) ou " " (falhou).
+          status() { [ "${1:-}" = "x" ] && echo ok || echo falhou; }
+          pr_body="$OUT/pr.md"
+          {
+            echo "## Dependência atualizada"
+            echo "$direct" | sed 's/^/- /'; echo
+            echo "## Motivo da atualização"
+            echo "- [$(mark 'Correção de segurança')] Correção de segurança"
+            echo "- [ ] Nova funcionalidade necessária"
+            echo "- [$(mark 'Manutenção de rotina')] Manutenção de rotina"; echo
+            echo "## Changelog relevante"
+            cat "$OUT/changes.md"; echo
+            if [ -s "$OUT/majors.md" ]; then
+              echo "### Versões major disponíveis (não aplicadas)"
+              echo "Podem quebrar a API; atualize manualmente depois de ler o changelog."; echo
+              cat "$OUT/majors.md"; echo
+            fi
+            echo "## Validação"
+            echo "- [x] \`flutter pub get\` executado sem conflito"
+            echo "- [${BUILD_OK:- }] App builda normalmente"
+            echo "- [${TEST_OK:- }] Testes existentes continuam passando"
+            echo "- [ ] Testado manualmente fluxo que usa o pacote (se crítico)"; echo
+            echo "Formatação: $(status "$FORMAT_OK") · Análise: $(status "$ANALYZE_OK") · [log da execução]($RUN_URL)"
+            echo
+            echo "Closes #$issue"
+          } > "$pr_body"
+
+          if [ -n "$existing" ]; then
+            gh pr edit "$pr" --body-file "$pr_body"
+          else
+            gh pr create --base "$BASE_BRANCH" --head "$branch" --title "chore: atualizar dependências" \
+              --label chore --label "$LABEL" --body-file "$pr_body" --draft
+            pr="$(gh pr view "$branch" --json number --jq .number)"
+          fi
+
+          # Vai para revisão só se tudo passou; senão fica como rascunho.
+          if [ "${FAILED:-}" = "true" ]; then
+            gh pr ready "$pr" --undo || true
+          else
+            gh pr ready "$pr" || true
+          fi
+
+          echo "PR #$pr atualizado para a issue #$issue." >> "$GITHUB_STEP_SUMMARY"
