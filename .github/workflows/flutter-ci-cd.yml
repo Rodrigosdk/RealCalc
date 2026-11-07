@@ -1,11 +1,24 @@
 name: Flutter CI/CD
 
+# Só roda quando muda algo que afeta o app Android, os testes ou o próprio workflow.
+# README, docs, screenshots, iOS/web/desktop etc. não disparam o CI.
+# O GitHub não aplica o filtro de paths em push de tag, então as tags v* sempre publicam.
 on:
   push:
     branches: [main, develop]
     tags: ['v*']
+    paths: &relevant_paths
+      - 'lib/**'
+      - 'test/**'
+      - 'assets/**'
+      - 'android/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+      - 'analysis_options.yaml'
+      - '.github/workflows/flutter-ci-cd.yml'
   pull_request:
     branches: [main, develop]
+    paths: *relevant_paths
   workflow_dispatch:
 
 # Um push novo na mesma branch cancela a execução anterior; tags de release nunca são canceladas.
