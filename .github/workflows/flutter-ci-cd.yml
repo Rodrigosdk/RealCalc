@@ -2,11 +2,13 @@ name: Flutter CI/CD
 
 # Só roda quando muda algo que afeta o app Android, os testes ou o próprio workflow.
 # README, docs, screenshots, iOS/web/desktop etc. não disparam o CI.
-# O GitHub não aplica o filtro de paths em push de tag, então as tags v* sempre publicam.
+#
+# Release: num push na main com uma versão nova no pubspec.yaml (ex.: 1.2.1+4), o CI
+# publica na Play Store (internal) e cria a tag v1.2.1 e a Release no GitHub com o .aab.
+# Se a tag da versão já existir, nada é publicado.
 on:
   push:
     branches: [main, develop]
-    tags: ['v*']
     paths: &relevant_paths
       - 'lib/**'
       - 'test/**'
@@ -21,10 +23,10 @@ on:
     paths: *relevant_paths
   workflow_dispatch:
 
-# Um push novo na mesma branch cancela a execução anterior; tags de release nunca são canceladas.
+# Um push novo na mesma branch cancela a execução anterior; na main nunca, para não interromper uma release.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 permissions:
   contents: read
@@ -88,25 +90,51 @@ jobs:
           retention-days: 14
           if-no-files-found: ignore
 
-  deploy:
-    name: Publicar na Play Store (internal)
-    needs: [quality, test]
-    if: startsWith(github.ref, 'refs/tags/v')
+  version:
+    name: Verificar versão nova
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    environment: production
+    timeout-minutes: 5
+    outputs:
+      tag: ${{ steps.check.outputs.tag }}
+      build: ${{ steps.check.outputs.build }}
+      release: ${{ steps.check.outputs.release }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Conferir tag com a versão do pubspec.yaml
+      - name: Comparar pubspec.yaml com as tags
+        id: check
         run: |
-          tag="${GITHUB_REF_NAME#v}"
-          version="$(grep -E '^version:' pubspec.yaml | awk '{print $2}' | cut -d+ -f1)"
-          if [ "$tag" != "$version" ]; then
-            echo "::error::A tag v$tag não bate com a versão $version do pubspec.yaml."
-            exit 1
+          version="$(grep -E '^version:' pubspec.yaml | awk '{print $2}')"
+          tag="v${version%%+*}"
+          build="${version#*+}"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "build=$build" >> "$GITHUB_OUTPUT"
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "A tag $tag já existe; nada para publicar." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            echo "Versão nova: $tag (build $build)." >> "$GITHUB_STEP_SUMMARY"
           fi
+
+  deploy:
+    name: Publicar ${{ needs.version.outputs.tag }} (Play Store e GitHub)
+    needs: [quality, test, version]
+    if: needs.version.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ needs.version.outputs.tag }}
+      BUILD: ${{ needs.version.outputs.build }}
+      AAB: build/app/outputs/bundle/release/app-release.aab
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
 
       - name: Instalar Java ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v5
@@ -146,8 +174,8 @@ jobs:
       - name: Guardar App Bundle
         uses: actions/upload-artifact@v5
         with:
-          name: app-release-${{ github.ref_name }}
-          path: build/app/outputs/bundle/release/app-release.aab
+          name: app-release-${{ env.TAG }}
+          path: ${{ env.AAB }}
           retention-days: 30
 
       - name: Enviar para a Play Store
@@ -155,10 +183,22 @@ jobs:
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_JSON_KEY }}
           packageName: br.com.rodrigosdk.realcalc
-          releaseFiles: build/app/outputs/bundle/release/app-release.aab
-          releaseName: ${{ github.ref_name }}
+          releaseFiles: ${{ env.AAB }}
+          releaseName: ${{ env.TAG }} (${{ env.BUILD }})
           track: internal
           status: completed
+
+      # A tag só é criada depois do envio: se a Play Store falhar, basta rodar de novo.
+      - name: Criar tag e Release no GitHub
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp "$AAB" "real_calc-$TAG.aab"
+          gh release create "$TAG" "real_calc-$TAG.aab" \
+            --target "$GITHUB_SHA" \
+            --title "$TAG (build $BUILD)" \
+            --generate-notes \
+            --latest
 
       - name: Apagar credenciais
         if: always()
