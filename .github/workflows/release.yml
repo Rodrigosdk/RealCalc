@@ -1,98 +1,38 @@
-name: Flutter CI/CD
+name: Release
 
-# Só roda quando muda algo que afeta o app Android, os testes ou o próprio workflow.
-# README, docs, screenshots, iOS/web/desktop etc. não disparam o CI.
-#
-# Release: num push na main com uma versão nova no pubspec.yaml (ex.: 1.2.1+4), o CI
-# publica na Play Store (internal) e cria a tag v1.2.1 e a Release no GitHub com o .aab.
+# Num push na main com versão nova no pubspec.yaml (ex.: 1.2.1+4): roda o CI, publica na
+# Play Store (internal) e cria a tag v1.2.1 e a Release no GitHub com o .aab.
 # Se a tag da versão já existir, nada é publicado.
 on:
   push:
-    branches: [main, develop]
-    paths: &relevant_paths
+    branches: [main]
+    paths:
       - 'lib/**'
-      - 'test/**'
       - 'assets/**'
       - 'android/**'
       - 'pubspec.yaml'
       - 'pubspec.lock'
-      - 'analysis_options.yaml'
-      - '.github/workflows/flutter-ci-cd.yml'
-  pull_request:
-    branches: [main, develop]
-    paths: *relevant_paths
+      - '.github/workflows/release.yml'
+      - '.github/workflows/ci.yml'
+      - '.github/actions/**'
   workflow_dispatch:
 
-# Um push novo na mesma branch cancela a execução anterior; na main nunca, para não interromper uma release.
+# Nunca cancela uma release em andamento.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  group: release
+  cancel-in-progress: false
 
 permissions:
   contents: read
 
-env:
-  FLUTTER_VERSION: '3.47.2'
-  JAVA_VERSION: '17'
-
 jobs:
-  quality:
-    name: Formatação e análise
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Instalar Flutter ${{ env.FLUTTER_VERSION }}
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache: true
-
-      - name: Instalar dependências
-        run: flutter pub get --enforce-lockfile
-
-      - name: Verificar formatação
-        run: dart format --output=none --set-exit-if-changed lib test
-
-      - name: Analisar código
-        run: flutter analyze --fatal-infos
-
-  test:
-    name: Testes
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Instalar Flutter ${{ env.FLUTTER_VERSION }}
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache: true
-
-      - name: Instalar dependências
-        run: flutter pub get --enforce-lockfile
-
-      - name: Rodar testes com cobertura
-        run: flutter test --coverage
-
-      - name: Publicar relatório de cobertura
-        if: always()
-        uses: actions/upload-artifact@v5
-        with:
-          name: coverage-lcov
-          path: coverage/lcov.info
-          retention-days: 14
-          if-no-files-found: ignore
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
 
   version:
     name: Verificar versão nova
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -100,8 +40,7 @@ jobs:
       build: ${{ steps.check.outputs.build }}
       release: ${{ steps.check.outputs.release }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v5
 
       - name: Comparar pubspec.yaml com as tags
         id: check
@@ -121,7 +60,7 @@ jobs:
 
   deploy:
     name: Publicar ${{ needs.version.outputs.tag }} (Play Store e GitHub)
-    needs: [quality, test, version]
+    needs: [ci, version]
     if: needs.version.outputs.release == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -133,22 +72,10 @@ jobs:
       BUILD: ${{ needs.version.outputs.build }}
       AAB: build/app/outputs/bundle/release/app-release.aab
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Instalar Java ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v5
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-flutter
         with:
-          distribution: temurin
-          java-version: ${{ env.JAVA_VERSION }}
-          cache: gradle
-
-      - name: Instalar Flutter ${{ env.FLUTTER_VERSION }}
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache: true
+          java: 'true'
 
       - name: Configurar assinatura
         env:
@@ -164,9 +91,6 @@ jobs:
           keyAlias=$KEY_ALIAS
           storeFile=upload-keystore.jks
           EOF
-
-      - name: Instalar dependências
-        run: flutter pub get --enforce-lockfile
 
       - name: Gerar App Bundle assinado
         run: flutter build appbundle --release

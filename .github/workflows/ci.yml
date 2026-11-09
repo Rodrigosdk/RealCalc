@@ -1,0 +1,64 @@
+name: CI
+
+# Formatação, análise e testes. Também é chamado pelo release.yml antes de publicar.
+# Só roda quando muda algo que afeta o app Android, os testes ou a própria automação.
+on:
+  push:
+    branches: [develop]
+    paths: &relevant_paths
+      - 'lib/**'
+      - 'test/**'
+      - 'assets/**'
+      - 'android/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+      - 'analysis_options.yaml'
+      - '.github/workflows/ci.yml'
+      - '.github/actions/**'
+  pull_request:
+    branches: [main, develop]
+    paths: *relevant_paths
+  workflow_call:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Formatação e análise
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-flutter
+
+      - name: Verificar formatação
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: Analisar código
+        run: flutter analyze --fatal-infos
+
+  test:
+    name: Testes
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-flutter
+
+      - name: Rodar testes com cobertura
+        run: flutter test --coverage
+
+      - name: Publicar relatório de cobertura
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: coverage-lcov
+          path: coverage/lcov.info
+          retention-days: 14
+          if-no-files-found: ignore

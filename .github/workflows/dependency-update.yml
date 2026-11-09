@@ -19,8 +19,6 @@ permissions:
   pull-requests: write
 
 env:
-  FLUTTER_VERSION: '3.47.2'
-  JAVA_VERSION: '17'
   BASE_BRANCH: develop
   LABEL: dependencies
 
@@ -39,22 +37,9 @@ jobs:
         with:
           ref: ${{ env.BASE_BRANCH }}
 
-      - name: Instalar Java ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v5
+      - uses: ./.github/actions/setup-flutter
         with:
-          distribution: temurin
-          java-version: ${{ env.JAVA_VERSION }}
-          cache: gradle
-
-      - name: Instalar Flutter ${{ env.FLUTTER_VERSION }}
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache: true
-
-      - name: Instalar dependências atuais
-        run: flutter pub get --enforce-lockfile
+          java: 'true'
 
       - name: Procurar e aplicar atualizações compatíveis
         id: upgrade
