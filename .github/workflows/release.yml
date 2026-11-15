@@ -40,7 +40,7 @@ jobs:
       build: ${{ steps.check.outputs.build }}
       release: ${{ steps.check.outputs.release }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       - name: Comparar pubspec.yaml com as tags
         id: check
@@ -72,7 +72,7 @@ jobs:
       BUILD: ${{ needs.version.outputs.build }}
       AAB: build/app/outputs/bundle/release/app-release.aab
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       - uses: ./.github/actions/setup-flutter
         with:
           java: 'true'
@@ -96,14 +96,14 @@ jobs:
         run: flutter build appbundle --release
 
       - name: Guardar App Bundle
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: app-release-${{ env.TAG }}
           path: ${{ env.AAB }}
           retention-days: 30
 
       - name: Enviar para a Play Store
-        uses: r0adkll/upload-google-play@v1
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_JSON_KEY }}
           packageName: br.com.rodrigosdk.realcalc
