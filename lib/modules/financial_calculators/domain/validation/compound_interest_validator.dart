@@ -1,5 +1,3 @@
-
-
 import '../../../../core/errors/failures.dart';
 import '../../../../core/errors/messages.dart';
 import '../../../../core/seed_works/result.dart';
@@ -30,15 +28,11 @@ Result<Failure, FinancialCalculationTarget> detectCompoundInterestTarget(
 
   if (emptyFields.length != 1) {
     return FailureResult<Failure, FinancialCalculationTarget>(
-      ValidationFailure(
-        message: [
-          FinancialCalculationValidationMessage.invalidParameterCount,
-        ],
+      const ValidationFailure(
+        message: [FinancialCalculationValidationMessage.invalidParameterCount],
       ),
     );
   }
 
-  return SuccessResult<Failure, FinancialCalculationTarget>(
-    emptyFields.first,
-  );
+  return SuccessResult<Failure, FinancialCalculationTarget>(emptyFields.first);
 }

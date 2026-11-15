@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:real_calc/modules/home/presentation/page/page.dart';
@@ -24,7 +26,13 @@ class HomeModule extends Module {
       child: (_) => MultiBlocProvider(
         providers: [
           BlocProvider(create: (_) => Modular.get<GreetingCubit>()),
-          BlocProvider(create: (_) => Modular.get<SelicCubit>()..load()),
+          BlocProvider(
+            create: (_) {
+              final cubit = Modular.get<SelicCubit>();
+              unawaited(cubit.load());
+              return cubit;
+            },
+          ),
         ],
         child: const HomePage(),
       ),

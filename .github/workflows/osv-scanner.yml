@@ -1,0 +1,37 @@
+name: OSV-Scanner
+
+# Procura vulnerabilidades conhecidas nos pacotes do pubspec.lock (base OSV do Google).
+# Reprova o PR se achar alguma e publica os alertas em Security → Code scanning.
+# Roda também toda semana, porque vulnerabilidades novas aparecem sem mudar o código.
+on:
+  push:
+    branches: [main, develop]
+    paths: &osv_paths
+      - 'pubspec.lock'
+      - '.github/workflows/osv-scanner.yml'
+  pull_request:
+    branches: [main, develop]
+    paths: *osv_paths
+  schedule:
+    # Toda quarta às 6h30 (Brasília).
+    - cron: '30 9 * * 3'
+  workflow_dispatch:
+
+concurrency:
+  group: osv-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    name: Vulnerabilidades nas dependências
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@32d3cd482bdadfb38b186c0ad1b031902d55d932 # v2.7.1
+    with:
+      scan-args: |-
+        --lockfile=pubspec.lock

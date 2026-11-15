@@ -2,7 +2,6 @@ import 'package:real_calc/core/seed_works/entity.dart';
 
 import 'period.dart';
 
-
 class ValueCorrection extends Entity {
   final int index;
   final Period period;

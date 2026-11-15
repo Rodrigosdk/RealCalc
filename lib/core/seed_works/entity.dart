@@ -3,10 +3,5 @@ abstract class Entity {
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
-  Entity({
-    this.id,
-    this.createdAt,
-    this.updatedAt,
-  });
-
+  Entity({this.id, this.createdAt, this.updatedAt});
 }

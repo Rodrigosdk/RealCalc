@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:real_calc/core/errors/messages.dart';
@@ -79,12 +81,14 @@ class _ValueCorrectionPageState extends State<ValueCorrectionPage> {
     if (!_form.state.canCalculate || index == null) return;
     FocusScope.of(context).unfocus();
     _calculatedInputs = _inputs;
-    _calculation.calculate(
-      index: index,
-      initialDate: _form.initialDate.text,
-      finalDate: _form.finalDate.text,
-      percentage: _form.percentage.text,
-      value: _form.value.text,
+    unawaited(
+      _calculation.calculate(
+        index: index,
+        initialDate: _form.initialDate.text,
+        finalDate: _form.finalDate.text,
+        percentage: _form.percentage.text,
+        value: _form.value.text,
+      ),
     );
   }
 
@@ -113,10 +117,12 @@ class _ValueCorrectionPageState extends State<ValueCorrectionPage> {
   }
 
   void _openIndexPicker(CorrectionIndex? selected) {
-    showCorrectionIndexPicker(
-      context,
-      selectedIndex: selected,
-      onSelected: _form.setIndex,
+    unawaited(
+      showCorrectionIndexPicker(
+        context,
+        selectedIndex: selected,
+        onSelected: _form.setIndex,
+      ),
     );
   }
 

@@ -1,5 +1,3 @@
-
-
 import '../../../domain/enum/financial_calculation_target.dart';
 import '../../../../../core/widgets/types/input_field_state.dart';
 

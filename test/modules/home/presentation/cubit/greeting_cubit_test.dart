@@ -36,11 +36,11 @@ void main() {
       );
     });
 
-    test('inicializa com a saudacao atual', () {
+    test('inicializa com a saudacao atual', () async {
       final cubit = GreetingCubit();
 
       expect(cubit.state, isIn(const ['Bom dia', 'Boa tarde', 'Boa noite']));
-      cubit.close();
+      await cubit.close();
     });
   });
 }

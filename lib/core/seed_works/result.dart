@@ -9,7 +9,8 @@ abstract class Result<L, R> {
 
   R? getOrNull() => fold((_) => null, (success) => success);
   L? getErrorOrNull() => fold((error) => error, (_) => null);
-  R getOrElse(R Function() orElse) => fold((_) => orElse(), (success) => success);
+  R getOrElse(R Function() orElse) =>
+      fold((_) => orElse(), (success) => success);
 }
 
 class FailureResult<L, R> extends Result<L, R> {
@@ -17,10 +18,12 @@ class FailureResult<L, R> extends Result<L, R> {
   FailureResult(this.value);
 
   @override
-  T fold<T>(T Function(L error) onError, T Function(R success) onSuccess) => onError(value);
+  T fold<T>(T Function(L error) onError, T Function(R success) onSuccess) =>
+      onError(value);
 
   @override
-  Result<L, R2> map<R2>(R2 Function(R success) onSuccess) => FailureResult<L, R2>(value);
+  Result<L, R2> map<R2>(R2 Function(R success) onSuccess) =>
+      FailureResult<L, R2>(value);
 }
 
 class SuccessResult<L, R> extends Result<L, R> {
@@ -28,8 +31,10 @@ class SuccessResult<L, R> extends Result<L, R> {
   SuccessResult(this.value);
 
   @override
-  T fold<T>(T Function(L error) onError, T Function(R success) onSuccess) => onSuccess(value);
+  T fold<T>(T Function(L error) onError, T Function(R success) onSuccess) =>
+      onSuccess(value);
 
   @override
-  Result<L, R2> map<R2>(R2 Function(R success) onSuccess) => SuccessResult<L, R2>(onSuccess(value));
+  Result<L, R2> map<R2>(R2 Function(R success) onSuccess) =>
+      SuccessResult<L, R2>(onSuccess(value));
 }

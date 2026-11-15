@@ -204,7 +204,7 @@ void main() {
       whenListen(
         selicCubit,
         const Stream<SelicState>.empty(),
-        initialState: SelicError(ServerErrorMessages.connectionError),
+        initialState: const SelicError(ServerErrorMessages.connectionError),
       );
       await pump(tester);
 

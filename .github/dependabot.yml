@@ -1,0 +1,25 @@
+version: 2
+
+# Só as GitHub Actions: as versões ficam fixadas pelo SHA do commit e o Dependabot
+# abre um PR por semana atualizando os SHAs e o comentário com a versão.
+# Os pacotes do pub são atualizados pelo workflow dependency-update.yml.
+updates:
+  - package-ecosystem: github-actions
+    directories:
+      - /
+      - /.github/actions/*
+    target-branch: develop
+    schedule:
+      interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: America/Sao_Paulo
+    commit-message:
+      prefix: ci
+    labels:
+      - chore
+      - dependencies
+    groups:
+      github-actions:
+        patterns:
+          - '*'

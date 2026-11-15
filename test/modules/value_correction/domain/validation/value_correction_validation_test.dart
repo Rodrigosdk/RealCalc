@@ -65,9 +65,7 @@ void main() {
     });
 
     test('rejeita percentual menor que zero', () {
-      final result = validation.validate(
-        buildValueCorrection(percentage: -1),
-      );
+      final result = validation.validate(buildValueCorrection(percentage: -1));
 
       expect(result.isError, isTrue);
       final failure = result.getErrorOrNull();

@@ -81,16 +81,16 @@ void main() {
       );
       value = formatter.formatEditUpdate(
         value,
-        TextEditingValue(
+        const TextEditingValue(
           text: '0,024',
-          selection: const TextSelection.collapsed(offset: 5),
+          selection: TextSelection.collapsed(offset: 5),
         ),
       );
       value = formatter.formatEditUpdate(
         value,
-        TextEditingValue(
+        const TextEditingValue(
           text: '0,243',
-          selection: const TextSelection.collapsed(offset: 5),
+          selection: TextSelection.collapsed(offset: 5),
         ),
       );
 

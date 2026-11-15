@@ -1,0 +1,48 @@
+name: CodeQL
+
+# Análise de segurança do GitHub nos próprios workflows: injeção de comando, permissões
+# excessivas, uso de secrets e actions de terceiros. Os alertas aparecem em Security → Code scanning.
+#
+# O CodeQL não suporta Dart. O Kotlin do Android ficou de fora porque exige um build
+# completo a cada análise, e o único arquivo é o MainActivity.kt vazio gerado pelo Flutter.
+on:
+  push:
+    branches: [main, develop]
+    paths: &codeql_paths
+      - '.github/**'
+  pull_request:
+    branches: [main, develop]
+    paths: *codeql_paths
+  schedule:
+    # Toda quarta às 6h (Brasília), para pegar regras novas mesmo sem mudanças no código.
+    - cron: '0 9 * * 3'
+  workflow_dispatch:
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analisar workflows
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - name: Iniciar CodeQL
+        uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          languages: actions
+          queries: security-and-quality
+
+      - name: Analisar
+        uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          category: /language:actions

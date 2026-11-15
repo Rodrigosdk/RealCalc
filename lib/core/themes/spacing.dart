@@ -14,10 +14,10 @@ abstract class AppSpacing {
   static const double rowHeightWithSecondLine = 64;
   static const double homeRowHeight = 72;
   static const double sectionGap = 26;
-  
+
   // Padding padrão de tela
   static const EdgeInsets screenPadding = EdgeInsets.all(md);
-  
+
   // Padding de conteúdo interno
   static const EdgeInsets contentPadding = EdgeInsets.symmetric(
     horizontal: md,

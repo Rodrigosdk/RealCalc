@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 /// Desenha uma linha de tendência simples a partir de uma lista de valores.

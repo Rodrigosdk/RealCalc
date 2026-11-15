@@ -49,9 +49,7 @@ void main() {
     );
   });
 
-  tearDown(() {
-    cubit.close();
-  });
+  tearDown(() => cubit.close());
 
   group('ValueCorrectionCubit - Testes Unitários de Cálculo', () {
     final ipcaValueCorrection = ValueCorrection(
