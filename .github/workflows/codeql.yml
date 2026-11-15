@@ -1,15 +1,15 @@
 name: CodeQL
 
-# Análise de segurança do GitHub. O CodeQL não suporta Dart, então cobre:
-#   - actions:     os próprios workflows (injeção de comando, permissões, actions de terceiros)
-#   - java-kotlin: o código nativo do Android (android/)
-# Os alertas aparecem em Security → Code scanning.
+# Análise de segurança do GitHub nos próprios workflows: injeção de comando, permissões
+# excessivas, uso de secrets e actions de terceiros. Os alertas aparecem em Security → Code scanning.
+#
+# O CodeQL não suporta Dart. O Kotlin do Android ficou de fora porque exige um build
+# completo a cada análise, e o único arquivo é o MainActivity.kt vazio gerado pelo Flutter.
 on:
   push:
     branches: [main, develop]
     paths: &codeql_paths
       - '.github/**'
-      - 'android/**'
   pull_request:
     branches: [main, develop]
     paths: *codeql_paths
@@ -27,27 +27,22 @@ permissions:
 
 jobs:
   analyze:
-    name: Analisar (${{ matrix.language }})
+    name: Analisar workflows
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
       contents: read
       security-events: write
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [actions, java-kotlin]
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
       - name: Iniciar CodeQL
         uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
-          languages: ${{ matrix.language }}
-          build-mode: none
+          languages: actions
           queries: security-and-quality
 
       - name: Analisar
         uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
-          category: /language:${{ matrix.language }}
+          category: /language:actions
