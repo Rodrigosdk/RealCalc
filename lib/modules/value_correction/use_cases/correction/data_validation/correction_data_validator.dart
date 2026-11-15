@@ -33,7 +33,7 @@ class CorrectionDataValidator implements ICorrectionDataValidator {
         type != SeriesKind.dailyRate;
 
     if (!hasInvalidSeries) return null;
-    return ValidationFailure(
+    return const ValidationFailure(
       message: [ValueCorrectionValidationMessage.invalidPeriod],
     );
   }

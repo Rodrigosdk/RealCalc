@@ -1,0 +1,33 @@
+name: Preparar Flutter
+description: Instala o Flutter (e opcionalmente o Java) com cache e baixa as dependências do pubspec.lock.
+
+# Versão do Flutter de todos os workflows: altere só aqui.
+inputs:
+  flutter-version:
+    description: Versão do Flutter
+    default: '3.47.2'
+  java:
+    description: Instalar o Java 17 (necessário para build Android)
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Instalar Java 17
+      if: inputs.java == 'true'
+      uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+      with:
+        distribution: temurin
+        java-version: '17'
+        cache: gradle
+
+    - name: Instalar Flutter ${{ inputs.flutter-version }}
+      uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+      with:
+        flutter-version: ${{ inputs.flutter-version }}
+        channel: stable
+        cache: true
+
+    - name: Instalar dependências
+      shell: bash
+      run: flutter pub get --enforce-lockfile

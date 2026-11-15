@@ -146,9 +146,11 @@ class _LegendItem extends StatelessWidget {
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 6),
-        Text(
-          '${segment.label} ${segment.percent}%',
-          style: AppTextStyles.caption.copyWith(color: textColor),
+        Flexible(
+          child: Text(
+            '${segment.label} ${segment.percent}%',
+            style: AppTextStyles.caption.copyWith(color: textColor),
+          ),
         ),
       ],
     );
@@ -166,25 +168,38 @@ class _DetailRow extends StatelessWidget {
     return MergeSemantics(
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: ResultDetails.lineHeight),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                line.label,
-                style: AppTextStyles.detailLabel.copyWith(
-                  color: colors.textSecondary,
+        child: LayoutBuilder(
+          builder: (context, constraints) => Row(
+            children: [
+              Expanded(
+                child: Text(
+                  line.label,
+                  style: AppTextStyles.detailLabel.copyWith(
+                    color: colors.textSecondary,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Text(
-              line.value,
-              softWrap: false,
-              style: AppTextStyles.detailValue.copyWith(
-                color: colors.textPrimary,
+              const SizedBox(width: AppSpacing.md),
+              // Valores muito longos (taxas anuais altas, por exemplo)
+              // encolhem em vez de estourar a linha.
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: constraints.maxWidth * 0.6,
+                ),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    line.value,
+                    softWrap: false,
+                    style: AppTextStyles.detailValue.copyWith(
+                      color: colors.textPrimary,
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

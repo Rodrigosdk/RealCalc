@@ -5,6 +5,8 @@ import 'package:real_calc/core/errors/messages.dart';
 import 'package:real_calc/core/seed_works/result.dart';
 
 import '../../domain/entities/financial_calculation.dart';
+import '../../domain/validation/calculation_limits.dart';
+import '../../domain/validation/solving.dart';
 import '../../domain/enum/financial_calculation_target.dart';
 import '../../domain/validation/compound_interest_validator.dart';
 
@@ -12,10 +14,22 @@ import 'i_calculate_financing.dart';
 
 class CalculateFinancing implements ICalculateFinancing {
   @override
-  Result<Failure, FinancialCalculation> calculate(FinancialCalculation params) {
+  Result<Failure, FinancialCalculation> calculate(
+    FinancialCalculation params,
+  ) => _calculate(params).fold(
+    (failure) => FailureResult<Failure, FinancialCalculation>(failure),
+    (result) => ensureWithinLimits(
+      result,
+      calculated: detectCompoundInterestTarget(params).getOrNull(),
+    ),
+  );
+
+  Result<Failure, FinancialCalculation> _calculate(
+    FinancialCalculation params,
+  ) {
     if (params.initialValue <= 0 && params.rate <= 0) {
       return FailureResult<Failure, FinancialCalculation>(
-        ValidationFailure(
+        const ValidationFailure(
           message: [
             FinancialCalculationValidationMessage.invalidParameterCount,
           ],
@@ -27,7 +41,8 @@ class CalculateFinancing implements ICalculateFinancing {
       (failure) => FailureResult<Failure, FinancialCalculation>(failure),
       (target) {
         switch (target) {
-          case FinancialCalculationTarget.finalValue: // Mapeado para Valor da Prestação (p)
+          case FinancialCalculationTarget
+              .finalValue: // Mapeado para Valor da Prestação (p)
             return _calculatePayment(
               params,
             ).map((value) => params.copyWith(finalValue: value));
@@ -60,31 +75,25 @@ class CalculateFinancing implements ICalculateFinancing {
     return SuccessResult<Failure, double>(p);
   }
 
-  /// Calcula a Taxa de Juros (j) por aproximação numérica (Newton-Raphson)
-  /// com tolerância de erro < 0.000001 sobre a prestação p.
+  /// Calcula a Taxa de Juros (j) por bisseção sobre a prestação p.
   Result<Failure, double> _calculateRate(FinancialCalculation params) {
     final q0 = params.initialValue;
     final n = params.periods;
-    final targetP = params.finalValue; // Valor da prestação esperado
+    final p = params.finalValue;
 
-    // Estimativa inicial para taxa de juros
-    double j = targetP / q0;
-
-    for (int i = 0; i < 100; i++) {
-      // f(j) = p_calculado - targetP
-      final factor = pow(1 + j, -n);
-      final currentP = q0 * (j / (1 - factor));
-      final error = currentP - targetP;
-
-      if (error.abs() < 0.000001) {
-        break;
-      }
-
-      // Derivada f'(j) em relação a j
-      final df = q0 * ((1 - factor) - j * n * pow(1 + j, -n - 1)) / pow(1 - factor, 2);
-      
-      j = j - (error / df);
+    if (p * n <= q0) {
+      return FailureResult<Failure, double>(
+        const ValidationFailure(
+          message: [FinancingValidationMessage.noPositiveRate],
+        ),
+      );
     }
+
+    double paymentFor(double j) => q0 * j / (1 - pow(1 + j, -n));
+
+    // A prestação é sempre maior que os juros do mês (q0 * j), então a taxa
+    // fica abaixo de p / q0.
+    final j = solveIncreasing((j) => paymentFor(j) - p, 0, p / q0);
 
     return SuccessResult<Failure, double>(j * 100);
   }
@@ -96,9 +105,29 @@ class CalculateFinancing implements ICalculateFinancing {
     final q0 = params.initialValue;
     final p = params.finalValue;
 
-    final n = -log(1 - (q0 * j) / p) / log(1 + j);
+    final firstMonthInterest = q0 * j;
+    if (p + halfCent <= firstMonthInterest) {
+      return FailureResult<Failure, int>(
+        ValidationFailure(
+          message: [PaymentBelowInterestError(firstMonthInterest)],
+        ),
+      );
+    }
 
-    return SuccessResult<Failure, int>(n.round());
+    double monthsFor(double payment) => payment <= firstMonthInterest
+        ? double.infinity
+        : -log(1 - firstMonthInterest / payment) / log(1 + j);
+
+    return periodsFromMoney(value: p, periodsFor: monthsFor).fold(
+      (failure) => FailureResult<Failure, int>(failure),
+      (months) => months < 1
+          ? FailureResult<Failure, int>(
+              const ValidationFailure(
+                message: [FinancingValidationMessage.paymentAboveDebt],
+              ),
+            )
+          : SuccessResult<Failure, int>(months),
+    );
   }
 
   /// Calcula o Valor Financiado (q0):

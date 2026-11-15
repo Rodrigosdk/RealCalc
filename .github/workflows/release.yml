@@ -1,0 +1,131 @@
+name: Release
+
+# Num push na main com versão nova no pubspec.yaml (ex.: 1.2.1+4): roda o CI, publica na
+# Play Store (internal) e cria a tag v1.2.1 e a Release no GitHub com o .aab.
+# Se a tag da versão já existir, nada é publicado.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'lib/**'
+      - 'assets/**'
+      - 'android/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+      - '.github/workflows/release.yml'
+      - '.github/workflows/ci.yml'
+      - '.github/actions/**'
+  workflow_dispatch:
+
+# Nunca cancela uma release em andamento.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
+    with:
+      build: false
+
+  version:
+    name: Verificar versão nova
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      tag: ${{ steps.check.outputs.tag }}
+      build: ${{ steps.check.outputs.build }}
+      release: ${{ steps.check.outputs.release }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - name: Comparar pubspec.yaml com as tags
+        id: check
+        run: |
+          version="$(grep -E '^version:' pubspec.yaml | awk '{print $2}')"
+          tag="v${version%%+*}"
+          build="${version#*+}"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "build=$build" >> "$GITHUB_OUTPUT"
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "A tag $tag já existe; nada para publicar." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            echo "Versão nova: $tag (build $build)." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  deploy:
+    name: Publicar ${{ needs.version.outputs.tag }} (Play Store e GitHub)
+    needs: [ci, version]
+    if: needs.version.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ needs.version.outputs.tag }}
+      BUILD: ${{ needs.version.outputs.build }}
+      AAB: build/app/outputs/bundle/release/app-release.aab
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: ./.github/actions/setup-flutter
+        with:
+          java: 'true'
+
+      - name: Configurar assinatura
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+          cat > android/key.properties <<EOF
+          storePassword=$KEYSTORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=upload-keystore.jks
+          EOF
+
+      - name: Gerar App Bundle assinado
+        run: flutter build appbundle --release
+
+      - name: Guardar App Bundle
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: app-release-${{ env.TAG }}
+          path: ${{ env.AAB }}
+          retention-days: 30
+
+      - name: Enviar para a Play Store
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_JSON_KEY }}
+          packageName: br.com.rodrigosdk.realcalc
+          releaseFiles: ${{ env.AAB }}
+          releaseName: ${{ env.TAG }} (${{ env.BUILD }})
+          track: internal
+          status: completed
+
+      # A tag só é criada depois do envio: se a Play Store falhar, basta rodar de novo.
+      - name: Criar tag e Release no GitHub
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp "$AAB" "real_calc-$TAG.aab"
+          gh release create "$TAG" "real_calc-$TAG.aab" \
+            --target "$GITHUB_SHA" \
+            --title "$TAG (build $BUILD)" \
+            --generate-notes \
+            --latest
+
+      - name: Apagar credenciais
+        if: always()
+        run: rm -f android/app/upload-keystore.jks android/key.properties

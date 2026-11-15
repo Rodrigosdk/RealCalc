@@ -20,10 +20,15 @@ class FinancingFormCubit extends Cubit<FinancingFormState> {
     }
   }
 
-  List<TextEditingController> get _controllers =>
-      [initialValue, months, rate, finalValue];
+  List<TextEditingController> get _controllers => [
+    initialValue,
+    months,
+    rate,
+    finalValue,
+  ];
 
-  TextEditingController controllerFor(FinancialCalculationTarget field) => switch (field) {
+  TextEditingController controllerFor(FinancialCalculationTarget field) =>
+      switch (field) {
         FinancialCalculationTarget.initialValue => initialValue,
         FinancialCalculationTarget.periods => months,
         FinancialCalculationTarget.interestRate => rate,
@@ -40,11 +45,11 @@ class FinancingFormCubit extends Cubit<FinancingFormState> {
 
   /// Snapshot atual dos campos, pra mandar pro FinancingCubit calcular.
   FinancialCalculation get financing => FinancialCalculation(
-        initialValue: _parseFormattedDouble(initialValue.text),
-        periods: int.tryParse(months.text) ?? 0,
-        rate: _parseFormattedDouble(rate.text),
-        finalValue: _parseFormattedDouble(finalValue.text),
-      );
+    initialValue: _parseFormattedDouble(initialValue.text),
+    periods: int.tryParse(months.text) ?? 0,
+    rate: _parseFormattedDouble(rate.text),
+    finalValue: _parseFormattedDouble(finalValue.text),
+  );
 
   void _onControllerChanged() {
     if (_suppressRecompute) return;
@@ -65,11 +70,13 @@ class FinancingFormCubit extends Cubit<FinancingFormState> {
         field: _stateFor(field, calculatedField, emptyCount),
     };
 
-    emit(FinancingFormState(
-      calculatedField: calculatedField,
-      fieldStates: fieldStates,
-      canCalculate: emptyCount == 1,
-    ));
+    emit(
+      FinancingFormState(
+        calculatedField: calculatedField,
+        fieldStates: fieldStates,
+        canCalculate: emptyCount == 1,
+      ),
+    );
   }
 
   InputFieldState _stateFor(
@@ -114,7 +121,10 @@ class FinancingFormCubit extends Cubit<FinancingFormState> {
   /// preenche o campo resolvido e marca ele como "calculated". Os 4 sets
   /// de texto são feitos com o recompute suprimido, pra emitir um único
   /// estado no final em vez de 4 emissões intermediárias.
-  void applyResult(FinancialCalculation result, FinancialCalculationTarget calculatedField) {
+  void applyResult(
+    FinancialCalculation result,
+    FinancialCalculationTarget calculatedField,
+  ) {
     _suppressRecompute = true;
     _setFormattedValue(initialValue, result.initialValue);
     months.text = result.periods > 0 ? result.periods.toString() : '';

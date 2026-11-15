@@ -176,6 +176,48 @@ void main() {
       expect(inBand('2,00% ao mês'), findsOneWidget);
     });
 
+    testWidgets('prestação abaixo dos juros: aviso de erro, sem travar', (
+      tester,
+    ) async {
+      await pump(tester);
+      await type(tester, FinancialCalculationTarget.initialValue, '1000000');
+      await type(tester, FinancialCalculationTarget.interestRate, '200');
+      await type(tester, FinancialCalculationTarget.finalValue, '10000');
+
+      await tester.tap(find.text('Calcular'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(financingCubit.state, isA<FinancingError>());
+      expect(find.text('Não foi possível calcular'), findsOneWidget);
+      expect(find.textContaining('a dívida nunca é quitada'), findsOneWidget);
+      expect(find.byType(ResultDetails), findsNothing);
+      expect(formCubit.months.text, isEmpty);
+    });
+
+    testWidgets('10.000, 70 meses, 999,99%: apagar o prazo e recalcular '
+        'explica que o prazo não pode ser descoberto', (tester) async {
+      await pump(tester);
+      await type(tester, FinancialCalculationTarget.initialValue, '1000000');
+      await type(tester, FinancialCalculationTarget.periods, '70');
+      await type(tester, FinancialCalculationTarget.interestRate, '99999');
+      await tester.tap(find.text('Calcular'));
+      await tester.pumpAndSettle();
+      expect(formCubit.finalValue.text, '99.999,00');
+
+      await type(tester, FinancialCalculationTarget.periods, '');
+      await tester.tap(find.text('Calcular'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(financingCubit.state, isA<FinancingError>());
+      expect(
+        find.textContaining('não dá para descobrir o prazo'),
+        findsOneWidget,
+      );
+      expect(formCubit.months.text, isEmpty);
+    });
+
     testWidgets('com menos de três campos, mostra o aviso com os campos '
         'vazios e desabilita "Calcular"', (tester) async {
       await pump(tester);

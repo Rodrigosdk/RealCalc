@@ -11,26 +11,31 @@ class RegularDepositsCubit extends Cubit<RegularDepositsState> {
 
   RegularDepositsCubit(this.useCase) : super(RegularDepositsInitial());
 
-  FinancialCalculationTarget _detectCalculatedField(FinancialCalculation params) {
-    if (params.initialValue <= 0) return FinancialCalculationTarget.initialValue;
+  FinancialCalculationTarget _detectCalculatedField(
+    FinancialCalculation params,
+  ) {
+    if (params.initialValue <= 0) {
+      return FinancialCalculationTarget.initialValue;
+    }
     if (params.finalValue <= 0) return FinancialCalculationTarget.finalValue;
     if (params.periods <= 0) return FinancialCalculationTarget.periods;
     if (params.rate <= 0) return FinancialCalculationTarget.interestRate;
     return FinancialCalculationTarget.finalValue;
   }
 
-
   void calculate(FinancialCalculation params) {
     final calculatedField = _detectCalculatedField(params);
     emit(RegularDepositsLoading());
 
-    useCase.calculate(params).fold(
-      (failure) => emit(
-        RegularDepositsError(
-          failure.message.map((error) => error.message).join(', '),
-        ),
-      ),
-      (value) => emit(RegularDepositsCalculated(value, calculatedField)),
-    );
+    useCase
+        .calculate(params)
+        .fold(
+          (failure) => emit(
+            RegularDepositsError(
+              failure.message.map((error) => error.message).join(', '),
+            ),
+          ),
+          (value) => emit(RegularDepositsCalculated(value, calculatedField)),
+        );
   }
 }

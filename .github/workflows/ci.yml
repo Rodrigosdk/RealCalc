@@ -1,0 +1,99 @@
+name: CI
+
+# Formatação, análise e testes. Também é chamado pelo release.yml antes de publicar.
+# Só roda quando muda algo que afeta o app Android, os testes ou a própria automação.
+on:
+  push:
+    branches: [develop]
+    paths: &relevant_paths
+      - 'lib/**'
+      - 'test/**'
+      - 'assets/**'
+      - 'android/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+      - 'analysis_options.yaml'
+      - '.github/workflows/ci.yml'
+      - '.github/actions/**'
+  pull_request:
+    branches: [main, develop]
+    paths: *relevant_paths
+  workflow_call:
+    inputs:
+      build:
+        description: Compilar o APK de debug (a release já gera o próprio .aab)
+        type: boolean
+        default: true
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+env:
+  # Cobertura mínima de linhas (hoje em ~95,8%). Suba conforme os testes crescerem.
+  COVERAGE_MIN: '95'
+
+jobs:
+  quality:
+    name: Formatação e análise
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: ./.github/actions/setup-flutter
+
+      - name: Verificar formatação
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: Analisar código
+        run: flutter analyze --fatal-infos
+
+  test:
+    name: Testes
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: ./.github/actions/setup-flutter
+
+      - name: Rodar testes com cobertura
+        run: flutter test --coverage
+
+      - name: Conferir cobertura mínima
+        env:
+          LC_ALL: C
+        run: |
+          coverage="$(awk -F: '/^LF:/{f+=$2} /^LH:/{h+=$2} END{printf "%.2f", 100*h/f}' coverage/lcov.info)"
+          echo "Cobertura de linhas: **$coverage%** (mínimo $COVERAGE_MIN%)" >> "$GITHUB_STEP_SUMMARY"
+          if awk -v c="$coverage" -v m="$COVERAGE_MIN" 'BEGIN{exit !(c < m)}'; then
+            echo "::error::Cobertura de $coverage% abaixo do mínimo de $COVERAGE_MIN%."
+            exit 1
+          fi
+
+      - name: Publicar relatório de cobertura
+        if: always()
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: coverage-lcov
+          path: coverage/lcov.info
+          retention-days: 14
+          if-no-files-found: ignore
+
+  build:
+    name: Build Android (debug)
+    # Em push/PR o input não existe (null); só é falso quando a release pede para pular.
+    if: inputs.build == null || inputs.build == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: ./.github/actions/setup-flutter
+        with:
+          java: 'true'
+
+      - name: Compilar APK de debug
+        run: flutter build apk --debug

@@ -250,7 +250,7 @@ void main() {
     });
 
     testWidgets('sem conexão e sem dados', (tester) async {
-      await pump(tester, SelicError(ServerErrorMessages.connectionError));
+      await pump(tester, const SelicError(ServerErrorMessages.connectionError));
 
       expect(find.text('Selic indisponível'), findsOneWidget);
       expect(find.text('Sem conexão com o Banco Central.'), findsOneWidget);

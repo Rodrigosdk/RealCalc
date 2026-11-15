@@ -107,6 +107,137 @@ void main() {
     );
   });
 
+  group('CalculateFinancing - prazo sem solução', () {
+    FinancialCalculation withoutTerm(double payment) =>
+        FinancialCalculation(initialValue: 10000, rate: 2, finalValue: payment);
+
+    test('prestação menor que os juros do primeiro mês devolve erro', () {
+      final result = useCase.calculate(withoutTerm(100));
+
+      final error = result.getErrorOrNull()!.message.single;
+      expect(error, isA<PaymentBelowInterestError>());
+      expect((error as PaymentBelowInterestError).firstMonthInterest, 200);
+      expect(
+        error.message,
+        'Com essa prestação, a dívida nunca é quitada: ela precisa ser maior '
+        'que os juros do primeiro mês, de R\$\u00A0200,00.',
+      );
+    });
+
+    test(
+      'prestação igual aos juros em centavos: qualquer prazo longo serve',
+      () {
+        final result = useCase.calculate(withoutTerm(200));
+
+        final error = result.getErrorOrNull()!.message.single;
+        expect(error, isA<AmbiguousPeriodsError>());
+        expect((error as AmbiguousPeriodsError).from, 536);
+      },
+    );
+
+    test('prestação um centavo abaixo dos juros nunca quita a dívida', () {
+      final result = useCase.calculate(withoutTerm(199.99));
+
+      expect(
+        result.getErrorOrNull()!.message.single,
+        isA<PaymentBelowInterestError>(),
+      );
+    });
+
+    test('prestação maior que a dívida com os juros não tem prazo', () {
+      final result = useCase.calculate(
+        FinancialCalculation(initialValue: 1000, rate: 1, finalValue: 5000),
+      );
+
+      expect(
+        result.getErrorOrNull()!.message.single,
+        FinancingValidationMessage.paymentAboveDebt,
+      );
+    });
+
+    test('10.000 em 70 meses a 999,99%: refazer o prazo pela prestação '
+        'mostrada explica que o prazo não pode ser descoberto', () {
+      final payment = useCase
+          .calculate(
+            FinancialCalculation(
+              initialValue: 10000,
+              periods: 70,
+              rate: 999.99,
+            ),
+          )
+          .getOrNull()!
+          .finalValue;
+      final shown = (payment * 100).round() / 100;
+      expect(shown, 99999.0);
+
+      final result = useCase.calculate(
+        FinancialCalculation(
+          initialValue: 10000,
+          rate: 999.99,
+          finalValue: shown,
+        ),
+      );
+
+      final error = result.getErrorOrNull()!.message.single;
+      expect(error, isA<AmbiguousPeriodsError>());
+      expect((error as AmbiguousPeriodsError).from, lessThanOrEqualTo(70));
+      expect(
+        error.message,
+        contains('qualquer prazo a partir de ${error.from} meses'),
+      );
+    });
+
+    test('prestação um centavo acima dos juros calcula o prazo', () {
+      final result = useCase.calculate(withoutTerm(200.01));
+
+      expect(result.isSuccess, isTrue);
+      expect(result.getOrNull()!.periods, greaterThan(0));
+    });
+  });
+
+  group('CalculateFinancing - limites do resultado', () {
+    test('prestações que somam o valor financiado não têm taxa', () {
+      final result = useCase.calculate(
+        FinancialCalculation(initialValue: 0.01, periods: 1, finalValue: 0.01),
+      );
+
+      expect(
+        result.getErrorOrNull()!.message.single,
+        FinancingValidationMessage.noPositiveRate,
+      );
+    });
+
+    test('taxa com prazo longo converge para o valor certo', () {
+      final payment = useCase
+          .calculate(
+            FinancialCalculation(initialValue: 10000, periods: 1200, rate: 0.5),
+          )
+          .getOrNull()!
+          .finalValue;
+
+      final result = useCase.calculate(
+        FinancialCalculation(
+          initialValue: 10000,
+          periods: 1200,
+          finalValue: payment,
+        ),
+      );
+
+      expect(result.getOrNull()!.rate, closeTo(0.5, 1e-9));
+    });
+
+    test('prestação acima de R\$ 1 trilhão devolve erro', () {
+      final result = useCase.calculate(
+        FinancialCalculation(initialValue: 1e12, periods: 1, rate: 50),
+      );
+
+      expect(
+        result.getErrorOrNull()!.message.single,
+        FinancialCalculationValidationMessage.resultOutOfRange,
+      );
+    });
+  });
+
   group('CalculateFinancing - Imprecisão de Ponto Flutuante', () {
     test(
       'Deve mitigar a dízima do double e retornar o número exato de meses (25) mesmo com centavos aproximados',

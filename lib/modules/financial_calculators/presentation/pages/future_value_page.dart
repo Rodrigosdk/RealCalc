@@ -25,7 +25,7 @@ class FutureValuePage extends StatelessWidget {
       prefix: 'R\$',
       hint: '0,00',
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      formatters: [DecimalInputFormatter()],
+      formatters: [DecimalInputFormatter.money()],
     ),
     CalculatorFieldConfig(
       target: FinancialCalculationTarget.periods,
@@ -33,7 +33,10 @@ class FutureValuePage extends StatelessWidget {
       unit: 'meses',
       hint: '0',
       keyboardType: TextInputType.number,
-      formatters: [FilteringTextInputFormatter.digitsOnly],
+      formatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        LengthLimitingTextInputFormatter(4),
+      ],
     ),
     CalculatorFieldConfig(
       target: FinancialCalculationTarget.interestRate,
@@ -41,7 +44,7 @@ class FutureValuePage extends StatelessWidget {
       unit: '% a.m.',
       hint: '0,00',
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      formatters: [DecimalInputFormatter()],
+      formatters: [DecimalInputFormatter.percent()],
     ),
     CalculatorFieldConfig(
       target: FinancialCalculationTarget.finalValue,
@@ -49,7 +52,7 @@ class FutureValuePage extends StatelessWidget {
       prefix: 'R\$',
       hint: '0,00',
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      formatters: [DecimalInputFormatter()],
+      formatters: [DecimalInputFormatter.money()],
     ),
   ];
 

@@ -374,6 +374,51 @@ void main() {
       expect(inBand('6.877,50'), findsOneWidget);
     });
 
+    testWidgets('o valor aceita no máximo 999.999.999.999,99', (tester) async {
+      await pump(tester);
+
+      final value = find.descendant(
+        of: row(ValueCorrectionField.value),
+        matching: find.byType(TextField),
+      );
+      await tester.enterText(value, '99999999999999');
+      await tester.pump();
+      expect(formCubit.value.text, '999.999.999.999,99');
+
+      await tester.enterText(value, '999999999999999');
+      await tester.pump();
+      expect(formCubit.value.text, '999.999.999.999,99');
+    });
+
+    testWidgets('valores perto do limite cabem em 360dp com fonte em 130%', (
+      tester,
+    ) async {
+      calculationReturns(
+        ValueCorrection(
+          index: CorrectionIndex.ipca.sgsCode,
+          period: Period(initial: DateTime(2001, 12), end: DateTime(2003, 12)),
+          percentage: 100,
+          originalValue: 999999999999.99,
+          factor: 1.0000001,
+          adjustedValue: 999999999999.99,
+          variation: 0.00001,
+        ),
+      );
+      await pump(tester, size: const Size(360, 700), textScale: 1.3);
+      formCubit.initialDate.text = '12/2001';
+      formCubit.finalDate.text = '12/2003';
+      formCubit.value.text = '999.999.999.999,99';
+      await tester.pump();
+      await correct(tester);
+
+      await tester.scrollUntilVisible(
+        find.text('1,0000001'),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(tester.takeException(), isNull);
+    });
+
     for (final themeMode in [ThemeMode.light, ThemeMode.dark]) {
       testWidgets('em 360dp e fonte em 130% no tema ${themeMode.name}, a '
           'barra não cobre o último item', (tester) async {

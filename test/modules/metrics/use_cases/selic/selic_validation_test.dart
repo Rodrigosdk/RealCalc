@@ -39,13 +39,16 @@ void main() {
     );
   });
 
-  test('aceita datas com diferentes horários comparando o instante completo', () {
-    expect(
-      validation.validatePeriod(
-        dataInicial: DateTime(2026, 1, 1, 23),
-        dataFinal: DateTime(2026, 1, 2),
-      ),
-      isNull,
-    );
-  });
+  test(
+    'aceita datas com diferentes horários comparando o instante completo',
+    () {
+      expect(
+        validation.validatePeriod(
+          dataInicial: DateTime(2026, 1, 1, 23),
+          dataFinal: DateTime(2026, 1, 2),
+        ),
+        isNull,
+      );
+    },
+  );
 }
