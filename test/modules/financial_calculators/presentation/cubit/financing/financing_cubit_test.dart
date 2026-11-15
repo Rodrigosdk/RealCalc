@@ -20,9 +20,7 @@ void main() {
     cubit = FinancingCubit(mockUseCase);
   });
 
-  tearDown(() {
-    cubit.close();
-  });
+  tearDown(() => cubit.close());
 
   group('FinancingCubit - Testes Unitários de Cálculo', () {
     final financingWithInvalidParameters = FinancialCalculation(

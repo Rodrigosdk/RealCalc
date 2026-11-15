@@ -32,6 +32,19 @@ linter:
     - unawaited_futures
     - avoid_dynamic_calls
     - always_declare_return_types
+    - cancel_subscriptions
+    - close_sinks
+    - only_throw_errors
+    - throw_in_finally
+    - test_types_in_equals
+    - unnecessary_statements
+    - literal_only_boolean_expressions
+    - avoid_slow_async_io
+    - avoid_void_async
+    - avoid_type_to_string
+    - no_adjacent_strings_in_list
+    - discarded_futures
+    - avoid_catches_without_on_clauses
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

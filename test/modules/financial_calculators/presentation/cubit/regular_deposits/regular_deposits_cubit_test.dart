@@ -19,9 +19,7 @@ void main() {
     cubit = RegularDepositsCubit(mockUseCase);
   });
 
-  tearDown(() {
-    cubit.close();
-  });
+  tearDown(() => cubit.close());
 
   group('RegularDepositsCubit', () {
     final invalidParameters = FinancialCalculation(

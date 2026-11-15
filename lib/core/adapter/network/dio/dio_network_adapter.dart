@@ -11,53 +11,36 @@ class DioNetworkAdapter implements Network {
   DioNetworkAdapter(this._dio);
 
   @override
-  Future<Result<ErrorMessages, T>> delete<T>(String url) async {
-    try {
-      final response = await _dio.delete(url);
-      return SuccessResult<ErrorMessages, T>(response.data as T);
-    } catch (e) {
-      return FailureResult<ErrorMessages, T>(
-        ServerErrorMessages.connectionError,
-      );
-    }
-  }
+  Future<Result<ErrorMessages, T>> delete<T>(String url) =>
+      _request<T>(() => _dio.delete(url));
 
   @override
-  Future<Result<ErrorMessages, T>> get<T>(String url) async {
-    try {
-      final response = await _dio.get(url);
-      return SuccessResult<ErrorMessages, T>(response.data as T);
-    } catch (e) {
-      return FailureResult<ErrorMessages, T>(
-        ServerErrorMessages.connectionError,
-      );
-    }
-  }
+  Future<Result<ErrorMessages, T>> get<T>(String url) =>
+      _request<T>(() => _dio.get(url));
 
   @override
   Future<Result<ErrorMessages, T>> post<T>(
     String url,
     Map<String, dynamic> body,
-  ) async {
-    try {
-      final response = await _dio.post(url, data: body);
-      return SuccessResult<ErrorMessages, T>(response.data as T);
-    } catch (e) {
-      return FailureResult<ErrorMessages, T>(
-        ServerErrorMessages.connectionError,
-      );
-    }
-  }
+  ) => _request<T>(() => _dio.post(url, data: body));
 
   @override
   Future<Result<ErrorMessages, T>> put<T>(
     String url,
     Map<String, dynamic> body,
+  ) => _request<T>(() => _dio.put(url, data: body));
+
+  /// Falha de rede ou resposta num formato diferente do esperado viram erro de conexão.
+  Future<Result<ErrorMessages, T>> _request<T>(
+    Future<Response<dynamic>> Function() call,
   ) async {
     try {
-      final response = await _dio.put(url, data: body);
-      return SuccessResult<ErrorMessages, T>(response.data as T);
-    } catch (e) {
+      final data = (await call()).data;
+      if (data is T) return SuccessResult<ErrorMessages, T>(data);
+      return FailureResult<ErrorMessages, T>(
+        ServerErrorMessages.connectionError,
+      );
+    } on DioException {
       return FailureResult<ErrorMessages, T>(
         ServerErrorMessages.connectionError,
       );

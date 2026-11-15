@@ -20,9 +20,9 @@ void main() {
     );
   }
 
-  tearDown(() {
+  tearDown(() async {
     Modular.destroy();
-    themeCubit.close();
+    await themeCubit.close();
   });
 
   group('AppWidget & AppModule - Integração de Rotas', () {

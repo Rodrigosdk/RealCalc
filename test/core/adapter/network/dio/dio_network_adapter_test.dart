@@ -43,6 +43,23 @@ void main() {
     expect(result.getErrorOrNull(), ServerErrorMessages.connectionError);
   });
 
+  test(
+    'get converte resposta em formato inesperado em erro de servidor',
+    () async {
+      when(() => dio.get<dynamic>('/selic')).thenAnswer(
+        (_) async => Response<dynamic>(
+          data: 'resposta inesperada',
+          requestOptions: RequestOptions(path: '/selic'),
+        ),
+      );
+
+      final result = await adapter.get<Map<String, dynamic>>('/selic');
+
+      expect(result.isError, isTrue);
+      expect(result.getErrorOrNull(), ServerErrorMessages.connectionError);
+    },
+  );
+
   test('post envia o body e retorna sucesso', () async {
     final body = {'value': 10.5};
     when(() => dio.post<dynamic>('/selic', data: body)).thenAnswer(

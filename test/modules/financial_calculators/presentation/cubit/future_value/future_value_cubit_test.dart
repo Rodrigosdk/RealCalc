@@ -19,9 +19,7 @@ void main() {
     cubit = FutureValueCubit(mockUseCase);
   });
 
-  tearDown(() {
-    cubit.close();
-  });
+  tearDown(() => cubit.close());
 
   group('FutureValueCubit - Testes Unitários de Cálculo', () {
     final futureWithInvalidParameters = FinancialCalculation(
