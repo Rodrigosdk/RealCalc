@@ -4,7 +4,7 @@ import 'package:real_calc/core/errors/messages.dart';
 import 'package:real_calc/core/seed_works/error.dart';
 import 'package:real_calc/core/seed_works/network.dart';
 import 'package:real_calc/core/seed_works/result.dart';
-import 'package:real_calc/modules/value_correction/domain/entites/series_point.dart';
+import 'package:real_calc/modules/value_correction/domain/entities/series_point.dart';
 import 'package:real_calc/modules/value_correction/domain/enum/correction_index.dart';
 import 'package:real_calc/modules/value_correction/infrastructure/repositories/sgs_repository.dart';
 

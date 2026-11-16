@@ -8,7 +8,7 @@ import 'package:real_calc/core/themes/app_theme.dart';
 import 'package:real_calc/modules/home/presentation/components/selic_band.dart';
 import 'package:real_calc/modules/home/presentation/components/sparkline_painter.dart';
 import 'package:real_calc/modules/home/presentation/cubit/selic_cubit.dart';
-import 'package:real_calc/modules/metrics/domain/entites/metric.dart';
+import 'package:real_calc/modules/metrics/domain/entities/metric.dart';
 import 'package:real_calc/modules/metrics/domain/enum/selic_period.dart';
 
 final today = DateTime(2026, 11, 3);

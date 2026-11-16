@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:real_calc/modules/metrics/domain/entites/metric.dart';
+import 'package:real_calc/modules/metrics/domain/entities/metric.dart';
 import 'package:real_calc/modules/metrics/domain/enum/selic_period.dart';
 import 'package:real_calc/modules/metrics/infrastructure/repositories/selic_cache_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';

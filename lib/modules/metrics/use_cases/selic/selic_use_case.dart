@@ -4,7 +4,7 @@ import 'package:real_calc/core/seed_works/result.dart';
 
 import '../../../../core/seed_works/error.dart';
 import '../../../../shared/network/response/selic_bc_response_network.dart';
-import '../../domain/entites/metric.dart';
+import '../../domain/entities/metric.dart';
 import '../../domain/enum/selic_period.dart';
 import '../../domain/repositories/selic/i_selic_cache_repository.dart';
 import '../../domain/repositories/selic/i_selic_network_only_repository.dart';

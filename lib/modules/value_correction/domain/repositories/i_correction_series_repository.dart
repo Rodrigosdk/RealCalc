@@ -1,7 +1,7 @@
 import '../../../../core/seed_works/error.dart';
 import '../../../../core/seed_works/result.dart';
 import '../enum/correction_index.dart';
-import '../entites/series_point.dart';
+import '../entities/series_point.dart';
 
 abstract class ICorrectionSeriesRepository {
   Future<Result<ErrorMessages, List<SeriesPoint>>> correctionSeries();

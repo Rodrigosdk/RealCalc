@@ -7,7 +7,7 @@ import 'package:real_calc/core/errors/messages.dart';
 import 'package:real_calc/core/seed_works/error.dart';
 import 'package:real_calc/core/seed_works/result.dart';
 import 'package:real_calc/modules/home/presentation/cubit/selic_cubit.dart';
-import 'package:real_calc/modules/metrics/domain/entites/metric.dart';
+import 'package:real_calc/modules/metrics/domain/entities/metric.dart';
 import 'package:real_calc/modules/metrics/domain/enum/selic_period.dart';
 import 'package:real_calc/modules/metrics/use_cases/selic/i_selic_use_case.dart';
 

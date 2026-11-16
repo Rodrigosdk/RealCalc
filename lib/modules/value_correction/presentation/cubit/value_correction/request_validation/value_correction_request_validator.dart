@@ -1,4 +1,4 @@
-import '../../../../domain/entites/value_correction.dart';
+import '../../../../domain/entities/value_correction.dart';
 import '../../../../domain/enum/correction_index.dart';
 import '../../../../domain/validation/i_value_correction_validation.dart';
 import 'i_value_correction_request_validator.dart';

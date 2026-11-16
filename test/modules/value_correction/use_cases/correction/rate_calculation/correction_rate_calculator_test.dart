@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:real_calc/modules/value_correction/domain/entites/series_point.dart';
+import 'package:real_calc/modules/value_correction/domain/entities/series_point.dart';
 import 'package:real_calc/modules/value_correction/use_cases/correction/rate_calculation/correction_rate_calculator.dart';
 
 void main() {

@@ -1,7 +1,7 @@
 import '../../../../../core/errors/failures.dart';
 import '../../../../../core/errors/messages.dart';
-import '../../../domain/entites/series_point.dart';
-import '../../../domain/entites/value_correction.dart';
+import '../../../domain/entities/series_point.dart';
+import '../../../domain/entities/value_correction.dart';
 import '../../../domain/enum/correction_index.dart';
 import '../../../domain/enum/series_kind.dart';
 import '../../../domain/validation/i_value_correction_validation.dart';

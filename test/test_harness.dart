@@ -7,7 +7,7 @@ import 'package:real_calc/modules/financial_calculators/presentation/cubit/forms
 import 'package:real_calc/modules/financial_calculators/presentation/cubit/future_value/future_value_cubit.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/cubit/regular_deposits/regular_deposits_cubit.dart';
 import 'package:real_calc/modules/home/presentation/cubit/selic_cubit.dart';
-import 'package:real_calc/modules/metrics/domain/entites/metric.dart';
+import 'package:real_calc/modules/metrics/domain/entities/metric.dart';
 
 import 'test_app_module.dart';
 import 'mock_cubits.dart';
