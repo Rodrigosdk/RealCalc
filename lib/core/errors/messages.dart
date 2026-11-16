@@ -11,7 +11,8 @@ enum UnexpectedErrorMessages implements ErrorMessages {
 }
 
 enum ServerErrorMessages implements ErrorMessages {
-  connectionError("Erro de conexão com o servidor");
+  connectionError("Erro de conexão com o servidor"),
+  invalidResponse("O servidor não devolveu dados válidos");
 
   @override
   final String message;
