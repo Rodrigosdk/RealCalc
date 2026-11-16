@@ -9,7 +9,7 @@ import 'package:real_calc/modules/metrics/domain/repositories/selic/i_selic_cach
 import 'package:real_calc/modules/metrics/domain/repositories/selic/i_selic_network_only_repository.dart';
 import 'package:real_calc/modules/metrics/use_cases/selic/selic_use_case.dart';
 import 'package:real_calc/modules/metrics/use_cases/selic/selic_validation.dart';
-import 'package:real_calc/shared/network/response/selic_bc_response_network.dart';
+import 'package:real_calc/shared/network/response/sgs_point_response.dart';
 
 class MockSelicRepository extends Mock implements ISelicNetworkOnlyRepository {}
 
@@ -50,7 +50,7 @@ void main() {
 
   void networkFails() {
     when(() => repository.getSelicRate()).thenAnswer(
-      (_) async => FailureResult<ErrorMessages, List<SelicBcResponseNetwork>>(
+      (_) async => FailureResult<ErrorMessages, List<SgsPointResponse>>(
         ServerErrorMessages.connectionError,
       ),
     );
@@ -60,7 +60,7 @@ void main() {
         dataFinal: any(named: 'dataFinal'),
       ),
     ).thenAnswer(
-      (_) async => FailureResult<ErrorMessages, List<SelicBcResponseNetwork>>(
+      (_) async => FailureResult<ErrorMessages, List<SgsPointResponse>>(
         ServerErrorMessages.connectionError,
       ),
     );
@@ -71,17 +71,10 @@ void main() {
       'rede ok grava o cache do período com a data de atualização',
       () async {
         when(() => repository.getSelicRate()).thenAnswer(
-          (_) async =>
-              SuccessResult<ErrorMessages, List<SelicBcResponseNetwork>>([
-                const SelicBcResponseNetwork(
-                  data: '02/11/2026',
-                  valor: '15.00',
-                ),
-                const SelicBcResponseNetwork(
-                  data: '03/11/2026',
-                  valor: '14.75',
-                ),
-              ]),
+          (_) async => SuccessResult<ErrorMessages, List<SgsPointResponse>>([
+            const SgsPointResponse(data: '02/11/2026', valor: '15.00'),
+            const SgsPointResponse(data: '03/11/2026', valor: '14.75'),
+          ]),
         );
 
         final metric = (await useCase.getSelic(
@@ -141,7 +134,7 @@ void main() {
       final start = DateTime(2021, 11, 3);
       final points = [
         for (var d = start; !d.isAfter(now); d = d.add(const Duration(days: 1)))
-          SelicBcResponseNetwork(
+          SgsPointResponse(
             data:
                 '${d.day.toString().padLeft(2, '0')}/'
                 '${d.month.toString().padLeft(2, '0')}/${d.year}',
@@ -155,7 +148,7 @@ void main() {
         ),
       ).thenAnswer(
         (_) async =>
-            SuccessResult<ErrorMessages, List<SelicBcResponseNetwork>>(points),
+            SuccessResult<ErrorMessages, List<SgsPointResponse>>(points),
       );
 
       final metric = (await useCase.getSelic(SelicPeriod.years5)).getOrNull()!;
@@ -175,9 +168,9 @@ void main() {
 
     test('falha ao gravar o cache não derruba o valor da rede', () async {
       when(() => repository.getSelicRate()).thenAnswer(
-        (_) async => SuccessResult<ErrorMessages, List<SelicBcResponseNetwork>>(
-          [const SelicBcResponseNetwork(data: '03/11/2026', valor: '14.75')],
-        ),
+        (_) async => SuccessResult<ErrorMessages, List<SgsPointResponse>>([
+          const SgsPointResponse(data: '03/11/2026', valor: '14.75'),
+        ]),
       );
       when(() => cache.save(any(), any())).thenThrow(Exception('disco cheio'));
 
@@ -189,9 +182,9 @@ void main() {
 
   test('mapeia os dados do repository para Metric', () async {
     when(() => repository.getSelicRate()).thenAnswer(
-      (_) async => SuccessResult<ErrorMessages, List<SelicBcResponseNetwork>>([
-        const SelicBcResponseNetwork(valor: '10.00'),
-        const SelicBcResponseNetwork(valor: '10.50'),
+      (_) async => SuccessResult<ErrorMessages, List<SgsPointResponse>>([
+        const SgsPointResponse(valor: '10.00'),
+        const SgsPointResponse(valor: '10.50'),
       ]),
     );
 
@@ -206,9 +199,9 @@ void main() {
 
   test('guarda as datas dos pontos e a data da última atualização', () async {
     when(() => repository.getSelicRate()).thenAnswer(
-      (_) async => SuccessResult<ErrorMessages, List<SelicBcResponseNetwork>>([
-        const SelicBcResponseNetwork(data: '30/10/2026', valor: '15.00'),
-        const SelicBcResponseNetwork(data: '03/11/2026', valor: '14.75'),
+      (_) async => SuccessResult<ErrorMessages, List<SgsPointResponse>>([
+        const SgsPointResponse(data: '30/10/2026', valor: '15.00'),
+        const SgsPointResponse(data: '03/11/2026', valor: '14.75'),
       ]),
     );
 
@@ -243,8 +236,8 @@ void main() {
         dataFinal: DateTime(2026, 1, 1),
       ),
     ).thenAnswer(
-      (_) async => SuccessResult<ErrorMessages, List<SelicBcResponseNetwork>>([
-        const SelicBcResponseNetwork(valor: '12.00'),
+      (_) async => SuccessResult<ErrorMessages, List<SgsPointResponse>>([
+        const SgsPointResponse(valor: '12.00'),
       ]),
     );
 

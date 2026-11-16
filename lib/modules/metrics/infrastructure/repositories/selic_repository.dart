@@ -1,5 +1,5 @@
 import 'package:real_calc/core/seed_works/network.dart';
-import 'package:real_calc/shared/network/response/selic_bc_response_network.dart';
+import 'package:real_calc/shared/network/response/sgs_point_response.dart';
 import '../../../../core/seed_works/error.dart';
 import '../../../../core/seed_works/result.dart';
 import '../../domain/repositories/selic/i_selic_network_only_repository.dart';
@@ -10,9 +10,9 @@ class SelicRepository implements ISelicNetworkOnlyRepository {
 
   SelicRepository(this._selicDatasource);
 
+  /// Selic dos últimos 12 meses.
   @override
-  Future<Result<ErrorMessages, List<SelicBcResponseNetwork>>>
-  getSelicRate() async {
+  Future<Result<ErrorMessages, List<SgsPointResponse>>> getSelicRate() {
     final dataFinal = DateTime.now();
     final dataInicial = DateTime(
       dataFinal.year - 1,
@@ -20,26 +20,11 @@ class SelicRepository implements ISelicNetworkOnlyRepository {
       dataFinal.day,
     );
 
-    final response = await _selicDatasource.get<List<dynamic>>(
-      '$_endpoint/dados?formato=json&dataInicial=${_formatDate(dataInicial)}&dataFinal=${_formatDate(dataFinal)}',
-    );
-
-    return response.fold(
-      (error) =>
-          FailureResult<ErrorMessages, List<SelicBcResponseNetwork>>(error),
-      (data) => SuccessResult<ErrorMessages, List<SelicBcResponseNetwork>>(
-        data
-            .whereType<Map<String, dynamic>>()
-            .map(SelicBcResponseNetwork.fromJson)
-            .toList(growable: false),
-      ),
-    );
+    return getSelicRateByPeriod(dataInicial: dataInicial, dataFinal: dataFinal);
   }
 
-  // Método adicional para buscar por período específico
   @override
-  Future<Result<ErrorMessages, List<SelicBcResponseNetwork>>>
-  getSelicRateByPeriod({
+  Future<Result<ErrorMessages, List<SgsPointResponse>>> getSelicRateByPeriod({
     required DateTime dataInicial,
     required DateTime dataFinal,
   }) async {
@@ -48,12 +33,11 @@ class SelicRepository implements ISelicNetworkOnlyRepository {
     );
 
     return response.fold(
-      (error) =>
-          FailureResult<ErrorMessages, List<SelicBcResponseNetwork>>(error),
-      (data) => SuccessResult<ErrorMessages, List<SelicBcResponseNetwork>>(
+      (error) => FailureResult<ErrorMessages, List<SgsPointResponse>>(error),
+      (data) => SuccessResult<ErrorMessages, List<SgsPointResponse>>(
         data
             .whereType<Map<String, dynamic>>()
-            .map(SelicBcResponseNetwork.fromJson)
+            .map(SgsPointResponse.fromJson)
             .toList(growable: false),
       ),
     );
