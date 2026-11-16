@@ -1,7 +1,7 @@
 import 'package:real_calc/core/utils/br_number_format.dart';
 import 'package:real_calc/core/widgets/result_details/result_summary.dart';
 
-import '../../domain/entites/value_correction.dart';
+import '../../domain/entities/value_correction.dart';
 import 'correction_statement.dart';
 
 ResultSummary correctionResultSummary(ValueCorrection correction) {

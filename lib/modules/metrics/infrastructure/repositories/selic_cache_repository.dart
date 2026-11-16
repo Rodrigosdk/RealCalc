@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../domain/entites/metric.dart';
+import '../../domain/entities/metric.dart';
 import '../../domain/enum/selic_period.dart';
 import '../../domain/repositories/selic/i_selic_cache_repository.dart';
 

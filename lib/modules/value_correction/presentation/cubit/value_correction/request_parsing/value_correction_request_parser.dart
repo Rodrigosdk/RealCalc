@@ -1,5 +1,5 @@
-import '../../../../domain/entites/period.dart';
-import '../../../../domain/entites/value_correction.dart';
+import '../../../../domain/entities/period.dart';
+import '../../../../domain/entities/value_correction.dart';
 import '../../../../domain/enum/correction_index.dart';
 import '../../../../domain/enum/series_kind.dart';
 import '../../forms/date_parsing/i_correction_form_date_parser.dart';

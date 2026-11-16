@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:real_calc/core/themes/app_colors.dart';
 import 'package:real_calc/core/themes/spacing.dart';
 import 'package:real_calc/core/themes/text_styles.dart';
-import 'package:real_calc/modules/metrics/domain/entites/metric.dart';
+import 'package:real_calc/modules/metrics/domain/entities/metric.dart';
 import 'package:real_calc/modules/metrics/domain/enum/selic_period.dart';
 
 import '../cubit/selic_cubit.dart';

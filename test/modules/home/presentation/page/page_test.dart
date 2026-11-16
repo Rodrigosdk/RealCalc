@@ -18,7 +18,7 @@ import 'package:real_calc/modules/home/presentation/cubit/greeting_cubit.dart';
 import 'package:real_calc/modules/home/presentation/cubit/selic_cubit.dart';
 import 'package:real_calc/modules/metrics/domain/enum/selic_period.dart';
 import 'package:real_calc/modules/home/presentation/page/page.dart';
-import 'package:real_calc/modules/metrics/domain/entites/metric.dart';
+import 'package:real_calc/modules/metrics/domain/entities/metric.dart';
 
 class MockNavigator extends Mock implements IModularNavigator {}
 

@@ -2,7 +2,7 @@ import 'package:intl/intl.dart';
 import 'package:real_calc/core/utils/br_number_format.dart';
 import 'package:real_calc/core/widgets/calculator_band/band_statement.dart';
 
-import '../../domain/entites/value_correction.dart';
+import '../../domain/entities/value_correction.dart';
 import '../../domain/enum/correction_index.dart';
 import '../../domain/enum/date_granularity.dart';
 

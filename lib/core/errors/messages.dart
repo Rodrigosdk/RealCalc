@@ -1,15 +1,6 @@
 import 'package:real_calc/core/seed_works/error.dart';
 import 'package:real_calc/core/utils/br_number_format.dart';
 
-enum CacheErrorMessages implements ErrorMessages {
-  cacheError("Erro ao acessar o cache");
-
-  @override
-  final String message;
-
-  const CacheErrorMessages(this.message);
-}
-
 enum UnexpectedErrorMessages implements ErrorMessages {
   defaultError("Ocorreu um erro inesperado. Tente novamente");
 
@@ -20,7 +11,8 @@ enum UnexpectedErrorMessages implements ErrorMessages {
 }
 
 enum ServerErrorMessages implements ErrorMessages {
-  connectionError("Erro de conexão com o servidor");
+  connectionError("Erro de conexão com o servidor"),
+  invalidResponse("O servidor não devolveu dados válidos");
 
   @override
   final String message;
@@ -29,7 +21,6 @@ enum ServerErrorMessages implements ErrorMessages {
 }
 
 enum SelicValidationMessage implements ErrorMessages {
-  invalidDate('Informe datas válidas no formato dd/MM/yyyy'),
   initialDateAfterFinalDate('A data inicial deve ser anterior à data final'),
   periodExceedsLimit('O período consultado não pode ser maior que 10 anos');
 

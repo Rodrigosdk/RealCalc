@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:real_calc/core/widgets/calculator_band/band_statement.dart';
-import 'package:real_calc/modules/value_correction/domain/entites/period.dart';
-import 'package:real_calc/modules/value_correction/domain/entites/value_correction.dart';
+import 'package:real_calc/modules/value_correction/domain/entities/period.dart';
+import 'package:real_calc/modules/value_correction/domain/entities/value_correction.dart';
 import 'package:real_calc/modules/value_correction/domain/enum/correction_index.dart';
 import 'package:real_calc/modules/value_correction/presentation/utils/correction_statement.dart';
 

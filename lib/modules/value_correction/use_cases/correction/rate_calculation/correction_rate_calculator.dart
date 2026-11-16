@@ -1,4 +1,4 @@
-import '../../../domain/entites/series_point.dart';
+import '../../../domain/entities/series_point.dart';
 import 'i_correction_rate_calculator.dart';
 
 class CorrectionRateCalculator implements ICorrectionRateCalculator {

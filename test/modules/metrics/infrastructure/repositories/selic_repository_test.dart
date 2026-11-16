@@ -5,7 +5,7 @@ import 'package:real_calc/core/seed_works/error.dart';
 import 'package:real_calc/core/seed_works/network.dart';
 import 'package:real_calc/core/seed_works/result.dart';
 import 'package:real_calc/modules/metrics/infrastructure/repositories/selic_repository.dart';
-import 'package:real_calc/shared/network/response/selic_bc_response_network.dart';
+import 'package:real_calc/shared/network/response/sgs_point_response.dart';
 
 class MockNetwork extends Mock implements Network {}
 
@@ -31,8 +31,8 @@ void main() {
 
       expect(result.isSuccess, isTrue);
       expect(result.getOrNull(), [
-        const SelicBcResponseNetwork(data: '01/01/2026', valor: '10.50'),
-        const SelicBcResponseNetwork(data: '02/01/2026', valor: '10.75'),
+        const SgsPointResponse(data: '01/01/2026', valor: '10.50'),
+        const SgsPointResponse(data: '02/01/2026', valor: '10.75'),
       ]);
       verify(() => network.get<List<dynamic>>(any())).called(1);
     });

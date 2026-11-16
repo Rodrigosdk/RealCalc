@@ -1,4 +1,4 @@
-import '../../../domain/entites/series_point.dart';
+import '../../../domain/entities/series_point.dart';
 
 abstract interface class ICorrectionRateCalculator {
   double calculateMonthlyVariation(List<SeriesPoint> series);

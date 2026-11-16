@@ -1,8 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:real_calc/core/module.dart';
-import 'package:real_calc/core/services/result_sharer.dart';
-import 'package:real_calc/core/services/share_plus_result_sharer.dart';
 
 import '../../core/routes/app_routes.dart';
 import 'domain/enum/correction_index.dart';
@@ -67,7 +65,6 @@ class ValueCorrectionModule extends Module {
     i.addLazySingleton<ICorrectionDataPreparer>(CorrectionDataPreparer.new);
     i.addLazySingleton<ICorrectionSeriesRepository>(SgsRepository.new);
     i.addLazySingleton<ICalculateValueCorrection>(CalculateValueCorrection.new);
-    i.addLazySingleton<ResultSharer>(SharePlusResultSharer.new);
     i.addLazySingleton<ValueCorrectionFormCubit>(ValueCorrectionFormCubit.new);
     i.addLazySingleton<ValueCorrectionCubit>(ValueCorrectionCubit.new);
   }
