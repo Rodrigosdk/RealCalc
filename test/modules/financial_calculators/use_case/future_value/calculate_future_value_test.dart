@@ -130,4 +130,102 @@ void main() {
       );
     });
   });
+
+  group('CalculateFutureValue - taxa e prazo sem solução', () {
+    test('taxa: R\$ 1.000 em 12 meses para R\$ 80 devolve erro', () {
+      final result = useCase.calculate(
+        buildFutureValue(
+          capitalParam: 1000,
+          monthsParam: 12,
+          interestRateParam: 0,
+          finalValueParam: 80,
+        ),
+      );
+
+      expect(result.isError, isTrue);
+      expect(
+        result.getErrorOrNull()!.message.single,
+        equals(FutureValueValidationMessage.finalNotAboveInitial),
+      );
+    });
+
+    test('prazo: R\$ 1.000 a 10% para R\$ 50 devolve erro', () {
+      final result = useCase.calculate(
+        buildFutureValue(
+          capitalParam: 1000,
+          interestRateParam: 10,
+          monthsParam: 0,
+          finalValueParam: 50,
+        ),
+      );
+
+      expect(result.isError, isTrue);
+      expect(
+        result.getErrorOrNull()!.message.single,
+        equals(FutureValueValidationMessage.finalNotAboveInitial),
+      );
+    });
+
+    test('nenhuma combinação devolve taxa ou prazo impossível', () {
+      const values = [0.01, 1.0, 50.0, 500.0, 1000.0, 1e6, 1e9];
+      const rates = [0.01, 0.5, 1.0, 10.0, 100.0, 999.99];
+      const monthsList = [1, 2, 12, 360, 9999];
+
+      for (final initial in values) {
+        for (final target in values) {
+          for (final n in monthsList) {
+            final result = useCase.calculate(
+              buildFutureValue(
+                capitalParam: initial,
+                monthsParam: n,
+                interestRateParam: 0,
+                finalValueParam: target,
+              ),
+            );
+            final reason = 'taxa: $initial, $n meses, final $target';
+
+            if (result.isError) {
+              expect(
+                result.getErrorOrNull()!.message,
+                isNotEmpty,
+                reason: reason,
+              );
+            } else {
+              expect(
+                result.getOrNull()!.rate,
+                greaterThanOrEqualTo(0.005),
+                reason: reason,
+              );
+            }
+          }
+
+          for (final r in rates) {
+            final result = useCase.calculate(
+              buildFutureValue(
+                capitalParam: initial,
+                interestRateParam: r,
+                monthsParam: 0,
+                finalValueParam: target,
+              ),
+            );
+            final reason = 'prazo: $initial a $r%, final $target';
+
+            if (result.isError) {
+              expect(
+                result.getErrorOrNull()!.message,
+                isNotEmpty,
+                reason: reason,
+              );
+            } else {
+              expect(
+                result.getOrNull()!.periods,
+                greaterThanOrEqualTo(1),
+                reason: reason,
+              );
+            }
+          }
+        }
+      }
+    });
+  });
 }
