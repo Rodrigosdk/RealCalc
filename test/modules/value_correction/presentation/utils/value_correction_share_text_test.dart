@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:real_calc/modules/value_correction/domain/entites/period.dart';
-import 'package:real_calc/modules/value_correction/domain/entites/value_correction.dart';
+import 'package:real_calc/modules/value_correction/domain/entities/period.dart';
+import 'package:real_calc/modules/value_correction/domain/entities/value_correction.dart';
 import 'package:real_calc/modules/value_correction/domain/enum/correction_index.dart';
 import 'package:real_calc/modules/value_correction/domain/enum/date_granularity.dart';
 import 'package:real_calc/modules/value_correction/presentation/utils/value_correction_share_text.dart';

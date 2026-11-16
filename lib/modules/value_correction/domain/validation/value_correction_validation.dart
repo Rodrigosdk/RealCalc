@@ -3,7 +3,7 @@ import 'package:real_calc/core/seed_works/error.dart';
 
 import '../../../../core/errors/failures.dart';
 import '../../../../core/seed_works/result.dart';
-import '../entites/value_correction.dart';
+import '../entities/value_correction.dart';
 import 'i_value_correction_validation.dart';
 
 class ValueCorrectionValidation implements IValueCorrectionValidation {

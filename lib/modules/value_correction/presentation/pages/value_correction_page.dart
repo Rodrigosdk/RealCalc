@@ -22,7 +22,7 @@ import 'package:real_calc/core/widgets/help_sheet/help_sheet.dart';
 import 'package:real_calc/core/widgets/result_details/result_details.dart';
 import 'package:real_calc/core/widgets/types/input_field_state.dart';
 
-import '../../domain/entites/value_correction.dart';
+import '../../domain/entities/value_correction.dart';
 import '../../domain/enum/correction_index.dart';
 import '../../domain/enum/date_granularity.dart';
 import '../cubit/forms/date_parsing/correction_form_date_parser.dart';

@@ -1,4 +1,4 @@
-import '../../entites/metric.dart';
+import '../../entities/metric.dart';
 import '../../enum/selic_period.dart';
 
 abstract class ISelicCacheRepository {

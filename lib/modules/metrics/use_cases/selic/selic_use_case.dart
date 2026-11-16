@@ -3,8 +3,8 @@ import 'dart:math';
 import 'package:real_calc/core/seed_works/result.dart';
 
 import '../../../../core/seed_works/error.dart';
-import '../../../../shared/network/response/selic_bc_response_network.dart';
-import '../../domain/entites/metric.dart';
+import '../../../../shared/network/response/sgs_point_response.dart';
+import '../../domain/entities/metric.dart';
 import '../../domain/enum/selic_period.dart';
 import '../../domain/repositories/selic/i_selic_cache_repository.dart';
 import '../../domain/repositories/selic/i_selic_network_only_repository.dart';
@@ -119,7 +119,7 @@ class SelicUseCase implements ISelicUseCase {
     );
   }
 
-  Metric _mapToMetric(List<SelicBcResponseNetwork> data) {
+  Metric _mapToMetric(List<SgsPointResponse> data) {
     final anualRate = double.tryParse(data.last.valor ?? '') ?? 0.0;
     final variationPercent = _calculateVariation(data);
     final sparklineData = data.map((e) => double.parse(e.valor!)).toList();
@@ -142,7 +142,7 @@ class SelicUseCase implements ISelicUseCase {
     return DateTime(year, month, day);
   }
 
-  double _calculateVariation(List<SelicBcResponseNetwork> values) {
+  double _calculateVariation(List<SgsPointResponse> values) {
     if (values.length < 2) return 0.0;
 
     final currentValue = double.tryParse(values.last.valor!) ?? 0.0;

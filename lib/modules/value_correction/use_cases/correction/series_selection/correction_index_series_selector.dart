@@ -1,4 +1,4 @@
-import '../../../domain/entites/series_point.dart';
+import '../../../domain/entities/series_point.dart';
 import '../../../domain/enum/correction_index.dart';
 import '../../../domain/enum/series_kind.dart';
 import '../rate_calculation/i_correction_rate_calculator.dart';

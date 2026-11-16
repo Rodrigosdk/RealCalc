@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:real_calc/core/errors/failures.dart';
 import 'package:real_calc/core/errors/messages.dart';
-import 'package:real_calc/modules/value_correction/domain/entites/period.dart';
-import 'package:real_calc/modules/value_correction/domain/entites/value_correction.dart';
+import 'package:real_calc/modules/value_correction/domain/entities/period.dart';
+import 'package:real_calc/modules/value_correction/domain/entities/value_correction.dart';
 import 'package:real_calc/modules/value_correction/domain/validation/value_correction_validation.dart';
 
 void main() {

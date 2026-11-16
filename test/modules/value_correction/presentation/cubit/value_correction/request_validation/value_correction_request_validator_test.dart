@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:real_calc/modules/value_correction/domain/entites/period.dart';
-import 'package:real_calc/modules/value_correction/domain/entites/value_correction.dart';
+import 'package:real_calc/modules/value_correction/domain/entities/period.dart';
+import 'package:real_calc/modules/value_correction/domain/entities/value_correction.dart';
 import 'package:real_calc/modules/value_correction/domain/enum/correction_index.dart';
 import 'package:real_calc/modules/value_correction/domain/validation/value_correction_validation.dart';
 import 'package:real_calc/modules/value_correction/presentation/cubit/value_correction/request_validation/value_correction_request_validator.dart';

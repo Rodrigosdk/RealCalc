@@ -2,9 +2,9 @@ import 'package:real_calc/core/errors/messages.dart';
 import 'package:real_calc/core/seed_works/error.dart';
 import 'package:real_calc/core/seed_works/network.dart';
 import 'package:real_calc/core/seed_works/result.dart';
-import 'package:real_calc/shared/network/response/sgs_response_network.dart';
+import 'package:real_calc/shared/network/response/sgs_point_response.dart';
 
-import '../../domain/entites/series_point.dart';
+import '../../domain/entities/series_point.dart';
 import '../../domain/enum/correction_index.dart';
 import '../../domain/enum/series_kind.dart';
 import '../../domain/repositories/i_correction_series_repository.dart';
@@ -18,13 +18,6 @@ class SgsRepository implements ICorrectionSeriesRepository {
   final Map<String, Result<ErrorMessages, List<SeriesPoint>>> _cache = {};
 
   SgsRepository(this._network);
-
-  @override
-  Future<Result<ErrorMessages, List<SeriesPoint>>> correctionSeries() async {
-    final now = DateTime.now();
-    final start = DateTime(now.year - 1, now.month, now.day);
-    return getSeries(index: CorrectionIndex.ipca, start: start, end: now);
-  }
 
   @override
   Future<Result<ErrorMessages, List<SeriesPoint>>> getSeries({
@@ -153,7 +146,7 @@ class SgsRepository implements ICorrectionSeriesRepository {
     for (final item in data) {
       if (item is! Map<String, dynamic>) continue;
 
-      final network = SgsResponseNetwork.fromJson(item);
+      final network = SgsPointResponse.fromJson(item);
       final rawValue = network.valor;
       if (rawValue == null || rawValue.trim().isEmpty) continue;
 

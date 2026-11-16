@@ -9,8 +9,8 @@ import 'package:real_calc/core/widgets/result_details/result_details.dart';
 import 'package:real_calc/core/widgets/result_details/result_summary.dart';
 import 'package:real_calc/modules/financial_calculators/domain/entities/financial_calculation.dart';
 import 'package:real_calc/modules/financial_calculators/presentation/utils/result_summaries.dart';
-import 'package:real_calc/modules/value_correction/domain/entites/period.dart';
-import 'package:real_calc/modules/value_correction/domain/entites/value_correction.dart';
+import 'package:real_calc/modules/value_correction/domain/entities/period.dart';
+import 'package:real_calc/modules/value_correction/domain/entities/value_correction.dart';
 import 'package:real_calc/modules/value_correction/presentation/utils/correction_result_summary.dart';
 
 final financing = financingResultSummary(

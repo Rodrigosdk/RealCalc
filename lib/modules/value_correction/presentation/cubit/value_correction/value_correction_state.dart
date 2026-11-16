@@ -1,4 +1,4 @@
-import 'package:real_calc/modules/value_correction/domain/entites/value_correction.dart';
+import 'package:real_calc/modules/value_correction/domain/entities/value_correction.dart';
 
 sealed class ValueCorrectionState {
   const ValueCorrectionState();
