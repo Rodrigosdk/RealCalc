@@ -1,7 +1,7 @@
 name: Release
 
 # Num push na main com versão nova no pubspec.yaml (ex.: 1.2.1+4): roda o CI, publica o .aab
-# na Play Store (internal) e cria a tag v1.2.1 e a Release no GitHub com o .apk instalável.
+# na Play Store (internal) e cria a tag v1.2.1 e a Release no GitHub com um .apk por arquitetura.
 # Se a tag da versão já existir, nada é publicado.
 on:
   push:
@@ -73,7 +73,7 @@ jobs:
       TAG: ${{ needs.version.outputs.tag }}
       BUILD: ${{ needs.version.outputs.build }}
       AAB: build/app/outputs/bundle/release/app-release.aab
-      APK: build/app/outputs/flutter-apk/app-release.apk
+      APK_DIR: build/app/outputs/flutter-apk
     steps:
       # Falha logo no início, antes de instalar e compilar, se faltar algum secret.
       - name: Conferir secrets
@@ -123,8 +123,9 @@ jobs:
       - name: Gerar App Bundle assinado (Play Store)
         run: flutter build appbundle --release
 
-      - name: Gerar APK assinado (Release do GitHub)
-        run: flutter build apk --release
+      # Um APK por arquitetura (~20 MB cada) em vez de um único com as três (~55 MB).
+      - name: Gerar APKs assinados por arquitetura (Release do GitHub)
+        run: flutter build apk --release --split-per-abi
 
       - name: Guardar App Bundle e APK
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -132,7 +133,7 @@ jobs:
           name: app-release-${{ env.TAG }}
           path: |
             ${{ env.AAB }}
-            ${{ env.APK }}
+            ${{ env.APK_DIR }}/app-*-release.apk
           retention-days: 30
 
       - name: Enviar para a Play Store
@@ -150,11 +151,19 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp "$APK" "real_calc-$TAG.apk"
-          gh release create "$TAG" "real_calc-$TAG.apk" \
+          # real_calc-v1.2.1-arm64-v8a.apk, real_calc-v1.2.1-armeabi-v7a.apk, real_calc-v1.2.1-x86_64.apk
+          apks=()
+          for apk in "$APK_DIR"/app-*-release.apk; do
+            abi="$(basename "$apk" -release.apk)"
+            abi="${abi#app-}"
+            cp "$apk" "real_calc-$TAG-$abi.apk"
+            apks+=("real_calc-$TAG-$abi.apk")
+          done
+          gh release create "$TAG" "${apks[@]}" \
             --target "$GITHUB_SHA" \
             --title "$TAG (build $BUILD)" \
             --generate-notes \
+            --notes "Qual APK baixar: \`arm64-v8a\` serve para quase todos os celulares atuais; \`armeabi-v7a\` para aparelhos antigos de 32 bits; \`x86_64\` para emuladores e Chromebooks." \
             --latest
 
       - name: Apagar credenciais
