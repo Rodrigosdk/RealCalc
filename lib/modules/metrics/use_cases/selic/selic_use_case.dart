@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:real_calc/core/errors/messages.dart';
 import 'package:real_calc/core/seed_works/result.dart';
 
 import '../../../../core/seed_works/error.dart';
@@ -91,7 +92,7 @@ class SelicUseCase implements ISelicUseCase {
 
     return result.fold(
       (error) => FailureResult<ErrorMessages, Metric>(error),
-      (data) => SuccessResult<ErrorMessages, Metric>(_mapToMetric(data)),
+      _mapToMetric,
     );
   }
 
@@ -115,23 +116,44 @@ class SelicUseCase implements ISelicUseCase {
 
     return result.fold(
       (error) => FailureResult<ErrorMessages, Metric>(error),
-      (data) => SuccessResult<ErrorMessages, Metric>(_mapToMetric(data)),
+      _mapToMetric,
     );
   }
 
-  Metric _mapToMetric(List<SgsPointResponse> data) {
-    final anualRate = double.tryParse(data.last.valor ?? '') ?? 0.0;
-    final variationPercent = _calculateVariation(data);
-    final sparklineData = data.map((e) => double.parse(e.valor!)).toList();
-    final dates = data.map((e) => _parseDate(e.data)).toList();
+  /// Ignora pontos sem data ou valor válidos, como o parser do SGS da Correção.
+  /// Sem nenhum ponto válido, devolve falha e o [getSelic] usa o cache.
+  Result<ErrorMessages, Metric> _mapToMetric(List<SgsPointResponse> data) {
+    final dates = <DateTime>[];
+    final values = <double>[];
+    for (final point in data) {
+      final date = _parseDate(point.data);
+      final value = _parseValue(point.valor);
+      if (date == null || value == null) continue;
+      dates.add(date);
+      values.add(value);
+    }
 
-    return Metric(
-      anualRate: anualRate,
-      variationPercent: variationPercent,
-      sparklineData: sparklineData,
-      sparklineDates: dates.contains(null) ? const [] : dates.cast<DateTime>(),
-      lastDate: dates.isEmpty ? null : dates.last,
+    if (values.isEmpty) {
+      return FailureResult<ErrorMessages, Metric>(
+        ServerErrorMessages.invalidResponse,
+      );
+    }
+
+    return SuccessResult<ErrorMessages, Metric>(
+      Metric(
+        anualRate: values.last,
+        variationPercent: _calculateVariation(values),
+        sparklineData: values,
+        sparklineDates: dates,
+        lastDate: dates.last,
+      ),
     );
+  }
+
+  double? _parseValue(String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    final parsed = double.tryParse(value.trim().replaceAll(',', '.'));
+    return parsed != null && parsed.isFinite ? parsed : null;
   }
 
   DateTime? _parseDate(String? value) {
@@ -142,13 +164,13 @@ class SelicUseCase implements ISelicUseCase {
     return DateTime(year, month, day);
   }
 
-  double _calculateVariation(List<SgsPointResponse> values) {
+  double _calculateVariation(List<double> values) {
     if (values.length < 2) return 0.0;
 
-    final currentValue = double.tryParse(values.last.valor!) ?? 0.0;
+    final currentValue = values.last;
 
     for (int i = values.length - 2; i >= 0; i--) {
-      final previousValue = double.tryParse(values[i].valor!) ?? 0.0;
+      final previousValue = values[i];
       if (previousValue != currentValue) {
         return double.parse((currentValue - previousValue).toStringAsFixed(2));
       }

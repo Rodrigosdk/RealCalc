@@ -66,6 +66,12 @@ void main() {
     );
   }
 
+  void networkReturns(List<SgsPointResponse> points) {
+    when(() => repository.getSelicRate()).thenAnswer(
+      (_) async => SuccessResult<ErrorMessages, List<SgsPointResponse>>(points),
+    );
+  }
+
   group('getSelic', () {
     test(
       'rede ok grava o cache do período com a data de atualização',
@@ -107,6 +113,34 @@ void main() {
       expect(metric.offline, isTrue);
       expect(metric.anualRate, 15);
       expect(metric.updatedAt, DateTime(2026, 10, 21));
+      verifyNever(() => cache.save(any(), any()));
+    });
+
+    test(
+      'resposta sem pontos válidos devolve o valor salvo sem conexão',
+      () async {
+        networkReturns(const [SgsPointResponse(data: '03/11/2026')]);
+        when(
+          () => cache.read(SelicPeriod.months12),
+        ).thenAnswer((_) async => cached());
+
+        final metric = (await useCase.getSelic(
+          SelicPeriod.months12,
+        )).getOrNull()!;
+
+        expect(metric.offline, isTrue);
+        expect(metric.anualRate, 15);
+        verifyNever(() => cache.save(any(), any()));
+      },
+    );
+
+    test('resposta vazia e sem cache devolve erro', () async {
+      networkReturns(const []);
+
+      final result = await useCase.getSelic(SelicPeriod.months12);
+
+      expect(result.getErrorOrNull(), ServerErrorMessages.invalidResponse);
+      verify(() => cache.read(SelicPeriod.months12)).called(1);
       verifyNever(() => cache.save(any(), any()));
     });
 
@@ -183,8 +217,8 @@ void main() {
   test('mapeia os dados do repository para Metric', () async {
     when(() => repository.getSelicRate()).thenAnswer(
       (_) async => SuccessResult<ErrorMessages, List<SgsPointResponse>>([
-        const SgsPointResponse(valor: '10.00'),
-        const SgsPointResponse(valor: '10.50'),
+        const SgsPointResponse(data: '30/10/2026', valor: '10.00'),
+        const SgsPointResponse(data: '03/11/2026', valor: '10.50'),
       ]),
     );
 
@@ -237,7 +271,7 @@ void main() {
       ),
     ).thenAnswer(
       (_) async => SuccessResult<ErrorMessages, List<SgsPointResponse>>([
-        const SgsPointResponse(valor: '12.00'),
+        const SgsPointResponse(data: '31/12/2025', valor: '12.00'),
       ]),
     );
 
@@ -253,5 +287,80 @@ void main() {
         dataFinal: DateTime(2026, 1, 1),
       ),
     ).called(1);
+  });
+
+  group('pontos inválidos da API', () {
+    test('ignora ponto com valor nulo', () async {
+      networkReturns(const [
+        SgsPointResponse(data: '30/10/2026', valor: '15.00'),
+        SgsPointResponse(data: '03/11/2026'),
+      ]);
+
+      final metric = (await useCase.getSelicRate()).getOrNull()!;
+
+      expect(metric.anualRate, 15);
+      expect(metric.sparklineData, [15.0]);
+      expect(metric.lastDate, DateTime(2026, 10, 30));
+    });
+
+    test('ignora ponto com valor não numérico ou vazio', () async {
+      networkReturns(const [
+        SgsPointResponse(data: '29/10/2026', valor: '15.00'),
+        SgsPointResponse(data: '30/10/2026', valor: 'abc'),
+        SgsPointResponse(data: '31/10/2026', valor: ''),
+        SgsPointResponse(data: '03/11/2026', valor: '14.75'),
+      ]);
+
+      final metric = (await useCase.getSelicRate()).getOrNull()!;
+
+      expect(metric.sparklineData, [15.0, 14.75]);
+      expect(metric.sparklineDates, [
+        DateTime(2026, 10, 29),
+        DateTime(2026, 11, 3),
+      ]);
+      expect(metric.variationPercent, closeTo(-0.25, 0.0001));
+    });
+
+    test('ignora ponto sem data válida', () async {
+      networkReturns(const [
+        SgsPointResponse(valor: '16.00'),
+        SgsPointResponse(data: '2026-10-31', valor: '15.50'),
+        SgsPointResponse(data: '03/11/2026', valor: '14.75'),
+      ]);
+
+      final metric = (await useCase.getSelicRate()).getOrNull()!;
+
+      expect(metric.sparklineData, [14.75]);
+      expect(metric.lastDate, DateTime(2026, 11, 3));
+    });
+
+    test('aceita valor com vírgula decimal', () async {
+      networkReturns(const [
+        SgsPointResponse(data: '03/11/2026', valor: '14,75'),
+      ]);
+
+      final metric = (await useCase.getSelicRate()).getOrNull()!;
+
+      expect(metric.anualRate, 14.75);
+    });
+
+    test('lista vazia devolve falha em vez de exceção', () async {
+      networkReturns(const []);
+
+      final result = await useCase.getSelicRate();
+
+      expect(result.getErrorOrNull(), ServerErrorMessages.invalidResponse);
+    });
+
+    test('só pontos inválidos devolvem falha em vez de exceção', () async {
+      networkReturns(const [
+        SgsPointResponse(data: '03/11/2026'),
+        SgsPointResponse(data: '04/11/2026', valor: 'n/d'),
+      ]);
+
+      final result = await useCase.getSelicRate();
+
+      expect(result.getErrorOrNull(), ServerErrorMessages.invalidResponse);
+    });
   });
 }
